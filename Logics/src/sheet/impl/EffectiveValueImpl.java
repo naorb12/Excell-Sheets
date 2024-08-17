@@ -45,6 +45,7 @@ public class EffectiveValueImpl implements EffectiveValue {
         return null;
     }
 
+    @Override
     public String formatValue(int columnWidth) {
         if (value == null) {
             return "";

@@ -72,7 +72,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
 
     @Override
     public void setCells(Map<Coordinate, Cell> cells) {
-        this.activeCells = Map.copyOf(cells);
+        this.activeCells = new HashMap<>(cells);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
         Coordinate coord = new Coordinate(row, col);
         Cell cell = activeCells.getOrDefault(coord, new CellImpl(row, col, input));
         cell.setOriginalValue(input);
-
+        cell.calculateEffectiveValue();
         // Put the cell in the map
         activeCells.put(coord, cell);
     }

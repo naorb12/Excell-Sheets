@@ -23,6 +23,60 @@ public class UserInterface {
         this.scanner = new Scanner(System.in);
     }
 
+    public void run() {
+         scanner = new Scanner(System.in);
+        boolean exit = false;
+
+        while (!exit) {
+            System.out.println();
+            // Display the menu
+            System.out.println("Menu:");
+            System.out.println("1. Load Sheet from XML");
+            System.out.println("2. Display Sheet");
+            System.out.println("3. Display Cell");
+            System.out.println("4. Update Cell");
+            System.out.println("5. Display Versions");
+            System.out.println("6. Exit");
+
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume newline
+
+            switch (choice) {
+                case 1:
+                    // Load Sheet from XML
+                    loadNewXML();
+                    break;
+                case 2:
+                    // Present Sheet
+                    presentSheet();
+                    break;
+                case 3:
+                    // Display Cell
+                    displayCell();
+                    break;
+                case 4:
+                    // Update Cell
+                    setCell();
+                    break;
+                case 5:
+                    // Display Versions
+                    //displayVersions();
+                    break;
+                case 6:
+                    // Exit
+                    System.out.println("Exiting the program.");
+                    exit = true;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+
+
+
+    }
+
     public void loadNewXML()
     {
         Scanner scanner = new Scanner(System.in);
@@ -60,44 +114,52 @@ public class UserInterface {
         // Display the column headers (A, B, C, ...)
         System.out.print("    "); // Starting offset for row numbers
         for (int i = 0; i < columns; i++) {
-            System.out.print(String.format("%-" + columnWidth + "s |", (char) (i + 'A')));
+            System.out.print(String.format("%-" + columnWidth + "s|", (char) (i + 'A')));
         }
         System.out.println();
 
+        // Display each row with its number and cell values
         for (int i = 0; i < rows; i++) {
-            System.out.printf("%02d | ", i + 1);
+            // Adjust the formatting for the row number to align properly
+            System.out.printf("%02d |", i + 1);
 
             for (int j = 0; j < columns; j++) {
                 Optional<CellDTO> cellOpt = Optional.ofNullable(sheet.getCellDTO(i, j));
                 if (cellOpt.isPresent()) {
                     EffectiveValue effectiveValue = cellOpt.get().getEffectiveValue();
                     String displayValue = effectiveValue.formatValue(columnWidth);
-                    System.out.print(String.format("%-" + columnWidth + "s | ", displayValue));
+
+                    // Ensure that displayValue fits within the columnWidth
+                    if (displayValue.length() > columnWidth) {
+                        displayValue = displayValue.substring(0, columnWidth); // Cut off the extra characters
+                    }
+
+                    System.out.print(String.format("%-" + columnWidth + "s|", displayValue));
                 } else {
-                    System.out.print(String.format("%-" + columnWidth + "s | ", "")); // Empty cell
+                    System.out.print(String.format("%-" + columnWidth + "s|", "")); // Empty cell
                 }
             }
             System.out.println();
 
-            // Add vertical space (padding) based on the row height units
+            // Now add vertical padding (if rowHeight > 1)
             for (int k = 1; k < rowHeight; k++) {
-                System.out.printf("%-3s", ""); // Maintain the row number column alignment
+                System.out.print("   |"); // Align with row number
                 for (int j = 0; j < columns; j++) {
-                    System.out.print(String.format("%-" + columnWidth + "s | ", "")); // Empty line for padding
+                    System.out.print(String.format("%-" + columnWidth + "s|", "")); // Empty line for padding
                 }
                 System.out.println();
             }
         }
     }
 
-    public void detailCell() {
+    public void displayCell() {
         while (true) {
             try {
 
                 Coordinate coord = inputCell();
 
                 // Retrieve the cell from the engine
-                CellDTO cell = engine.getCell(coord.getRow() - 1, coord.getColumn()); // Adjusting row index (1-based to 0-based)
+                CellDTO cell = engine.getCell(coord.getRow() , coord.getColumn()); // Adjusting row index (1-based to 0-based)
 
                 // Display the details of the cell
                 printCell(cell);
@@ -178,4 +240,5 @@ public class UserInterface {
     private boolean isValidCoordinate(String cellReference) {
         return cellReference.matches("^[A-Z]+[0-9]+$");
     }
+
 }
