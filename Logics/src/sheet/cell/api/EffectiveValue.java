@@ -1,6 +1,8 @@
-package sheet.api;
+package sheet.cell.api;
 
 import sheet.cell.impl.CellType;
+
+import java.util.Optional;
 
 public interface EffectiveValue {
     CellType getCellType();
@@ -8,5 +10,5 @@ public interface EffectiveValue {
     Object getValue();
     void setValue(Object value);
     <T> T extractValueWithExpectation(Class<T> type);
-    String formatValue(int columnWidth);
+    String formatValue(Optional<Integer> columnWidth);
 }

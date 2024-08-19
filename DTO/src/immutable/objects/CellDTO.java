@@ -1,6 +1,6 @@
 package immutable.objects;
 
-import sheet.api.EffectiveValue;
+import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 

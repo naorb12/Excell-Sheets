@@ -17,5 +17,5 @@ public interface XMLSheetLoader {
      * @throws JAXBException If there is an error during XML unmarshalling.
      * @throws InvalidXMLFormatException If the XML file does not conform to the expected format or contains invalid data.
      */
-    STLSheet loadAndValidateXML(String filePath) throws FileNotFoundException, JAXBException, InvalidXMLFormatException, InvalidXMLFormatException;
+    STLSheet loadXML(String filePath) throws FileNotFoundException, JAXBException, InvalidXMLFormatException, InvalidXMLFormatException;
 }

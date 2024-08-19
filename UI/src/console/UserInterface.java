@@ -4,7 +4,7 @@ import engine.Engine;
 import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
-import sheet.api.EffectiveValue;
+import sheet.cell.api.EffectiveValue;
 import sheet.coordinate.Coordinate;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;
@@ -87,7 +87,7 @@ public class UserInterface {
         XMLSheetLoader loader = new XMLSheetLoaderImpl(); // MOVE THE LOADER TO ENGINE
 
         try {
-            STLSheet sheet = loader.loadAndValidateXML(filePath);
+            STLSheet sheet = loader.loadXML(filePath);
             engine.mapSTLSheet(sheet);
             System.out.println("XML file loaded and validated successfully.");
         } catch (Exception e) {
@@ -127,7 +127,7 @@ public class UserInterface {
                 Optional<CellDTO> cellOpt = Optional.ofNullable(sheet.getCellDTO(i, j));
                 if (cellOpt.isPresent()) {
                     EffectiveValue effectiveValue = cellOpt.get().getEffectiveValue();
-                    String displayValue = effectiveValue.formatValue(columnWidth);
+                    String displayValue = effectiveValue.formatValue(Optional.of(columnWidth));
 
                     // Ensure that displayValue fits within the columnWidth
                     if (displayValue.length() > columnWidth) {
@@ -194,10 +194,11 @@ public class UserInterface {
     }
 
     private void printCell(CellDTO cell) {
+
         if (cell != null) {
             System.out.println("sheet.cell.impl.Cell Reference: " );
             System.out.println("Original Value: " + cell.getOriginalValue());
-            System.out.println("Effective Value: " + cell.getEffectiveValue());
+            System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()));
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
             // Assuming methods to get dependencies are implemented:
             System.out.println("Depends on: " + cell.getDependsOn()); // Adjust based on actual method

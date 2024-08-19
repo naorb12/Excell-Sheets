@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<STL-Sheet name="InvalidSheet" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="shtisel-v1.xsd">
+    <STL-Layout rows="55" columns="5">
+        <STL-Size column-width-units="10" rows-height-units="1"/>
+    </STL-Layout>
+    <STL-Cells>
+        <STL-Cell row="1" column="A">
+            <STL-Original-Value>10</STL-Original-Value>
+        </STL-Cell>
+        <!-- More cells... -->
+        <STL-Cell row="55" column="A">
+            <STL-Original-Value>100</STL-Original-Value>
+        </STL-Cell>
+    </STL-Cells>
+</STL-Sheet>

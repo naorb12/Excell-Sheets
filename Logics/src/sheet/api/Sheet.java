@@ -30,4 +30,6 @@ public interface Sheet {
     void setCells(Map<Coordinate, Cell> cells);
 
     void setCell(int row, int col, String input);
+
+    void incrementVersion();
 }

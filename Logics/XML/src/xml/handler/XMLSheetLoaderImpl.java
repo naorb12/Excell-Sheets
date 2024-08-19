@@ -12,38 +12,18 @@ import java.io.FileNotFoundException;
 public class XMLSheetLoaderImpl implements XMLSheetLoader {
 
     @Override
-    public STLSheet loadAndValidateXML(String filePath) throws FileNotFoundException, JAXBException, InvalidXMLFormatException {
+    public STLSheet loadXML(String filePath) throws FileNotFoundException, JAXBException, InvalidXMLFormatException, InvalidXMLFormatException {
         File xmlFile = new File(filePath);
 
+        // Check if the file exists
         if (!xmlFile.exists()) {
             throw new FileNotFoundException("XML file not found at: " + filePath);
         }
 
+        // Load the XML file into an STLSheet object
         JAXBContext jaxbContext = JAXBContext.newInstance(STLSheet.class);
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        STLSheet sheet = (STLSheet) unmarshaller.unmarshal(xmlFile);
-
-        // Validate the loaded sheet according to the rules
-        validateSheet(sheet);
-
-        return sheet;
+        return (STLSheet) unmarshaller.unmarshal(xmlFile);
     }
 
-    /**
-     * Validates the loaded STLSheet object based on specific criteria.
-     *
-     * @param sheet The STLSheet object to validate.
-     * @throws InvalidXMLFormatException If validation fails.
-     */
-    private void validateSheet(STLSheet sheet) throws InvalidXMLFormatException {
-        // Perform the necessary validations
-        int rows = sheet.getSTLLayout().getRows(); // Assuming getRows() returns the number of rows
-        int columns = sheet.getSTLLayout().getColumns(); // Assuming getColumns() returns the number of columns
-
-        if (rows < 1 || rows > 50 || columns < 1 || columns > 20) {
-            throw new InvalidXMLFormatException("Sheet dimensions are out of bounds: " + rows + "x" + columns);
-        }
-
-        // Additional validations...
-    }
 }

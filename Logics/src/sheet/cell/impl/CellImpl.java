@@ -1,10 +1,9 @@
 package sheet.cell.impl;
 
 import immutable.objects.CellDTO;
-import sheet.api.EffectiveValue;
+import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
-import sheet.impl.EffectiveValueImpl;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -64,7 +63,7 @@ public class CellImpl<T> implements Cell, CellDTO {
 
         if(cellType.isAssignableFrom(String.class))
         {
-            if(isFormula(originalValue))
+            if(isFormula())
             {
                 // 1. If there are dependancies - add them.
                 // 2. Calculate the formula.
@@ -86,9 +85,10 @@ public class CellImpl<T> implements Cell, CellDTO {
         }
     }
 
-    public boolean isFormula(String value) {
+    @Override
+    public boolean isFormula() {
         //Not GOOD ENOUGH
-        return value.matches(".*[A-Z]+\\d+.*") && value.endsWith("=");
+        return originalValue.matches(".*[A-Z]+\\d+.*") && originalValue.endsWith("=");
     }
 
     @Override
@@ -109,11 +109,12 @@ public class CellImpl<T> implements Cell, CellDTO {
     @Override
     public void setOriginalValue(String originalValue) {
         this.originalValue = originalValue;
+        this.versionNumber++;
     }
 
     @Override
-    public void setEffectiveValue(EffectiveValue effectiveValue) {
-        this.effectiveValue = effectiveValue;
+    public void setDependsOn(Set<Cell> dependencies) {
+        this.dependsOn = dependencies;
     }
 
 

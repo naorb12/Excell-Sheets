@@ -84,4 +84,9 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
         // Put the cell in the map
         activeCells.put(coord, cell);
     }
+
+    @Override
+    public void incrementVersion() {
+        this.version++;
+    }
 }

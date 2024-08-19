@@ -1,7 +1,8 @@
-package sheet.impl;
+package sheet.cell.impl;
 
-import sheet.api.EffectiveValue;
-import sheet.cell.impl.CellType;
+import sheet.cell.api.EffectiveValue;
+
+import java.util.Optional;
 
 public class EffectiveValueImpl implements EffectiveValue {
     private CellType cellType;
@@ -46,7 +47,7 @@ public class EffectiveValueImpl implements EffectiveValue {
     }
 
     @Override
-    public String formatValue(int columnWidth) {
+    public String formatValue(Optional<Integer> columnWidth) {
         if (value == null) {
             return "";
         }
@@ -67,9 +68,9 @@ public class EffectiveValueImpl implements EffectiveValue {
                 break;
         }
 
-        // Limit display value to the column width
-        if (displayValue.length() > columnWidth) {
-            displayValue = displayValue.substring(0, columnWidth); // Truncate the value
+        // Apply the column width limit if present
+        if (columnWidth.isPresent() && displayValue.length() > columnWidth.get()) {
+            displayValue = displayValue.substring(0, columnWidth.get()); // Truncate the value
         }
 
         return displayValue;

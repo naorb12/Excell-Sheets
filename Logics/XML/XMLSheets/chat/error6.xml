@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<STL-Sheet name="OutOfBoundsSheet" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="shtisel-v1.xsd">
+    <STL-Layout rows="5" columns="5">
+        <STL-Size column-width-units="10" rows-height-units="1"/>
+    </STL-Layout>
+    <STL-Cells>
+        <STL-Cell row="6" column="F">
+            <STL-Original-Value>Out of Bounds</STL-Original-Value>
+        </STL-Cell>
+    </STL-Cells>
+</STL-Sheet>
