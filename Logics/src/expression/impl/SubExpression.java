@@ -1,6 +1,7 @@
 package expression.impl;
 
 import expression.api.Expression;
+import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -17,10 +18,10 @@ public class SubExpression implements Expression {
         this.endIndex = endIndex;
     }
     @Override
-    public EffectiveValue eval() {
-        EffectiveValue sourceVal = source.eval();
-        EffectiveValue startVal = startIndex.eval();
-        EffectiveValue endVal = endIndex.eval();
+    public EffectiveValue eval(SheetDTO sheet) {
+        EffectiveValue sourceVal = source.eval(sheet);
+        EffectiveValue startVal = startIndex.eval(sheet);
+        EffectiveValue endVal = endIndex.eval(sheet);
 
         if(isUndefined(sourceVal, startVal, endVal))
         {

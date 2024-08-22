@@ -3,6 +3,7 @@ package sheet.cell.impl;
 import expression.api.Expression;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
+import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
@@ -59,10 +60,10 @@ public class CellImpl<T> implements Cell, CellDTO {
     }
 
     @Override
-    public void calculateEffectiveValue() {
+    public void calculateEffectiveValue(SheetDTO sheetDTO) {
         try {
             Expression expression = FunctionParser.parseExpression(this.originalValue);
-            effectiveValue = expression.eval();
+            effectiveValue = expression.eval(sheetDTO);
         }
         catch (Exception e) {
             throw new RuntimeException("Error parsing expression: " + this.originalValue);

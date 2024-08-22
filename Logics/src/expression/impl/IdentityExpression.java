@@ -1,6 +1,7 @@
 package expression.impl;
 
 import expression.api.Expression;
+import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -16,7 +17,7 @@ public class IdentityExpression implements Expression {
     }
 
     @Override
-    public EffectiveValue eval() {
+    public EffectiveValue eval(SheetDTO sheet) {
         return new EffectiveValueImpl(type, value);
     }
 

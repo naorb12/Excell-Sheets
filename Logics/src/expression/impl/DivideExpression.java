@@ -1,6 +1,7 @@
 package expression.impl;
 
 import expression.api.Expression;
+import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -16,9 +17,9 @@ public class DivideExpression implements Expression {
     }
 
     @Override
-    public EffectiveValue eval() {
-        EffectiveValue leftVal = left.eval();
-        EffectiveValue rightVal = right.eval();
+    public EffectiveValue eval(SheetDTO sheet) {
+        EffectiveValue leftVal = left.eval(sheet);
+        EffectiveValue rightVal = right.eval(sheet);
 
 
         if(rightVal.extractValueWithExpectation(Double.class) == 0)

@@ -1,5 +1,7 @@
 package sheet.cell.api;
 
+import immutable.objects.SheetDTO;
+import sheet.api.Sheet;
 import sheet.coordinate.Coordinate;
 
 import java.util.Set;
@@ -10,7 +12,7 @@ public interface Cell {
     String getOriginalValue();
     void setCellOriginalValue(String value);
     EffectiveValue getEffectiveValue();
-    void calculateEffectiveValue();
+    void calculateEffectiveValue(SheetDTO sheet);
 
     boolean isFormula();
 
