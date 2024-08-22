@@ -17,7 +17,13 @@ public class RefExpression implements Expression {
     @Override
     public EffectiveValue eval(SheetDTO sheet) {
         // error handling if the cell is empty or not found
-        return sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
+         EffectiveValue effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
+         if(effectiveValue.getValue() == null)
+         {
+             sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).calculateEffectiveValue(sheet);
+             effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
+         }
+         return effectiveValue;
     }
 
     @Override

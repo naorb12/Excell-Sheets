@@ -20,4 +20,6 @@ public interface CellDTO {
 
     Set<Cell> getInfluencingOn();
 
+    void calculateEffectiveValue(SheetDTO sheet);
+
 }

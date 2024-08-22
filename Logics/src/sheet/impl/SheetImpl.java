@@ -1,5 +1,6 @@
 package sheet.impl;
 
+import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;

@@ -318,5 +318,29 @@ public enum FunctionParser {
 
         return parts;
     }
+
+    public static List<String> parseDependsOn(String input) {
+        List<String> dependencies = new ArrayList<>();
+
+        // First, use parseMainParts() to break down the input into main parts
+        List<String> mainParts = parseMainParts(input);
+
+        // Iterate through each part
+        for (String part : mainParts) {
+            // Check if the part is a reference (starts with "{REF,")
+            if (part.startsWith("{REF,")) {
+                // Find the comma after "{REF,"
+                int commaIndex = part.indexOf(',');
+                // Extract the cell reference by taking the substring after the comma and before the closing "}"
+                String cellReference = part.substring(commaIndex + 1, part.length() - 1);
+                dependencies.add(cellReference.trim());
+            } else if (part.startsWith("{")) {
+                // If the part is another expression, recursively parse it
+                dependencies.addAll(parseDependsOn(part));
+            }
+        }
+
+        return dependencies;
+    }
 }
 
