@@ -20,7 +20,7 @@
             <STL-Original-Value>{PLUS,{REF,A1},{REF,B1}}</STL-Original-Value>
         </STL-Cell>
         <STL-Cell row="3" column="D">
-            <STL-Original-Value>{MULTIPLY,{REF,A2},{REF,B2}}</STL-Original-Value>
+            <STL-Original-Value>{TIMES,{REF,A2},{REF,B2}}</STL-Original-Value>
         </STL-Cell>
     </STL-Cells>
 </STL-Sheet>

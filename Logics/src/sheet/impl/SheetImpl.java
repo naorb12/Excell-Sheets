@@ -73,6 +73,10 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
     @Override
     public void setCells(Map<Coordinate, Cell> cells) {
         this.activeCells = new HashMap<>(cells);
+        for (Coordinate coordinate : cells.keySet()) {
+            Cell cell = cells.get(coordinate);
+            cell.calculateEffectiveValue();
+        }
     }
 
     @Override

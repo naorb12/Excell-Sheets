@@ -1,5 +1,7 @@
 package sheet.cell.impl;
 
+import expression.api.Expression;
+import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
@@ -58,30 +60,12 @@ public class CellImpl<T> implements Cell, CellDTO {
 
     @Override
     public void calculateEffectiveValue() {
-        CellType cellType = CellType.determineCellType(originalValue);
-        effectiveValue.setCellType(cellType);
-
-        if(cellType.isAssignableFrom(String.class))
-        {
-            if(isFormula())
-            {
-                // 1. If there are dependancies - add them.
-                // 2. Calculate the formula.
-                // 3. Set the effective value.
-            }
-            else
-            {
-                effectiveValue.setValue(originalValue.trim());
-            }
+        try {
+            Expression expression = FunctionParser.parseExpression(this.originalValue);
+            effectiveValue = expression.eval();
         }
-        else if(cellType.isAssignableFrom(Double.class))
-        {
-            effectiveValue.setValue(Double.parseDouble(originalValue));
-
-        }
-        else if(cellType.isAssignableFrom(Boolean.class))
-        {
-            effectiveValue.setValue(Boolean.parseBoolean(originalValue));
+        catch (Exception e) {
+            throw new RuntimeException("Error parsing expression: " + this.originalValue);
         }
     }
 

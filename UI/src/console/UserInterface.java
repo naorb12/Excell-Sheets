@@ -124,7 +124,7 @@ public class UserInterface {
             System.out.printf("%02d |", i + 1);
 
             for (int j = 0; j < columns; j++) {
-                Optional<CellDTO> cellOpt = Optional.ofNullable(sheet.getCellDTO(i, j));
+                Optional<CellDTO> cellOpt = Optional.ofNullable(sheet.getCellDTO(i+1, j+1));
                 if (cellOpt.isPresent()) {
                     EffectiveValue effectiveValue = cellOpt.get().getEffectiveValue();
                     String displayValue = effectiveValue.formatValue(Optional.of(columnWidth));

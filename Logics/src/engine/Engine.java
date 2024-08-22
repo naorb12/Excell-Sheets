@@ -15,7 +15,7 @@ import xml.generated.STLSheet;
 import java.util.*;
 
 public class Engine {
-    private SheetImpl sheet;
+    private static SheetImpl sheet;
 
     public Engine(int rowsCount, int colsCount, int rowsHeight, int colsWidth) {
         sheet = new SheetImpl(rowsCount, colsCount, rowsHeight, colsWidth);
@@ -37,12 +37,16 @@ public class Engine {
         return (CellDTO) sheet.getCellDTO(row, col);
     }
 
+    public static CellDTO getCellDTO(int row, int col) {
+        return (CellDTO) sheet.getCellDTO(row, col);
+    }
+
     public boolean isWithinBounds(int row, int column) throws OutOfBoundsException {
         int maxRow = sheet.getRowCount(); // Assuming method to get total rows
         int maxColumn = sheet.getColumnCount(); // Assuming method to get total columns
 
-        if (row < 0 || row >= maxRow || column < 0 || column >= maxColumn) {
-            throw new OutOfBoundsException(maxRow, maxColumn);
+        if (row <= 0 || row > maxRow || column <= 0 || column > maxColumn) {
+            throw new OutOfBoundsException(maxRow, maxColumn, row, column);
         }
         return true;
     }
@@ -60,9 +64,7 @@ public class Engine {
             Map<Coordinate, Cell> cells = new HashMap<>();
             for (STLCell generatedCell : generatedSheet.getSTLCells().getSTLCell()) {
                 // Validate that the cell is within the sheet's bounds
-                if (!isWithinBounds(generatedCell.getRow(), generatedCell.getColumn().trim().charAt(0) - 'A' - 1)) {
-                    throw new InvalidXMLFormatException("Cell at " + generatedCell.getRow() + "," + generatedCell.getColumn() + " is out of sheet bounds.");
-                }
+                isWithinBounds(generatedCell.getRow(), generatedCell.getColumn().trim().charAt(0) - 'A' + 1);
 
                 // Translate and validate the cell
                 Cell cell = translateSTLCellToCell(generatedCell);
@@ -88,12 +90,12 @@ public class Engine {
     }
 
     private Cell translateSTLCellToCell(STLCell generatedCell) throws InvalidXMLFormatException {
-        Cell cell = new CellImpl(generatedCell.getRow() - 1, generatedCell.getColumn().trim().charAt(0) - 'A', generatedCell.getSTLOriginalValue());
+        Cell cell = new CellImpl(generatedCell.getRow() , generatedCell.getColumn().trim().charAt(0) - 'A' + 1, generatedCell.getSTLOriginalValue());
 
         // Set the original value from the generated XML object
         cell.setOriginalValue(generatedCell.getSTLOriginalValue());
         // Optionally calculate the effective value based on your logic
-        cell.calculateEffectiveValue();
+        //cell.calculateEffectiveValue();
 
         if(cell.isFormula())
         {

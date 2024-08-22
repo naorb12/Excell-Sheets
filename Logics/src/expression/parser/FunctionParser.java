@@ -1,10 +1,9 @@
 package expression.parser;
 
+import engine.Engine;
 import expression.api.Expression;
-import expression.impl.IdentityExpression;
-import expression.impl.MinusExpression;
-import expression.impl.PlusExpression;
-import expression.impl.UpperCaseExpression;
+import expression.impl.*;
+import immutable.objects.CellDTO;
 import sheet.cell.impl.CellType;
 
 import java.util.ArrayList;
@@ -86,6 +85,155 @@ public enum FunctionParser {
             return new MinusExpression(left, right);
         }
     },
+    TIMES{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for Times function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if (!left.getFunctionResultType().equals(CellType.NUMERIC) || !right.getFunctionResultType().equals(CellType.NUMERIC)) {
+                throw new IllegalArgumentException("Invalid argument types for TIMES function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new TimesExpression(left, right);
+        }
+    },
+    DIVIDE{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for DIVIDE function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if (!left.getFunctionResultType().equals(CellType.NUMERIC) || !right.getFunctionResultType().equals(CellType.NUMERIC)) {
+                throw new IllegalArgumentException("Invalid argument types for DIVIDE function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new DivideExpression(left, right);
+        }
+    },
+    MOD{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for MOD function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if (!left.getFunctionResultType().equals(CellType.NUMERIC) || !right.getFunctionResultType().equals(CellType.NUMERIC)) {
+                throw new IllegalArgumentException("Invalid argument types for MOD function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new ModExpression(left, right);
+        }
+
+    },
+    POW{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for POW function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if (!left.getFunctionResultType().equals(CellType.NUMERIC) || !right.getFunctionResultType().equals(CellType.NUMERIC)) {
+                throw new IllegalArgumentException("Invalid argument types for POW function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new PowExpression(left, right);
+        }
+    },
+    ABS{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly one argument
+            if (arguments.size() != 1) {
+                throw new IllegalArgumentException("Invalid number of arguments for ABS function. Expected 1, but got " + arguments.size());
+            }
+
+            Expression expression = parseExpression(arguments.get(0).trim());
+
+            if(!expression.getFunctionResultType().equals(CellType.NUMERIC)) {
+                throw new IllegalArgumentException("Invalid argument types for ABS function. Expected NUMERIC, but got " + expression.getFunctionResultType());
+            }
+
+            return new AbsExpression(expression);
+        }
+    },
+    CONCAT{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for CONCAT function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if (!left.getFunctionResultType().equals(CellType.STRING) || !right.getFunctionResultType().equals(CellType.STRING)) {
+                throw new IllegalArgumentException("Invalid argument types for CONCAT function. Expected STRING, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new ConcatExpression(left, right);
+        }
+    },
+    SUB{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 3) {
+                throw new IllegalArgumentException("Invalid number of arguments for SUB function. Expected 3, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression source = parseExpression(arguments.get(0).trim());
+            Expression startIndex = parseExpression(arguments.get(1).trim());
+            Expression endIndex = parseExpression(arguments.get(2).trim());
+
+            // more validations on the expected argument types
+            if (!source.getFunctionResultType().equals(CellType.STRING) || !startIndex.getFunctionResultType().equals(CellType.NUMERIC) || !endIndex.getFunctionResultType().equals(CellType.NUMERIC)) {
+                throw new IllegalArgumentException("Invalid argument types for CONCAT function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
+            }
+
+            return new SubExpression(source, startIndex, endIndex);
+
+        }
+    },
+    REF{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly one argument
+            if (arguments.size() != 1) {
+                throw new IllegalArgumentException("Invalid number of arguments for REF function. Expected 1, but got " + arguments.size());
+            }
+
+            String refCell = arguments.get(0).trim();
+            CellDTO cell = Engine.getCellDTO(refCell.charAt(1) - '0', refCell.charAt(0) - 'A' + 1);
+
+            return new RefExpression(parseExpression(cell.getOriginalValue()));
+
+        }
+    },
     UPPER_CASE {
         @Override
         public Expression parse(List<String> arguments) {
@@ -93,6 +241,7 @@ public enum FunctionParser {
             if (arguments.size() != 1) {
                 throw new IllegalArgumentException("Invalid number of arguments for UPPER_CASE function. Expected 1, but got " + arguments.size());
             }
+
 
             // structure is good. parse arguments
             Expression arg = parseExpression(arguments.get(0).trim());
@@ -105,6 +254,7 @@ public enum FunctionParser {
             // all is good. create the relevant function instance
             return new UpperCaseExpression(arg);
         }
+
     };
 
     abstract public Expression parse(List<String> arguments);
@@ -115,7 +265,6 @@ public enum FunctionParser {
 
             String functionContent = input.substring(1, input.length() - 1);
             List<String> topLevelParts = parseMainParts(functionContent);
-
 
             String functionName = topLevelParts.get(0).trim().toUpperCase();
 
