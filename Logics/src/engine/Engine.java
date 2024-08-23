@@ -2,6 +2,7 @@ package engine;
 
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
+import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
@@ -96,14 +97,6 @@ public class Engine {
         cell.setOriginalValue(generatedCell.getSTLOriginalValue());
         // Optionally calculate the effective value based on your logic
         //cell.calculateEffectiveValue();
-
-        if(cell.isFormula())
-        {
-            Set<Cell> dependencies = parseFormulaForDependencies(cell.getOriginalValue());
-            cell.setDependsOn(dependencies);
-
-            validateDependencies(dependencies);
-        }
 
         // Return the fully constructed and populated cell
         return cell;

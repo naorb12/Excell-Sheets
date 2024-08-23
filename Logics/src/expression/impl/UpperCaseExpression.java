@@ -1,6 +1,8 @@
 package expression.impl;
 
 import expression.api.Expression;
+import immutable.objects.SheetDTO;
+import sheet.api.Sheet;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -14,8 +16,8 @@ public class UpperCaseExpression implements Expression {
     }
 
     @Override
-    public EffectiveValue eval() {
-        EffectiveValue eval = e.eval();
+    public EffectiveValue eval(SheetDTO sheet) {
+        EffectiveValue eval = e.eval(sheet);
         String upperCaseResult = eval.extractValueWithExpectation(String.class).toUpperCase();
         return new EffectiveValueImpl(CellType.STRING, upperCaseResult);
     }
