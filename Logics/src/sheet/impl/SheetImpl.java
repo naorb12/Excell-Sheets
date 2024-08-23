@@ -1,13 +1,13 @@
 package sheet.impl;
 
+import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.coordinate.Coordinate;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class SheetImpl implements sheet.api.Sheet, SheetDTO {
 
@@ -70,23 +70,102 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
         this.name = name;
     }
 
+
     @Override
     public void setCells(Map<Coordinate, Cell> cells) {
         this.activeCells = new HashMap<>(cells);
-        for (Coordinate coordinate : cells.keySet()) {
-            Cell cell = cells.get(coordinate);
-            cell.calculateEffectiveValue();
+
+        // First loop: Update dependsOn and influencingOn sets, and detect loops
+        activeCells.forEach((coordinate, cell) -> {
+            Set<Coordinate> dependsOnSet = FunctionParser.parseDependsOn(cell.getOriginalValue());
+            cell.setDependsOn(dependsOnSet);
+
+            // Detect loops
+            if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
+                throw new IllegalStateException("Dependency loop detected at " + coordinate);
+            }
+
+            // Update the influencingOn set for each dependent cell
+            dependsOnSet.forEach(dependsOnCoordinate -> {
+                Cell dependentCell = activeCells.get(dependsOnCoordinate);
+                if (dependentCell != null) {
+                    dependentCell.getInfluencingOn().add(coordinate);
+                }
+            });
+        });
+
+        // Second loop: Calculate effective values
+        activeCells.forEach((coordinate, cell) -> {
+            cell.calculateEffectiveValue(this);
+        });
+    }
+
+    private boolean hasDependencyLoop(Coordinate start, Coordinate current, Set<Coordinate> visited) {
+        if (visited.contains(current)) {
+            return true;  // Loop detected
         }
+
+        visited.add(current);
+
+        Cell currentCell = activeCells.get(current);
+        if (currentCell != null) {
+            for (Coordinate dependency : currentCell.getDependsOn()) {
+                if (hasDependencyLoop(start, dependency, visited)) {
+                    return true;
+                }
+            }
+        }
+
+        visited.remove(current);
+        return false;
     }
 
     @Override
     public void setCell(int row, int col, String input) {
-        Coordinate coord = new Coordinate(row, col);
-        Cell cell = activeCells.getOrDefault(coord, new CellImpl(row, col, input));
-        cell.setOriginalValue(input);
-        cell.calculateEffectiveValue();
-        // Put the cell in the map
-        activeCells.put(coord, cell);
+        Coordinate coordinate = new Coordinate(row, col);
+        Cell cell = activeCells.get(coordinate);
+
+        if (cell == null) {
+            // Handle the case where the cell doesn't exist (e.g., create a new one)
+            cell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), input);
+            activeCells.put(coordinate, cell);
+        } else {
+            // Update the cell's value
+            cell.setOriginalValue(input);
+        }
+
+        // Parse the new dependencies
+        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(cell.getOriginalValue());
+
+        // Detect loops before applying the changes
+        if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
+            throw new IllegalStateException("Dependency loop detected at " + coordinate);
+        }
+
+        // Update the cell's dependsOn set
+        Set<Coordinate> oldDependsOnSet = cell.getDependsOn();
+        cell.setDependsOn(newDependsOnSet);
+
+        // Remove the current cell's influence from the old dependencies
+        if (oldDependsOnSet != null) {
+            oldDependsOnSet.forEach(dependsOnCoordinate -> {
+                Cell dependentCell = activeCells.get(dependsOnCoordinate);
+                if (dependentCell != null) {
+                    dependentCell.getInfluencingOn().remove(coordinate);
+                }
+            });
+        }
+
+        // Update the influencingOn sets for the new dependencies
+        newDependsOnSet.forEach(dependsOnCoordinate -> {
+            Cell dependentCell = activeCells.get(dependsOnCoordinate);
+            if (dependentCell != null) {
+                dependentCell.getInfluencingOn().add(coordinate);
+            }
+        });
+
+        // Recalculate the effective value for this cell
+        cell.calculateEffectiveValue(this);
     }
 
     @Override

@@ -24,4 +24,9 @@ public class Coordinate {
     public int hashCode() {
         return Objects.hash(column, row);
     }
+
+    @Override
+    public String toString() {
+        return "(" + (char)(column + 'A' - 1)  + row + ")";
+    }
 }

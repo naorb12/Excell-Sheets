@@ -201,7 +201,7 @@ public class UserInterface {
             System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()));
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
             // Assuming methods to get dependencies are implemented:
-            System.out.println("Depends on: " + cell.getDependsOn()); // Adjust based on actual method
+            System.out.println("Depends on: " + cell.getDependsOn().toString()); // Adjust based on actual method
             System.out.println("Affects: " + cell.getInfluencingOn()); // Adjust based on actual method
         } else {
             System.out.println("The cell is empty.");
@@ -213,6 +213,7 @@ public class UserInterface {
         System.out.println("Enter your input: ");
         String input = scanner.nextLine();
         engine.setCell(coord.getRow(), coord.getColumn(), input);
+        System.out.println("Cell: " + (char)(coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
     }
 
     public Coordinate inputCell()
@@ -222,8 +223,8 @@ public class UserInterface {
         while (true) {
             try{
                 input = scanner.nextLine().trim().toUpperCase();
-                int row = Integer.parseInt(input.substring(1)) - 1; // Assuming rows start from 1
-                int col = input.charAt(0) - 'A'; // Convert column letter to index
+                int row = Integer.parseInt(input.substring(1)) ; // Assuming rows start from 1
+                int col = input.charAt(0) - 'A' + 1; // Convert column letter to index
 
                 if (engine.isWithinBounds(row, col)) {
                     return new Coordinate(row, col);

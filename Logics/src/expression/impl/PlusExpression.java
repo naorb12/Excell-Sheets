@@ -1,6 +1,8 @@
 package expression.impl;
 
 import expression.api.Expression;
+import immutable.objects.SheetDTO;
+import sheet.api.Sheet;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -16,9 +18,9 @@ public class PlusExpression implements Expression {
     }
 
     @Override
-    public EffectiveValue eval() {
-        EffectiveValue leftValue = left.eval();
-        EffectiveValue rightValue = right.eval();
+    public EffectiveValue eval(SheetDTO sheet) {
+        EffectiveValue leftValue = left.eval(sheet);
+        EffectiveValue rightValue = right.eval(sheet);
         // do some checking... error handling...
         //double result = (Double) leftValue.getValue() + (Double) rightValue.getValue();
         double result = leftValue.extractValueWithExpectation(Double.class) + rightValue.extractValueWithExpectation(Double.class);
