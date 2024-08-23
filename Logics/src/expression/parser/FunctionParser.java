@@ -333,6 +333,7 @@ public enum FunctionParser {
                 int commaIndex = part.indexOf(',');
                 // Extract the cell reference by taking the substring after the comma and before the closing "}"
                 String cellReference = part.substring(commaIndex + 1, part.length() - 1);
+                Coordinate coordinate = new Coordinate(Integer.parseInt(cellReference.substring(1)), cellReference.charAt(0) - 'A' + 1);
                 dependencies.add(cellReference.trim());
             } else if (part.startsWith("{")) {
                 // If the part is another expression, recursively parse it

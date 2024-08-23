@@ -97,14 +97,6 @@ public class Engine {
         // Optionally calculate the effective value based on your logic
         //cell.calculateEffectiveValue();
 
-        if(cell.isFormula())
-        {
-            Set<Cell> dependencies = parseFormulaForDependencies(cell.getOriginalValue());
-            cell.setDependsOn(dependencies);
-
-            validateDependencies(dependencies);
-        }
-
         // Return the fully constructed and populated cell
         return cell;
     }

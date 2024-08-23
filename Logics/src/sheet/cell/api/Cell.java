@@ -14,8 +14,6 @@ public interface Cell {
     EffectiveValue getEffectiveValue();
     void calculateEffectiveValue(SheetDTO sheet);
 
-    boolean isFormula();
-
     int getVersion();
     Set<Cell> getDependsOn();
     Set<Cell> getInfluencingOn();
