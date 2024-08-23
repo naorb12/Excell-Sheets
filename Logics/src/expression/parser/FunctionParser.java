@@ -7,9 +7,7 @@ import immutable.objects.CellDTO;
 import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public enum FunctionParser {
     IDENTITY {
@@ -319,8 +317,8 @@ public enum FunctionParser {
         return parts;
     }
 
-    public static List<String> parseDependsOn(String input) {
-        List<String> dependencies = new ArrayList<>();
+    public static Set<Coordinate> parseDependsOn(String input) {
+        Set<Coordinate> dependencies = new HashSet<>();
 
         // First, use parseMainParts() to break down the input into main parts
         List<String> mainParts = parseMainParts(input);
@@ -333,8 +331,10 @@ public enum FunctionParser {
                 int commaIndex = part.indexOf(',');
                 // Extract the cell reference by taking the substring after the comma and before the closing "}"
                 String cellReference = part.substring(commaIndex + 1, part.length() - 1);
-                Coordinate coordinate = new Coordinate(Integer.parseInt(cellReference.substring(1)), cellReference.charAt(0) - 'A' + 1);
-                dependencies.add(cellReference.trim());
+                int row = Integer.parseInt(cellReference.substring(1));  // Extract the row number (after the first character)
+                int column = cellReference.charAt(0) - 'A' + 1; // Convert the column letter to a number
+                Coordinate coordinate = new Coordinate(row, column);
+                dependencies.add(coordinate);
             } else if (part.startsWith("{")) {
                 // If the part is another expression, recursively parse it
                 dependencies.addAll(parseDependsOn(part));

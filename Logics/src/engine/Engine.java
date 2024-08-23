@@ -2,6 +2,7 @@ package engine;
 
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
+import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;

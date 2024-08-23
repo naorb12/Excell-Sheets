@@ -16,9 +16,9 @@ public interface CellDTO {
 
     int getVersion();
 
-    Set<Cell> getDependsOn();
+    Set<Coordinate> getDependsOn();
 
-    Set<Cell> getInfluencingOn();
+    Set<Coordinate> getInfluencingOn();
 
     void calculateEffectiveValue(SheetDTO sheet);
 

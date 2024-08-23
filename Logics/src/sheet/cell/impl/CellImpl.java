@@ -21,10 +21,10 @@ public class CellImpl<T> implements Cell, CellDTO {
     private EffectiveValue effectiveValue;
     private int versionNumber = 1;
 
-    private Set<Cell> dependsOn;
-    private Set<Cell> influencingOn;
+    private Set<Coordinate> dependsOn;
+    private Set<Coordinate> influencingOn;
 
-    public CellImpl(int row, int column, String originalValue, EffectiveValue effectiveValue, int version, Set<Cell> dependsOn, Set<Cell> influencingOn) {
+    public CellImpl(int row, int column, String originalValue, EffectiveValue effectiveValue, int version, Set<Coordinate> dependsOn, Set<Coordinate> influencingOn) {
         this.coordinate = new Coordinate(row, column);
         this.originalValue = originalValue;
         this.effectiveValue = effectiveValue;
@@ -37,8 +37,8 @@ public class CellImpl<T> implements Cell, CellDTO {
         this.coordinate = new Coordinate(row, column);
         this.originalValue = originalValue;
         this.effectiveValue = new EffectiveValueImpl();
-        this.dependsOn = new HashSet<Cell>();
-        this.influencingOn = new HashSet<Cell>();
+        this.dependsOn = new HashSet<Coordinate>();
+        this.influencingOn = new HashSet<Coordinate>();
     }
 
     @Override
@@ -78,12 +78,12 @@ public class CellImpl<T> implements Cell, CellDTO {
     }
 
     @Override
-    public Set<Cell> getDependsOn() {
+    public Set<Coordinate> getDependsOn() {
         return dependsOn;
     }
 
     @Override
-    public Set<Cell> getInfluencingOn() {
+    public Set<Coordinate> getInfluencingOn() {
         return influencingOn;
     }
 
@@ -95,7 +95,7 @@ public class CellImpl<T> implements Cell, CellDTO {
     }
 
     @Override
-    public void setDependsOn(Set<Cell> dependencies) {
+    public void setDependsOn(Set<Coordinate> dependencies) {
         this.dependsOn = dependencies;
     }
 
