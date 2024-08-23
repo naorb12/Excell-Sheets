@@ -75,16 +75,18 @@ public class CellImpl<T> implements Cell, CellDTO {
                 CellDTO influencedCell = sheet.getCellDTO(influencedCoordinate.getRow(), influencedCoordinate.getColumn());
                 if (influencedCell != null) {
                     influencedCell.calculateEffectiveValue(sheet);
-                    //influencedCell.incrementVersionNumber();
                 }
             }
 
-            this.versionNumber++;
 
-        } catch (CalculationException e) {
-            throw new CalculationException("Error calculating effective value for cell at " + this.coordinate, e);
+        }
+        catch (IllegalArgumentException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+        catch (CalculationException e) {
+            throw new IllegalArgumentException("Error calculating effective value for cell at " + this.coordinate + ". " + e.getMessage());
         } catch (Exception e) {
-            throw new CalculationException("Unexpected error while calculating effective value for cell at " + this.coordinate, e);
+            throw new CalculationException("Unexpected error while calculating effective value for cell at " + this.coordinate + ". " + e.getMessage());
         }
     }
 
@@ -109,7 +111,6 @@ public class CellImpl<T> implements Cell, CellDTO {
         // Update the dependsOn set using the FunctionParser
         Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(originalValue);
         this.dependsOn = newDependsOnSet;
-        this.versionNumber++;
     }
 
     @Override

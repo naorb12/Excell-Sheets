@@ -27,6 +27,6 @@ public class Coordinate {
 
     @Override
     public String toString() {
-        return "(" + (char)(column + 'A' - 1)  + row + ")";
+        return "(" + (char)(column + 'A' - 1) + row + ")";
     }
 }

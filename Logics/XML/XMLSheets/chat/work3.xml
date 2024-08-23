@@ -22,5 +22,8 @@
         <STL-Cell row="2" column="C">
             <STL-Original-Value>{CONCAT,{REF,B1},{REF,B2}}</STL-Original-Value>
         </STL-Cell>
+        <STL-Cell row="2" column="E">
+            <STL-Original-Value>{REF,C2}</STL-Original-Value>
+        </STL-Cell>
     </STL-Cells>
 </STL-Sheet>

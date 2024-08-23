@@ -31,5 +31,7 @@ public interface Sheet {
 
     void setCell(int row, int col, String input);
 
+    void incrementVersionForCellAndInfluences(Coordinate coordinate);
+
     void incrementVersion();
 }

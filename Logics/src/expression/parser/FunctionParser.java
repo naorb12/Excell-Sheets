@@ -327,16 +327,19 @@ public enum FunctionParser {
 
         List<String> mainParts = parseMainParts(input);
 
-        // The first part is the function name, skip it
-        mainParts.remove(0);
-
-        for (String part : mainParts) {
-            if (part.startsWith("{REF,")) {
-                // This part is a reference, extract and add it to the set
-                dependencies.add(parseReference(part));
-            } else if (part.startsWith("{")) {
-                // This part is a nested expression, recurse into it
-                dependencies.addAll(parseDependsOn(part));
+        // If the first part is "REF", handle it as a reference
+        if (mainParts.get(0).equalsIgnoreCase("REF") && mainParts.size() == 2) {
+            dependencies.add(parseReference("{" + input + "}"));
+        } else {
+            // Otherwise, process as a function with possible nested expressions
+            for (String part : mainParts) {
+                if (part.startsWith("{REF,")) {
+                    // This part is a reference, extract and add it to the set
+                    dependencies.add(parseReference(part));
+                } else if (part.startsWith("{")) {
+                    // This part is a nested expression, recurse into it
+                    dependencies.addAll(parseDependsOn(part));
+                }
             }
         }
 

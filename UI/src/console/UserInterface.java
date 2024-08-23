@@ -99,7 +99,7 @@ public class UserInterface {
         SheetDTO sheet = engine.getSheet();
 
         // Display the sheet name and version
-        System.out.println("sheet.impl.Sheet Name: " + sheet.getName());
+        System.out.println("Sheet Name: " + sheet.getName());
         System.out.println("Version: " + sheet.getVersion());
         System.out.println();
 
@@ -196,7 +196,6 @@ public class UserInterface {
     private void printCell(CellDTO cell) {
 
         if (cell != null) {
-            System.out.println("sheet.cell.impl.Cell Reference: " );
             System.out.println("Original Value: " + cell.getOriginalValue());
             System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()));
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
@@ -209,11 +208,22 @@ public class UserInterface {
     }
 
     public void setCell() {
-        Coordinate coord = inputCell();
-        System.out.println("Enter your input: ");
-        String input = scanner.nextLine();
-        engine.setCell(coord.getRow(), coord.getColumn(), input);
-        System.out.println("Cell: " + (char)(coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
+        while (true) {
+        try {
+            Coordinate coord = inputCell();
+            System.out.println("Enter your input: ");
+            String input = scanner.nextLine();
+            engine.setCell(coord.getRow(), coord.getColumn(), input);
+            System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
+            break;
+        }
+        catch (RuntimeException e) {
+            System.out.println(e.getMessage() + ". Please try again.");
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage() + ". Please try again.");
+        }
+        }
     }
 
     public Coordinate inputCell()

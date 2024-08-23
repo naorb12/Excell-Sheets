@@ -1,5 +1,6 @@
 package engine;
 
+import exception.CalculationException;
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
 import expression.parser.FunctionParser;
@@ -102,27 +103,16 @@ public class Engine {
         return cell;
     }
 
-    private void validateDependencies(Set<Cell> dependencies) throws InvalidXMLFormatException {
-        for (Cell cell : dependencies) {
-            Optional<Cell> dependentCellOpt = Optional.ofNullable(cell);
-            if (!dependentCellOpt.isPresent()) {
-                throw new InvalidXMLFormatException("Dependent cell at " + cell + " is missing or has an invalid value.");
-            }
-            Cell dependentCell = dependentCellOpt.get();
-            if (dependentCell.getEffectiveValue().getCellType() == CellType.STRING) {
-                throw new InvalidXMLFormatException("Dependent cell at " + cell + " has an invalid type: STRING");
-            }
-        }
-    }
-
-    private Set<Cell> parseFormulaForDependencies(String originalValue) {
-        Set<Cell> dependencies = new HashSet<>();
-        // Parsing logic here...
-        return dependencies;
-    }
-
     public void setCell(int row, int col, String input) {
-        sheet.setCell(row, col, input);
-        sheet.incrementVersion();
+        try {
+            sheet.setCell(row, col, input);
+        }
+        catch (CalculationException e)
+        {
+            throw new RuntimeException(e);
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

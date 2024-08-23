@@ -82,7 +82,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
 
             // Detect loops
             if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
-                throw new IllegalStateException("Dependency loop detected at " + coordinate);
+                throw new IllegalStateException("Dependency loop detected at " + coordinate.toString());
             }
 
             // Update the influencingOn set for each dependent cell
@@ -166,6 +166,28 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
 
         // Recalculate the effective value for this cell
         cell.calculateEffectiveValue(this);
+
+        // Increment the version number for this cell and all influenced cells
+        incrementVersionForCellAndInfluences(coordinate);
+
+        // Increment the version number for the entire sheet
+        incrementVersion();
+    }
+
+    @Override
+    public void incrementVersionForCellAndInfluences(Coordinate coordinate) {
+        Cell cell = activeCells.get(coordinate);
+        if (cell == null) {
+            return;
+        }
+
+        // Increment the version number for the current cell
+        cell.incrementVersionNumber();
+
+        // Recursively increment the version number for all influenced cells
+        for (Coordinate influencedCoordinate : cell.getInfluencingOn()) {
+            incrementVersionForCellAndInfluences(influencedCoordinate);
+        }
     }
 
     @Override
