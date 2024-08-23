@@ -1,5 +1,6 @@
 package sheet.cell.impl;
 
+import exception.CalculationException;
 import expression.api.Expression;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
@@ -64,11 +65,31 @@ public class CellImpl<T> implements Cell, CellDTO {
     @Override
     public void calculateEffectiveValue(SheetDTO sheetDTO) {
         try {
+            // Recalculate the effective value of each dependency before this cell
+            for (Coordinate dependency : this.dependsOn) {
+                CellDTO dependentCell = sheetDTO.getCellDTO(dependency.getRow(), dependency.getColumn());
+                if (dependentCell == null) {
+                    throw new CalculationException("Dependency cell not found at " + dependency);
+                }
+
+                // Recursively calculate the effective value of the dependent cell
+                dependentCell.calculateEffectiveValue(sheetDTO);
+            }
+
+            // Parse and evaluate the expression for this cell
             Expression expression = FunctionParser.parseExpression(this.originalValue);
             effectiveValue = expression.eval(sheetDTO);
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Error parsing expression: " + this.originalValue);
+
+            // Handle any specific post-calculation tasks if necessary
+            // For example, update version, notify listeners, etc.
+            this.versionNumber++;
+
+        } catch (CalculationException e) {
+            // Re-throw the exception to be handled by higher-level logic
+            throw new CalculationException("Error calculating effective value for cell at " + this.coordinate, e);
+        } catch (Exception e) {
+            // Catch any other unexpected exceptions and wrap them
+            throw new CalculationException("Unexpected error while calculating effective value for cell at " + this.coordinate, e);
         }
     }
 
