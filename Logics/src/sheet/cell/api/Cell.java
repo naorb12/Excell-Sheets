@@ -20,4 +20,6 @@ public interface Cell {
     void setOriginalValue(String stlOriginalValue);
 
     void setDependsOn(Set<Coordinate> dependencies);
+
+    void incrementVersionNumber();
 }

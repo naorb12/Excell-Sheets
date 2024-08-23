@@ -1,6 +1,7 @@
 package expression.api;
 
 import immutable.objects.SheetDTO;
+import sheet.api.Sheet;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 

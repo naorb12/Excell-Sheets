@@ -201,7 +201,7 @@ public class UserInterface {
             System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()));
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
             // Assuming methods to get dependencies are implemented:
-            System.out.println("Depends on: " + cell.getDependsOn()); // Adjust based on actual method
+            System.out.println("Depends on: " + cell.getDependsOn().toString()); // Adjust based on actual method
             System.out.println("Affects: " + cell.getInfluencingOn()); // Adjust based on actual method
         } else {
             System.out.println("The cell is empty.");

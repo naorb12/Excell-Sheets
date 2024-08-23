@@ -320,28 +320,35 @@ public enum FunctionParser {
     public static Set<Coordinate> parseDependsOn(String input) {
         Set<Coordinate> dependencies = new HashSet<>();
 
-        // First, use parseMainParts() to break down the input into main parts
+        // If the input is enclosed with '{' and '}', remove them
+        if (input.startsWith("{") && input.endsWith("}")) {
+            input = input.substring(1, input.length() - 1);
+        }
+
         List<String> mainParts = parseMainParts(input);
 
-        // Iterate through each part
+        // The first part is the function name, skip it
+        mainParts.remove(0);
+
         for (String part : mainParts) {
-            // Check if the part is a reference (starts with "{REF,")
             if (part.startsWith("{REF,")) {
-                // Find the comma after "{REF,"
-                int commaIndex = part.indexOf(',');
-                // Extract the cell reference by taking the substring after the comma and before the closing "}"
-                String cellReference = part.substring(commaIndex + 1, part.length() - 1);
-                int row = Integer.parseInt(cellReference.substring(1));  // Extract the row number (after the first character)
-                int column = cellReference.charAt(0) - 'A' + 1; // Convert the column letter to a number
-                Coordinate coordinate = new Coordinate(row, column);
-                dependencies.add(coordinate);
+                // This part is a reference, extract and add it to the set
+                dependencies.add(parseReference(part));
             } else if (part.startsWith("{")) {
-                // If the part is another expression, recursively parse it
+                // This part is a nested expression, recurse into it
                 dependencies.addAll(parseDependsOn(part));
             }
         }
 
         return dependencies;
+    }
+
+    private static Coordinate parseReference(String refPart) {
+        int commaIndex = refPart.indexOf(',');
+        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1);
+        int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
+        int column = cellReference.charAt(0) - 'A' + 1;  // Convert column letter to number
+        return new Coordinate(row, column);
     }
 }
 

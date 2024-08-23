@@ -96,7 +96,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
 
         // Second loop: Calculate effective values
         activeCells.forEach((coordinate, cell) -> {
-            cell.calculateEffectiveValue((SheetDTO) this);
+            cell.calculateEffectiveValue(this);
         });
     }
 
@@ -165,7 +165,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
         });
 
         // Recalculate the effective value for this cell
-        cell.calculateEffectiveValue((SheetDTO) this);
+        cell.calculateEffectiveValue(this);
     }
 
     @Override
