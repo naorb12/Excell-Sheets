@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<STL-Sheet name="circular-dependency-example" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="shtisel-v1.xsd">
+    <STL-Layout rows="3" columns="3">
+        <STL-Size column-width-units="15" rows-height-units="3"/>
+    </STL-Layout>
+    <STL-Cells>
+        <STL-Cell row="3" column="A">
+            <STL-Original-Value>{PLUS,{REF,B1},2}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="B">
+            <STL-Original-Value>{PLUS,{REF,C1},3}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="C">
+            <STL-Original-Value>{PLUS,{REF,A3},4}</STL-Original-Value>
+        </STL-Cell>
+    </STL-Cells>
+</STL-Sheet>

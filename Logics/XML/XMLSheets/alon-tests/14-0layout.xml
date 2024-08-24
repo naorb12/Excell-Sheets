@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<STL-Sheet name="MixedDataTypesSheet" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="shtisel-v1.xsd">
+    <STL-Layout rows="0" columns="0">
+        <STL-Size column-width-units="10" rows-height-units="1"/>
+    </STL-Layout>
+    <STL-Cells>
+        <STL-Cell row="1" column="A">
+            <STL-Original-Value>100</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="B">
+            <STL-Original-Value>"Hello"</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="C">
+            <STL-Original-Value>{PLUS,{REF,A1},50}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="A">
+            <STL-Original-Value>200</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="B">
+            <STL-Original-Value>"World"</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="C">
+            <STL-Original-Value>{CONCAT,{REF,B1},{REF,B2}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="E">
+            <STL-Original-Value>{REF,C2}</STL-Original-Value>
+        </STL-Cell>
+    </STL-Cells>
+</STL-Sheet>
