@@ -1,6 +1,7 @@
 package sheet.api;
 
 import immutable.objects.CellDTO;
+import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
@@ -8,6 +9,12 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface Sheet {
+
+    // Add a method to save the current version of the sheet
+    void saveCurrentVersion();
+
+    // Method to create a snapshot of the current sheet state
+    SheetDTO createSnapshot();
 
     Map<Coordinate, Cell> getMapOfCells();
 

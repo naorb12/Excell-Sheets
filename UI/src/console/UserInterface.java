@@ -39,31 +39,30 @@ public class UserInterface {
             System.out.println("6. Exit");
 
             System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
+            String choice = scanner.nextLine();
 
-            switch (choice) {
-                case 1:
+            switch (choice.trim()) {
+                case "1":
                     // Load Sheet from XML
                     loadNewXML();
                     break;
-                case 2:
+                case "2":
                     // Present Sheet
-                    presentSheet();
+                    presentCurrentSheet();
                     break;
-                case 3:
+                case "3":
                     // Display Cell
                     displayCell();
                     break;
-                case 4:
+                case "4":
                     // Update Cell
                     setCell();
                     break;
-                case 5:
+                case "5":
                     // Display Versions
-                    //displayVersions();
+                    displayPreviousVersions();
                     break;
-                case 6:
+                case "6":
                     // Exit
                     System.out.println("Exiting the program.");
                     exit = true;
@@ -73,31 +72,31 @@ public class UserInterface {
             }
         }
 
-
-
     }
 
-    public void loadNewXML()
-    {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Enter the full path to the XML file:");
-        String filePath = scanner.nextLine();
-
-        XMLSheetLoader loader = new XMLSheetLoaderImpl(); // MOVE THE LOADER TO ENGINE
-
+    private void displayPreviousVersions() {
         try {
-            STLSheet sheet = loader.loadXML(filePath);
-            engine.mapSTLSheet(sheet);
-            System.out.println("XML file loaded and validated successfully.");
+            System.out.println("Enter the version number you want to peek at range of 1-" + engine.getSheet().getVersion() + ": ");
+            int version = Integer.parseInt(scanner.nextLine());
+
+            // Ask the engine to get the specified version of the sheet
+            SheetDTO sheetVersion = engine.peekVersion(version);
+
+            if (sheetVersion != null) {
+                int cellsChanged = engine.countAmountOfCellsChangedFromPreviousVersions(sheetVersion);
+                System.out.println("Displaying sheet version (" + version +") With (" + cellsChanged + ") cells updated in that version:");
+                presentSpecificSheet(sheetVersion);  // Display the retrieved version
+            } else {
+                System.out.println("Version " + version + " not found.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid version number. Please enter a valid integer.");
         } catch (Exception e) {
-            System.out.println("Failed to load and validate XML: " + e.getMessage());
+            System.out.println("An error occurred while retrieving the version: " + e.getMessage());
         }
     }
 
-    public void presentSheet() {
-        SheetDTO sheet = engine.getSheet();
-
+    private void presentSpecificSheet(SheetDTO sheet) {
         // Display the sheet name and version
         System.out.println("Sheet Name: " + sheet.getName());
         System.out.println("Version: " + sheet.getVersion());
@@ -150,6 +149,29 @@ public class UserInterface {
                 System.out.println();
             }
         }
+    }
+
+    public void loadNewXML()
+    {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter the full path to the XML file:");
+        String filePath = scanner.nextLine();
+
+        XMLSheetLoader loader = new XMLSheetLoaderImpl(); // MOVE THE LOADER TO ENGINE
+
+        try {
+            STLSheet sheet = loader.loadXML(filePath);
+            engine.mapSTLSheet(sheet);
+            System.out.println("XML file loaded and validated successfully.");
+        } catch (Exception e) {
+            System.out.println("Failed to load and validate XML: " + e.getMessage());
+        }
+    }
+
+    public void presentCurrentSheet() {
+        SheetDTO sheet = engine.getSheet();
+        presentSpecificSheet(sheet);
     }
 
     public void displayCell() {

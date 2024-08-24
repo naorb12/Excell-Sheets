@@ -115,4 +115,21 @@ public class Engine {
             throw new RuntimeException(e);
         }
     }
+
+    public SheetDTO peekVersion(int version) {
+        return sheet.peekVersion(version);
+    }
+
+    public int countAmountOfCellsChangedFromPreviousVersions(SheetDTO sheetVersion) {
+        int currentVersion = sheetVersion.getVersion();
+        int count = 0;
+
+        for(CellDTO cell : sheetVersion.getMapOfCellsDTO().values()) {
+            if(cell.getVersion() == currentVersion){
+                count++;
+            }
+        }
+
+        return count;
+    }
 }

@@ -13,6 +13,12 @@ public class EffectiveValueImpl implements EffectiveValue {
         this.value = value;
     }
 
+    // Copy constructor
+    public EffectiveValueImpl(EffectiveValueImpl original) {
+        this.cellType = original.getCellType();
+        this.value = original.getValue();
+    }
+
     public EffectiveValueImpl() {
 
     }
