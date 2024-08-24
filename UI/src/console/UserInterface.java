@@ -258,7 +258,7 @@ public class UserInterface {
         while (true) {
             try{
                 input = scanner.nextLine().trim().toUpperCase();
-                int row = Integer.parseInt(input.substring(1)) ; // Assuming rows start from 1
+                int row = Integer.parseInt(input.substring(1)) ;
                 int col = input.charAt(0) - 'A' + 1; // Convert column letter to index
 
                 if (engine.isWithinBounds(row, col)) {
