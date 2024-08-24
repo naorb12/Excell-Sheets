@@ -7,8 +7,6 @@ import java.util.Optional;
 
 public interface SheetDTO {
 
-    // Add a method to retrieve a specific version of the sheet
-    SheetDTO peekVersion(int version);
 
     CellDTO getCellDTO(int row, int column);
 

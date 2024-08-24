@@ -34,6 +34,7 @@ public interface Sheet {
 
     void setCell(int row, int col, String input);
 
-
     void incrementVersion();
+
+    void setVersion(int version);
 }

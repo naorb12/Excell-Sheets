@@ -78,7 +78,6 @@ public class CellImpl<T> implements Cell, CellDTO {
                 }
             }
 
-
         }
         catch (IllegalArgumentException e) {
             throw new RuntimeException(e.getMessage());

@@ -9,6 +9,7 @@ import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.CellType;
+import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 import sheet.impl.SheetImpl;
 import xml.generated.STLCell;
@@ -18,6 +19,8 @@ import java.util.*;
 
 public class Engine {
     private static SheetImpl sheet;
+    // Version history
+    private Map<Integer, SheetDTO> versionHistory = new HashMap<>();
 
     public Engine(int rowsCount, int colsCount, int rowsHeight, int colsWidth) {
         sheet = new SheetImpl(rowsCount, colsCount, rowsHeight, colsWidth);
@@ -76,6 +79,7 @@ public class Engine {
                 cells.put(coord, cell);
             }
             sheet.setCells(cells);
+            saveCurrentVersion(createSnapshot());
 
         } catch (OutOfBoundsException e) {
             throw new RuntimeException(e);
@@ -106,6 +110,7 @@ public class Engine {
     public void setCell(int row, int col, String input) {
         try {
             sheet.setCell(row, col, input);
+            saveCurrentVersion(createSnapshot());
         }
         catch (CalculationException e)
         {
@@ -117,7 +122,39 @@ public class Engine {
     }
 
     public SheetDTO peekVersion(int version) {
-        return sheet.peekVersion(version);
+        return versionHistory.get(version);
+    }
+
+    public void saveCurrentVersion(SheetDTO snapShot) {
+        versionHistory.put(sheet.getVersion(), snapShot);
+    }
+
+    // Method to create a snapshot of the current sheet state
+    public SheetDTO createSnapshot() {
+        // Create a deep copy of the current sheet
+        SheetImpl snapshot = new SheetImpl(sheet.getRowCount(), sheet.getColumnCount(), sheet.getRowHeightUnits(), sheet.getColumnsWidthUnits());
+        snapshot.setName(sheet.getName());
+        snapshot.setVersion(sheet.getVersion());
+
+        // Create a deep copy of the activeCells map
+        Map<Coordinate, Cell> deepCopiedCells = new HashMap<>();
+        for (Map.Entry<Coordinate, Cell> entry : sheet.getMapOfCells().entrySet()) {
+            // Copying cells
+            Cell cellCopied = entry.getValue();
+            Cell cell = new CellImpl(
+                    cellCopied.getCoordinate().getRow(),
+                    cellCopied.getCoordinate().getColumn(),
+                    new String(cellCopied.getOriginalValue()),
+                    new EffectiveValueImpl((EffectiveValueImpl) cellCopied.getEffectiveValue()),  // Deep copy the EffectiveValue
+                    cellCopied.getVersion(),
+                    new HashSet<>(cellCopied.getDependsOn()),
+                    new HashSet<>(cellCopied.getInfluencingOn())
+            );
+            deepCopiedCells.put(entry.getKey(), cell);
+        }
+        snapshot.setCells(deepCopiedCells);
+
+        return (SheetDTO) snapshot;
     }
 
     public int countAmountOfCellsChangedFromPreviousVersions(SheetDTO sheetVersion) {

@@ -285,7 +285,7 @@ public enum FunctionParser {
                 return FunctionParser.valueOf(functionName).parse(topLevelParts);
             }
             catch (Exception e) {
-                throw new IllegalArgumentException("No such function: " + functionName);
+                throw new IllegalArgumentException(e);
             }
         }
 
