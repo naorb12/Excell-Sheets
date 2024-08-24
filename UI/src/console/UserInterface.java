@@ -230,14 +230,14 @@ public class UserInterface {
     }
 
     public void setCell() {
-        while (true) {
+      //while (true) {
         try {
             Coordinate coord = inputCell();
             System.out.println("Enter your input: ");
             String input = scanner.nextLine();
             engine.setCell(coord.getRow(), coord.getColumn(), input);
             System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
-            break;
+         //   break;
         }
         catch (RuntimeException e) {
             System.out.println(e.getMessage() + ". Please try again.");
@@ -245,7 +245,7 @@ public class UserInterface {
         catch (Exception e) {
             System.out.println(e.getMessage() + ". Please try again.");
         }
-        }
+     //  }
     }
 
     public Coordinate inputCell()

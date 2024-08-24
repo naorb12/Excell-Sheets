@@ -281,7 +281,12 @@ public enum FunctionParser {
 
             //remove the first element from the array
             topLevelParts.remove(0);
-            return FunctionParser.valueOf(functionName).parse(topLevelParts);
+            try {
+                return FunctionParser.valueOf(functionName).parse(topLevelParts);
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException("No such function: " + functionName);
+            }
         }
 
         // handle identity expression

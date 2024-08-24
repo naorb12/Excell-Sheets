@@ -10,11 +10,7 @@ import java.util.Optional;
 
 public interface Sheet {
 
-    // Add a method to save the current version of the sheet
-    void saveCurrentVersion();
 
-    // Method to create a snapshot of the current sheet state
-    SheetDTO createSnapshot();
 
     Map<Coordinate, Cell> getMapOfCells();
 
@@ -38,7 +34,6 @@ public interface Sheet {
 
     void setCell(int row, int col, String input);
 
-    void incrementVersionForCellAndInfluences(Coordinate coordinate);
 
     void incrementVersion();
 }

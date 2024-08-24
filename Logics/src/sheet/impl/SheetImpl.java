@@ -153,64 +153,81 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
         Coordinate coordinate = new Coordinate(row, col);
         Cell cell = activeCells.get(coordinate);
 
-        // Step 1: Legitimacy Check
         try {
-            // Parse the new dependencies
-            Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+            // Step 1: Validate Input and Detect Dependency Loops
+            validateAndCheckLoops(coordinate, input);
 
-            // Detect loops before applying the changes
-            if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
-                throw new IllegalStateException("Dependency loop detected at " + coordinate);
-            }
-
-            // Step 2: Save the current version (before making changes)
+            // Step 2: Save Current Version Snapshot
             SheetDTO prevSnapShot = createSnapshot();
-            Set<Coordinate> oldDependsOnSet = cell.getDependsOn();
 
-            // Step 3: Apply the update
-            if (cell == null) {
-                // Handle the case where the cell doesn't exist (e.g., create a new one)
-                cell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), input);
-                activeCells.put(coordinate, cell);
-            } else {
-                // Update the cell's value
-                cell.setOriginalValue(input);
-            }
+            // Step 3: Apply Cell Update
+            Set<Coordinate> oldDependsOnSet = updateCell(coordinate, cell, input);
 
-            // Remove the current cell's influence from the old dependencies
-            if (oldDependsOnSet != null) {
-                oldDependsOnSet.forEach(dependsOnCoordinate -> {
-                    Cell dependentCell = activeCells.get(dependsOnCoordinate);
-                    if (dependentCell != null) {
-                        dependentCell.getInfluencingOn().remove(coordinate);
-                    }
-                });
-            }
+            // Step 4: Update Dependencies
+            updateDependencies(coordinate, cell, oldDependsOnSet, input);
 
-            // Update the influencingOn sets for the new dependencies
-            newDependsOnSet.forEach(dependsOnCoordinate -> {
-                Cell dependentCell = activeCells.get(dependsOnCoordinate);
-                if (dependentCell != null) {
-                    dependentCell.getInfluencingOn().add(coordinate);
-                }
-            });
+            // Step 5: Recalculate Effective Values
+            recalculateEffectiveValue(coordinate, cell);
 
-            // Recalculate the effective value for this cell
-            cell.calculateEffectiveValue(this);
-
-            // Increment the version number for this cell and all influenced cells
-            incrementVersionForCellAndInfluences(coordinate);
-
-            versionHistory.put(prevSnapShot.getVersion(), prevSnapShot);
-            // Finalize the version increment if everything is successful
-            incrementVersion();
+            // Step 6: Update Versions
+            updateVersions(coordinate, prevSnapShot);
 
         } catch (Exception e) {
             throw e;
         }
     }
 
-    @Override
+    private void validateAndCheckLoops(Coordinate coordinate, String input) {
+        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+        if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
+            throw new IllegalStateException("Dependency loop detected at " + coordinate);
+        }
+    }
+
+    private Set<Coordinate> updateCell(Coordinate coordinate, Cell cell, String input) {
+        Set<Coordinate> oldDependsOnSet = cell != null ? cell.getDependsOn() : null;
+
+        if (cell == null) {
+            cell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), input);
+            activeCells.put(coordinate, cell);
+        } else {
+            cell.setOriginalValue(input);
+        }
+
+        return oldDependsOnSet;
+    }
+
+    private void updateDependencies(Coordinate coordinate, Cell cell, Set<Coordinate> oldDependsOnSet, String input) {
+        // Remove the cell's influence from old dependencies
+        if (oldDependsOnSet != null) {
+            for (Coordinate dependsOnCoordinate : oldDependsOnSet) {
+                Cell dependentCell = activeCells.get(dependsOnCoordinate);
+                if (dependentCell != null) {
+                    dependentCell.getInfluencingOn().remove(coordinate);
+                }
+            }
+        }
+
+        // Update the influencingOn sets for the new dependencies
+        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+        for (Coordinate dependsOnCoordinate : newDependsOnSet) {
+            Cell dependentCell = activeCells.get(dependsOnCoordinate);
+            if (dependentCell != null) {
+                dependentCell.getInfluencingOn().add(coordinate);
+            }
+        }
+    }
+
+    private void recalculateEffectiveValue(Coordinate coordinate, Cell cell) {
+        cell.calculateEffectiveValue(this);
+        incrementVersionForCellAndInfluences(coordinate);
+    }
+
+    private void updateVersions(Coordinate coordinate, SheetDTO prevSnapShot) {
+        versionHistory.put(prevSnapShot.getVersion(), prevSnapShot);
+        incrementVersion();
+    }
+
     public void incrementVersionForCellAndInfluences(Coordinate coordinate) {
         Cell cell = activeCells.get(coordinate);
         if (cell == null) {
@@ -227,13 +244,11 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
     }
 
     // Add a method to save the current version of the sheet
-    @Override
     public void saveCurrentVersion() {
         versionHistory.put(version, createSnapshot());
     }
 
     // Method to create a snapshot of the current sheet state
-    @Override
     public SheetDTO createSnapshot() {
         // Create a deep copy of the current sheet
         SheetImpl snapshot = new SheetImpl(rowsCount, columnsCount, rowsHeight, columnsWidth);
@@ -245,9 +260,16 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO {
         for (Map.Entry<Coordinate, Cell> entry : this.activeCells.entrySet()) {
             // Copying cells
             Cell cellCopied = entry.getValue();
-            Cell cell = new CellImpl(cellCopied.getCoordinate().getRow(),cellCopied.getCoordinate().getColumn(), cellCopied.getOriginalValue(), cellCopied.getEffectiveValue(),
-                    cellCopied.getVersion(), cellCopied.getDependsOn(),cellCopied.getInfluencingOn());
-            deepCopiedCells.put(entry.getKey(),cell);
+            Cell cell = new CellImpl(
+                    cellCopied.getCoordinate().getRow(),
+                    cellCopied.getCoordinate().getColumn(),
+                    new String(cellCopied.getOriginalValue()),
+                    new EffectiveValueImpl((EffectiveValueImpl) cellCopied.getEffectiveValue()),  // Deep copy the EffectiveValue
+                    cellCopied.getVersion(),
+                    new HashSet<>(cellCopied.getDependsOn()),
+                    new HashSet<>(cellCopied.getInfluencingOn())
+            );
+            deepCopiedCells.put(entry.getKey(), cell);
         }
         snapshot.activeCells = deepCopiedCells;
 
