@@ -1,8 +1,10 @@
 package sheet.coordinate;
 
+import java.io.Serializable;
 import java.util.Objects;
+import java.util.Set;
 
-public class Coordinate {
+public class Coordinate implements Serializable {
     private int column;
     private int row;
 

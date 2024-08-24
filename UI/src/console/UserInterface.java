@@ -36,7 +36,9 @@ public class UserInterface {
             System.out.println("3. Display Cell");
             System.out.println("4. Update Cell");
             System.out.println("5. Display Versions");
-            System.out.println("6. Exit");
+            System.out.println("6. Save State");
+            System.out.println("7. Load State");
+            System.out.println("8. Exit");
 
             System.out.print("Enter your choice: ");
             String choice = scanner.nextLine();
@@ -63,7 +65,12 @@ public class UserInterface {
                     displayPreviousVersions();
                     break;
                 case "6":
-                    // Exit
+                    saveState();
+                    break;
+                case "7":
+                    loadState();
+                    break;
+                case "8":
                     System.out.println("Exiting the program.");
                     exit = true;
                     break;
@@ -126,7 +133,7 @@ public class UserInterface {
                 Optional<CellDTO> cellOpt = Optional.ofNullable(sheet.getCellDTO(i+1, j+1));
                 if (cellOpt.isPresent()) {
                     EffectiveValue effectiveValue = cellOpt.get().getEffectiveValue();
-                    String displayValue = effectiveValue.formatValue(Optional.of(columnWidth));
+                    String displayValue = effectiveValue.formatValue(Optional.of(columnWidth)).trim();
 
                     // Ensure that displayValue fits within the columnWidth
                     if (displayValue.length() > columnWidth) {
@@ -219,7 +226,7 @@ public class UserInterface {
 
         if (cell != null) {
             System.out.println("Original Value: " + cell.getOriginalValue());
-            System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()));
+            System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()).trim());
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
             // Assuming methods to get dependencies are implemented:
             System.out.println("Depends on: " + cell.getDependsOn().toString()); // Adjust based on actual method
@@ -278,4 +285,29 @@ public class UserInterface {
         return cellReference.matches("^[A-Z]+[0-9]+$");
     }
 
+
+    private void saveState() {
+        try {
+            System.out.println("Enter the file path to save the state:");
+            String filePath = scanner.nextLine();
+            engine.saveStateToFile(filePath);
+            System.out.println("State saved successfully.");
+        }
+        catch (Exception e) {
+            System.out.println("An error occurred while saving the state: " + e.getMessage());
+        }
+
+    }
+
+    private void loadState() {
+        try{
+            System.out.println("Enter the file path to load the state:");
+            String filePath = scanner.nextLine();
+            engine = Engine.loadStateFromFile(filePath);
+            System.out.println("State loaded successfully.");
+        }
+        catch (Exception e) {
+            System.out.println("An error occurred while loading the state: " + e.getMessage());
+        }
+    }
 }

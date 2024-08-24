@@ -19,7 +19,7 @@ public enum FunctionParser {
             }
 
             // all is good. create the relevant function instance
-            String actualValue = arguments.get(0).trim();
+            String actualValue = arguments.get(0);
             if (isBoolean(actualValue)) {
                 return new IdentityExpression(Boolean.parseBoolean(actualValue), CellType.BOOLEAN);
             } else if (isNumeric(actualValue)) {
@@ -30,12 +30,12 @@ public enum FunctionParser {
         }
 
         private boolean isBoolean(String value) {
-            return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value);
+            return "true".equalsIgnoreCase(value.trim()) || "false".equalsIgnoreCase(value.trim());
         }
 
         private boolean isNumeric(String value) {
             try {
-                Double.parseDouble(value);
+                Double.parseDouble(value.trim());
                 return true;
             } catch (NumberFormatException e) {
                 return false;
@@ -290,7 +290,7 @@ public enum FunctionParser {
         }
 
         // handle identity expression
-        return FunctionParser.IDENTITY.parse(List.of(input.trim()));
+        return FunctionParser.IDENTITY.parse(List.of(input));
     }
 
     private static List<String> parseMainParts(String input) {

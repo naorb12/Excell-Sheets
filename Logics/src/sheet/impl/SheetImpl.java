@@ -8,9 +8,11 @@ import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 
-public class SheetImpl implements sheet.api.Sheet, SheetDTO {
+public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
     private Map<Coordinate, Cell> activeCells;
     private String name;

@@ -10,11 +10,12 @@ import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CellImpl<T> implements Cell, CellDTO {
+public class CellImpl<T> implements Cell, CellDTO, Serializable {
 
 
     private final Coordinate coordinate;

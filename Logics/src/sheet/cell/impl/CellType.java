@@ -1,6 +1,8 @@
 package sheet.cell.impl;
 
-public enum CellType {
+import java.io.Serializable;
+
+public enum CellType implements Serializable {
     NUMERIC(Double.class),
     STRING(String.class) ,
     BOOLEAN(Boolean.class), UNKNOWN(void.class);
