@@ -19,7 +19,8 @@ public class RefExpression implements Expression {
     @Override
     public EffectiveValue eval(SheetDTO sheet) {
         // error handling if the cell is empty or not found
-        if(sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue().getCellType() == CellType.EMPTY)
+        if(sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()) == null ||
+                sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue().getCellType() == CellType.EMPTY)
         {
             return new EffectiveValueImpl(CellType.EMPTY, "Empty cell");
         }

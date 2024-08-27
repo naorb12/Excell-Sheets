@@ -118,6 +118,11 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
                 if (dependentCell != null) {
                     dependentCell.getInfluencingOn().add(coordinate);
                 }
+                else {
+                    dependentCell = new CellImpl(dependsOnCoordinate.getRow(), dependsOnCoordinate.getColumn(), "");
+                    activeCells.put(dependsOnCoordinate, dependentCell);
+                    dependentCell.getInfluencingOn().add(coordinate); // Now safely add the influence
+                }
             }
         }
 
