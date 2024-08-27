@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Optional;
 
 public class EffectiveValueImpl implements EffectiveValue, Serializable {
-    private CellType cellType;
+    private CellType cellType = CellType.EMPTY;
     private Object value;
 
     public EffectiveValueImpl(CellType cellType, Object value) {

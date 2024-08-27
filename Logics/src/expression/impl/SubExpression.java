@@ -24,13 +24,17 @@ public class SubExpression implements Expression {
         EffectiveValue startVal = startIndex.eval(sheet);
         EffectiveValue endVal = endIndex.eval(sheet);
 
-        if(isUndefined(sourceVal, startVal, endVal))
-        {
+        if(sourceVal.getCellType().equals(CellType.STRING) && startVal.getCellType().equals(CellType.NUMERIC) && endVal.getCellType().equals(CellType.NUMERIC)) {
+        if(isUndefined(sourceVal, startVal, endVal)) {
             return new EffectiveValueImpl(CellType.STRING, "!UNDEFINED!");
         }
         else {
             String result = sourceVal.extractValueWithExpectation(String.class).substring(startVal.extractValueWithExpectation(Double.class).intValue(), endVal.extractValueWithExpectation(Double.class).intValue());
             return new EffectiveValueImpl(CellType.STRING, result);
+        }
+        }
+        else {
+            return new EffectiveValueImpl(CellType.STRING, "!UNDEFINED!");
         }
     }
 

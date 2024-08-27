@@ -20,10 +20,15 @@ public class TimesExpression implements Expression {
     public EffectiveValue eval(SheetDTO sheet) {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC) {
 
-        double result = leftVal.extractValueWithExpectation(Double.class) * rightVal.extractValueWithExpectation(Double.class);
+            double result = leftVal.extractValueWithExpectation(Double.class) * rightVal.extractValueWithExpectation(Double.class);
 
-        return new EffectiveValueImpl(CellType.NUMERIC, result);
+            return new EffectiveValueImpl(CellType.NUMERIC, result);
+        }
+        else{
+            return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+        }
     }
 
     @Override

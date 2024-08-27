@@ -5,7 +5,7 @@ import java.io.Serializable;
 public enum CellType implements Serializable {
     NUMERIC(Double.class),
     STRING(String.class) ,
-    BOOLEAN(Boolean.class), UNKNOWN(void.class);
+    BOOLEAN(Boolean.class), UNKNOWN(void.class), EMPTY(void.class);
 
     private Class<?> type;
 

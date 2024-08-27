@@ -95,31 +95,36 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
     @Override
     public void setCells(Map<Coordinate, Cell> cells) {
+        // Step 1: Initialize activeCells with a copy of the provided cells map
         this.activeCells = new HashMap<>(cells);
 
-        // First loop: Update dependsOn and influencingOn sets, and detect loops
-        activeCells.forEach((coordinate, cell) -> {
+        // Step 2: Loop through each cell to update dependencies and check for loops
+        for (Map.Entry<Coordinate, Cell> entry : activeCells.entrySet()) {
+            Coordinate coordinate = entry.getKey();
+            Cell cell = entry.getValue();
+
+            // Parse and set the dependencies (dependsOn) for the current cell
             Set<Coordinate> dependsOnSet = FunctionParser.parseDependsOn(cell.getOriginalValue());
             cell.setDependsOn(dependsOnSet);
 
-            // Detect loops
+            // Check for dependency loops starting from the current cell
             if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
                 throw new IllegalStateException("Dependency loop detected at " + coordinate.toString());
             }
 
             // Update the influencingOn set for each dependent cell
-            dependsOnSet.forEach(dependsOnCoordinate -> {
+            for (Coordinate dependsOnCoordinate : dependsOnSet) {
                 Cell dependentCell = activeCells.get(dependsOnCoordinate);
                 if (dependentCell != null) {
                     dependentCell.getInfluencingOn().add(coordinate);
                 }
-            });
-        });
+            }
+        }
 
-        // Second loop: Calculate effective values
-        activeCells.forEach((coordinate, cell) -> {
+        // Step 3: Loop through each cell again to calculate its effective value
+        for (Cell cell : activeCells.values()) {
             cell.calculateEffectiveValue(this);
-        });
+        }
     }
 
     private boolean hasDependencyLoop(Coordinate start, Coordinate current, Set<Coordinate> visited) {
@@ -160,6 +165,9 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
                 cell.setOriginalValue(input);
             }
 
+            Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+            cell.setDependsOn(newDependsOnSet);
+
             // Step 2: Update Dependencies
             updateDependencies(coordinate, cell, oldDependsOnSet, input);
 
@@ -188,6 +196,11 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
                 Cell dependentCell = activeCells.get(dependsOnCoordinate);
                 if (dependentCell != null) {
                     dependentCell.getInfluencingOn().remove(coordinate);
+                } else {
+                    // If the cell is null but there's a reference, create it
+                    dependentCell = new CellImpl(dependsOnCoordinate.getRow(), dependsOnCoordinate.getColumn(), "");
+                    activeCells.put(dependsOnCoordinate, dependentCell);
+                    dependentCell.getInfluencingOn().remove(coordinate); // Now safely remove the influence
                 }
             }
         }
@@ -198,6 +211,11 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
             Cell dependentCell = activeCells.get(dependsOnCoordinate);
             if (dependentCell != null) {
                 dependentCell.getInfluencingOn().add(coordinate);
+            } else {
+                // If the cell is null but there's a reference, create it
+                dependentCell = new CellImpl(dependsOnCoordinate.getRow(), dependsOnCoordinate.getColumn(), "");
+                activeCells.put(dependsOnCoordinate, dependentCell);
+                dependentCell.getInfluencingOn().add(coordinate); // Now safely add the influence
             }
         }
     }

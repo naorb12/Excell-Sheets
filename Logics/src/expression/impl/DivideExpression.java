@@ -22,15 +22,18 @@ public class DivideExpression implements Expression {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
 
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC) {
+            if (rightVal.extractValueWithExpectation(Double.class) == 0) {
+                return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+            }
 
-        if(rightVal.extractValueWithExpectation(Double.class) == 0)
-        {
+            double result = leftVal.extractValueWithExpectation(Double.class) / rightVal.extractValueWithExpectation(Double.class);
+
+            return new EffectiveValueImpl(CellType.NUMERIC, result);
+        }
+        else {
             return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
         }
-
-        double result = leftVal.extractValueWithExpectation(Double.class) / rightVal.extractValueWithExpectation(Double.class);
-
-        return new EffectiveValueImpl(CellType.NUMERIC, result);
     }
 
     @Override

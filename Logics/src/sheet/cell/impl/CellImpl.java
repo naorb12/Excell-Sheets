@@ -108,9 +108,6 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
     @Override
     public void setOriginalValue(String originalValue) {
         this.originalValue = originalValue;
-        // Update the dependsOn set using the FunctionParser
-        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(originalValue);
-        this.dependsOn = newDependsOnSet;
     }
 
     @Override

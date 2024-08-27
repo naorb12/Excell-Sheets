@@ -5,6 +5,7 @@ import immutable.objects.SheetDTO;
 import sheet.api.Sheet;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
+import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
 public class RefExpression implements Expression {
@@ -18,13 +19,18 @@ public class RefExpression implements Expression {
     @Override
     public EffectiveValue eval(SheetDTO sheet) {
         // error handling if the cell is empty or not found
-         EffectiveValue effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
-         if(effectiveValue.getValue() == null)
-         {
-             sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).calculateEffectiveValue(sheet);
-             effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
-         }
-         return effectiveValue;
+        if(sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue().getCellType() == CellType.EMPTY)
+        {
+            return new EffectiveValueImpl(CellType.EMPTY, "Empty cell");
+        }
+        else {
+            EffectiveValue effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
+            if (effectiveValue.getValue() == null) {
+                sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).calculateEffectiveValue(sheet);
+                effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();
+            }
+            return effectiveValue;
+        }
     }
 
     @Override

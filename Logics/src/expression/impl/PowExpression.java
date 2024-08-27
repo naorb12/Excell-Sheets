@@ -22,12 +22,18 @@ public class PowExpression implements Expression {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
 
-        double result = 1;
-        for(int i = 0; i<rightVal.extractValueWithExpectation(Double.class); i++) {
-            result *= leftVal.extractValueWithExpectation(Double.class);
-        }
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC) {
 
-        return new EffectiveValueImpl(CellType.NUMERIC, result);
+            double result = 1;
+            for (int i = 0; i < rightVal.extractValueWithExpectation(Double.class); i++) {
+                result *= leftVal.extractValueWithExpectation(Double.class);
+            }
+
+            return new EffectiveValueImpl(CellType.NUMERIC, result);
+        }
+        else {
+            return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+        }
     }
 
     @Override

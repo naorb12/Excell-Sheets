@@ -19,13 +19,17 @@ public class PlusExpression implements Expression {
 
     @Override
     public EffectiveValue eval(SheetDTO sheet) {
-        EffectiveValue leftValue = left.eval(sheet);
-        EffectiveValue rightValue = right.eval(sheet);
-        // do some checking... error handling...
-        //double result = (Double) leftValue.getValue() + (Double) rightValue.getValue();
-        double result = leftValue.extractValueWithExpectation(Double.class) + rightValue.extractValueWithExpectation(Double.class);
+        EffectiveValue leftVal = left.eval(sheet);
+        EffectiveValue rightVal = right.eval(sheet);
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC) {
 
-        return new EffectiveValueImpl(CellType.NUMERIC, result);
+            double result = leftVal.extractValueWithExpectation(Double.class) + rightVal.extractValueWithExpectation(Double.class);
+
+            return new EffectiveValueImpl(CellType.NUMERIC, result);
+        }
+        else {
+            return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+        }
     }
 
     @Override

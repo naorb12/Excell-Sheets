@@ -24,6 +24,8 @@ public enum FunctionParser {
                 return new IdentityExpression(Boolean.parseBoolean(actualValue), CellType.BOOLEAN);
             } else if (isNumeric(actualValue)) {
                 return new IdentityExpression(Double.parseDouble(actualValue), CellType.NUMERIC);
+            } else if (actualValue == "") {
+                return new IdentityExpression(null, CellType.EMPTY);
             } else {
                 return new IdentityExpression(actualValue, CellType.STRING);
             }
@@ -235,7 +237,7 @@ public enum FunctionParser {
                 throw new IllegalArgumentException("Invalid number of arguments for REF function. Expected 1, but got " + arguments.size());
             }
 
-            String refCell = arguments.get(0).trim();
+            String refCell = arguments.get(0).trim().toUpperCase();
             Coordinate target = new Coordinate(refCell.charAt(1) - '0', refCell.charAt(0) - 'A' + 1);
             if (target == null) {
                 throw new IllegalArgumentException("Invalid argument for REF function. Expected a valid cell reference, but got " + arguments.get(0));
@@ -307,7 +309,7 @@ public enum FunctionParser {
 
             if (c == ',' && stack.isEmpty()) {
                 // If we are at a comma and the stack is empty, it's a separator for top-level parts
-                parts.add(buffer.toString().trim());
+                parts.add(buffer.toString().trim().toUpperCase());
                 buffer.setLength(0); // Clear the buffer for the next part
             } else {
                 buffer.append(c);
@@ -333,7 +335,7 @@ public enum FunctionParser {
         List<String> mainParts = parseMainParts(input);
 
         // If the first part is "REF", handle it as a reference
-        if (mainParts.get(0).equalsIgnoreCase("REF") && mainParts.size() == 2) {
+        if (mainParts.size() == 2 && mainParts.get(0).equalsIgnoreCase("REF")) {
             dependencies.add(parseReference("{" + input + "}"));
         } else {
             // Otherwise, process as a function with possible nested expressions
@@ -353,7 +355,7 @@ public enum FunctionParser {
 
     private static Coordinate parseReference(String refPart) {
         int commaIndex = refPart.indexOf(',');
-        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1);
+        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1).toUpperCase();
         int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
         int column = cellReference.charAt(0) - 'A' + 1;  // Convert column letter to number
         return new Coordinate(row, column);

@@ -23,8 +23,15 @@ public class ConcatExpression implements Expression {
         EffectiveValue rightValue = right.eval(sheet);
 
         try {
-            String result = leftValue.extractValueWithExpectation(String.class).concat(rightValue.extractValueWithExpectation(String.class));
-            return new EffectiveValueImpl(CellType.STRING, result);
+            // Check if both values are of type String
+            if (leftValue.getCellType() == CellType.STRING && rightValue.getCellType() == CellType.STRING) {
+                String result = leftValue.extractValueWithExpectation(String.class)
+                        .concat(rightValue.extractValueWithExpectation(String.class));
+                return new EffectiveValueImpl(CellType.STRING, result);
+            } else {
+                // Return !UNDEFINED! if either value is not a string
+                return new EffectiveValueImpl(CellType.STRING, "!UNDEFINED!");
+            }
         }
         catch (Exception e) {
             throw new RuntimeException("couldn't evaluate expression" , e);
