@@ -222,7 +222,7 @@ public class UserInterface {
             throw new IllegalArgumentException("Invalid column part in cell reference.");
         }
 
-        int column = 0;
+        int column = 0;//
         for (int i = 0; i < columnPart.length(); i++) {
             column = column * 26 + (columnPart.charAt(i) - 'A' + 1);
         }
