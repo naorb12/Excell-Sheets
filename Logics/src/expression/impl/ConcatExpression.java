@@ -22,13 +22,25 @@ public class ConcatExpression implements Expression {
         EffectiveValue leftValue = left.eval(sheet);
         EffectiveValue rightValue = right.eval(sheet);
 
-        String result = leftValue.extractValueWithExpectation(String.class).concat(rightValue.extractValueWithExpectation(String.class));
-
-        return new EffectiveValueImpl(CellType.STRING, result);
+        try {
+            // Check if both values are of type String
+            if (leftValue.getCellType() == CellType.STRING && rightValue.getCellType() == CellType.STRING
+                    && leftValue.getValue() != "!UNDEFINED!" && leftValue.getValue() != "!UNDEFINED!") {
+                String result = leftValue.extractValueWithExpectation(String.class)
+                        .concat(rightValue.extractValueWithExpectation(String.class));
+                return new EffectiveValueImpl(CellType.STRING, result);
+            } else {
+                // Return !UNDEFINED! if either value is not a string
+                return new EffectiveValueImpl(CellType.STRING, "!UNDEFINED!");
+            }
+        }
+        catch (Exception e) {
+            throw new RuntimeException("couldn't evaluate expression" , e);
+        }
     }
 
     @Override
     public CellType getFunctionResultType() {
-        return null;
+        return CellType.STRING;
     }
 }

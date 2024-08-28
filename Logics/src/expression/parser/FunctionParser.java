@@ -1,6 +1,7 @@
 package expression.parser;
 
 import engine.Engine;
+import exception.OutOfBoundsException;
 import expression.api.Expression;
 import expression.impl.*;
 import immutable.objects.CellDTO;
@@ -19,23 +20,25 @@ public enum FunctionParser {
             }
 
             // all is good. create the relevant function instance
-            String actualValue = arguments.get(0).trim();
+            String actualValue = arguments.get(0);
             if (isBoolean(actualValue)) {
                 return new IdentityExpression(Boolean.parseBoolean(actualValue), CellType.BOOLEAN);
             } else if (isNumeric(actualValue)) {
                 return new IdentityExpression(Double.parseDouble(actualValue), CellType.NUMERIC);
+            } else if (actualValue == "") {
+                return new IdentityExpression(null, CellType.EMPTY);
             } else {
                 return new IdentityExpression(actualValue, CellType.STRING);
             }
         }
 
         private boolean isBoolean(String value) {
-            return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value);
+            return "true".equalsIgnoreCase(value.trim()) || "false".equalsIgnoreCase(value.trim());
         }
 
         private boolean isNumeric(String value) {
             try {
-                Double.parseDouble(value);
+                Double.parseDouble(value.trim());
                 return true;
             } catch (NumberFormatException e) {
                 return false;
@@ -220,7 +223,7 @@ public enum FunctionParser {
             if ( (!source.getFunctionResultType().equals(CellType.STRING) && !source.getFunctionResultType().equals(CellType.UNKNOWN)) ||
                     (!startIndex.getFunctionResultType().equals(CellType.NUMERIC) && !startIndex.getFunctionResultType().equals(CellType.UNKNOWN)) ||
             (!endIndex.getFunctionResultType().equals(CellType.NUMERIC) && !endIndex.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for CONCAT function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
+                throw new IllegalArgumentException("Invalid argument types for SUB function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
             }
 
             return new SubExpression(source, startIndex, endIndex);
@@ -235,8 +238,12 @@ public enum FunctionParser {
                 throw new IllegalArgumentException("Invalid number of arguments for REF function. Expected 1, but got " + arguments.size());
             }
 
-            String refCell = arguments.get(0).trim();
+            String refCell = arguments.get(0).trim().toUpperCase();
             Coordinate target = new Coordinate(refCell.charAt(1) - '0', refCell.charAt(0) - 'A' + 1);
+            if(!Engine.isWithinBounds(target.getRow(), target.getColumn()))
+            {
+                throw new RuntimeException();
+            }
             if (target == null) {
                 throw new IllegalArgumentException("Invalid argument for REF function. Expected a valid cell reference, but got " + arguments.get(0));
             }
@@ -268,7 +275,7 @@ public enum FunctionParser {
 
     };
 
-    abstract public Expression parse(List<String> arguments);
+    abstract public Expression parse(List<String> arguments) ;
 
     public static Expression parseExpression(String input) {
 
@@ -279,13 +286,25 @@ public enum FunctionParser {
 
             String functionName = topLevelParts.get(0).trim().toUpperCase();
 
+            // Check if the function name is valid
+            try {
+                FunctionParser.valueOf(functionName);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid function name: " + functionName);
+            }
+
             //remove the first element from the array
             topLevelParts.remove(0);
-            return FunctionParser.valueOf(functionName).parse(topLevelParts);
+            try {
+                return FunctionParser.valueOf(functionName).parse(topLevelParts);
+            }
+            catch (Exception e) {
+                throw new IllegalArgumentException(e.getMessage());
+            }
         }
 
         // handle identity expression
-        return FunctionParser.IDENTITY.parse(List.of(input.trim()));
+        return FunctionParser.IDENTITY.parse(List.of(input));
     }
 
     private static List<String> parseMainParts(String input) {
@@ -320,6 +339,11 @@ public enum FunctionParser {
     public static Set<Coordinate> parseDependsOn(String input) {
         Set<Coordinate> dependencies = new HashSet<>();
 
+        // Empty cell
+        if(input == null) {
+            return dependencies;
+        }
+
         // If the input is enclosed with '{' and '}', remove them
         if (input.startsWith("{") && input.endsWith("}")) {
             input = input.substring(1, input.length() - 1);
@@ -327,16 +351,19 @@ public enum FunctionParser {
 
         List<String> mainParts = parseMainParts(input);
 
-        // The first part is the function name, skip it
-        mainParts.remove(0);
-
-        for (String part : mainParts) {
-            if (part.startsWith("{REF,")) {
-                // This part is a reference, extract and add it to the set
-                dependencies.add(parseReference(part));
-            } else if (part.startsWith("{")) {
-                // This part is a nested expression, recurse into it
-                dependencies.addAll(parseDependsOn(part));
+        // If the first part is "REF", handle it as a reference
+        if (mainParts.size() == 2 && mainParts.get(0).equalsIgnoreCase("REF")) {
+            dependencies.add(parseReference("{" + input + "}"));
+        } else {
+            // Otherwise, process as a function with possible nested expressions
+            for (String part : mainParts) {
+                if (part.startsWith("{REF,")) {
+                    // This part is a reference, extract and add it to the set
+                    dependencies.add(parseReference(part));
+                } else if (part.startsWith("{") && part.endsWith("}")) {
+                    // This part is a nested expression, recurse into it
+                    dependencies.addAll(parseDependsOn(part));
+                }
             }
         }
 
@@ -345,10 +372,16 @@ public enum FunctionParser {
 
     private static Coordinate parseReference(String refPart) {
         int commaIndex = refPart.indexOf(',');
-        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1);
-        int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
-        int column = cellReference.charAt(0) - 'A' + 1;  // Convert column letter to number
-        return new Coordinate(row, column);
+        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1).trim().toUpperCase();
+        try {
+            int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
+            int column = cellReference.charAt(0) - 'A' + 1;
+            Engine.isWithinBounds(row, column);
+            // Convert column letter to number
+            return new Coordinate(row, column);
+        }catch (Exception e) {
+            throw new IllegalArgumentException(" Illegal cell reference: " + cellReference);
+        }
     }
 }
 

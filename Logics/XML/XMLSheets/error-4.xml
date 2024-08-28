@@ -14,7 +14,7 @@
 			<STL-Original-Value>5</STL-Original-Value>
 		</STL-Cell>
 		<STL-Cell row="2" column="D">
-			<STL-Original-Value>{CONCAT,{REF,A1},{REF,C2}}</STL-Original-Value>
+			<STL-Original-Value>{CONCAT,{REF,C2},"hello,world"}</STL-Original-Value>
 		</STL-Cell>
 	</STL-Cells>
 </STL-Sheet>

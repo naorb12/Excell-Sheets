@@ -22,14 +22,19 @@ public class ModExpression implements Expression {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
 
-        if(rightVal.extractValueWithExpectation(Double.class) == 0)
-        {
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC
+                && leftVal.getValue() != "NaN" && rightVal.getValue() != "NaN"){
+            if (rightVal.extractValueWithExpectation(Double.class) == 0) {
+                return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+            }
+
+            double result = leftVal.extractValueWithExpectation(Double.class) % rightVal.extractValueWithExpectation(Double.class);
+
+            return new EffectiveValueImpl(CellType.NUMERIC, result);
+        }
+        else{
             return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
         }
-
-        double result = leftVal.extractValueWithExpectation(Double.class) % rightVal.extractValueWithExpectation(Double.class);
-
-        return new EffectiveValueImpl(CellType.NUMERIC, result);
     }
 
     @Override

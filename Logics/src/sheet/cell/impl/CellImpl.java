@@ -10,11 +10,12 @@ import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class CellImpl<T> implements Cell, CellDTO {
+public class CellImpl<T> implements Cell, CellDTO, Serializable {
 
 
     private final Coordinate coordinate;
@@ -66,6 +67,9 @@ public class CellImpl<T> implements Cell, CellDTO {
     @Override
     public void calculateEffectiveValue(SheetDTO sheet) {
         try {
+            if(originalValue == null) {
+                return;
+            }
             // Parse and evaluate the expression for this cell
             Expression expression = FunctionParser.parseExpression(this.originalValue);
             effectiveValue = expression.eval(sheet);
@@ -75,16 +79,17 @@ public class CellImpl<T> implements Cell, CellDTO {
                 CellDTO influencedCell = sheet.getCellDTO(influencedCoordinate.getRow(), influencedCoordinate.getColumn());
                 if (influencedCell != null) {
                     influencedCell.calculateEffectiveValue(sheet);
-                    //influencedCell.incrementVersionNumber();
                 }
             }
 
-            this.versionNumber++;
-
-        } catch (CalculationException e) {
-            throw new CalculationException("Error calculating effective value for cell at " + this.coordinate, e);
+        }
+        catch (IllegalArgumentException e) {
+            throw new RuntimeException(e.getMessage() + " at " + this.coordinate);
+        }
+        catch (CalculationException e) {
+            throw new IllegalArgumentException("Error calculating effective value for cell at " + this.coordinate + ". " + e.getMessage());
         } catch (Exception e) {
-            throw new CalculationException("Unexpected error while calculating effective value for cell at " + this.coordinate, e);
+            throw new CalculationException("Unexpected error while calculating effective value for cell at " + this.coordinate + ". " + e.getMessage());
         }
     }
 
@@ -106,10 +111,6 @@ public class CellImpl<T> implements Cell, CellDTO {
     @Override
     public void setOriginalValue(String originalValue) {
         this.originalValue = originalValue;
-        // Update the dependsOn set using the FunctionParser
-        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(originalValue);
-        this.dependsOn = newDependsOnSet;
-        this.versionNumber++;
     }
 
     @Override

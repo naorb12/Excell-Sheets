@@ -1,6 +1,7 @@
 package sheet.api;
 
 import immutable.objects.CellDTO;
+import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
@@ -8,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface Sheet {
+
+
 
     Map<Coordinate, Cell> getMapOfCells();
 
@@ -32,4 +35,6 @@ public interface Sheet {
     void setCell(int row, int col, String input);
 
     void incrementVersion();
+
+    void setVersion(int version);
 }

@@ -2,15 +2,22 @@ package sheet.cell.impl;
 
 import sheet.cell.api.EffectiveValue;
 
+import java.io.Serializable;
 import java.util.Optional;
 
-public class EffectiveValueImpl implements EffectiveValue {
-    private CellType cellType;
+public class EffectiveValueImpl implements EffectiveValue, Serializable {
+    private CellType cellType = CellType.EMPTY;
     private Object value;
 
     public EffectiveValueImpl(CellType cellType, Object value) {
         this.cellType = cellType;
         this.value = value;
+    }
+
+    // Copy constructor
+    public EffectiveValueImpl(EffectiveValueImpl original) {
+        this.cellType = original.getCellType();
+        this.value = original.getValue();
     }
 
     public EffectiveValueImpl() {
@@ -58,7 +65,12 @@ public class EffectiveValueImpl implements EffectiveValue {
                 displayValue = (String) value;
                 break;
             case NUMERIC:
-                displayValue = String.format("%.2f", (Double) value); // Format double to 2 decimal places
+                if(this.value.getClass().isAssignableFrom(String.class)) {
+                    displayValue = (String) value;
+                }
+                else {
+                    displayValue = String.format("%.2f", (Double) value); // Format double to 2 decimal places
+                }
                 break;
             case BOOLEAN:
                 displayValue = (Boolean) value ? "TRUE" : "FALSE";

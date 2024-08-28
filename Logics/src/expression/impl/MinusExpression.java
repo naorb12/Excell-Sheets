@@ -19,13 +19,25 @@ public class MinusExpression implements Expression {
 
     @Override
     public EffectiveValue eval(SheetDTO sheet) {
-        EffectiveValue leftValue = left.eval(sheet);
-        EffectiveValue rightValue = right.eval(sheet);
+        EffectiveValue leftVal = left.eval(sheet);
+        EffectiveValue rightVal = right.eval(sheet);
         // do some checking... error handling...
         //double result = (Double) leftValue.getValue() + (Double) rightValue.getValue();
-        double result = leftValue.extractValueWithExpectation(Double.class) - rightValue.extractValueWithExpectation(Double.class);
 
-        return new EffectiveValueImpl(CellType.NUMERIC, result);
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC
+                && leftVal.getValue() != "NaN" && rightVal.getValue() != "NaN") {
+            if (rightVal.extractValueWithExpectation(Double.class) == 0) {
+                return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+            }
+
+            double result = leftVal.extractValueWithExpectation(Double.class) - rightVal.extractValueWithExpectation(Double.class);
+
+            return new EffectiveValueImpl(CellType.NUMERIC, result);
+        }
+        else {
+            return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+        }
+
 
     }
 

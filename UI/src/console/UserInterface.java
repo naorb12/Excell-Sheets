@@ -5,6 +5,7 @@ import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
+import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;
@@ -36,35 +37,41 @@ public class UserInterface {
             System.out.println("3. Display Cell");
             System.out.println("4. Update Cell");
             System.out.println("5. Display Versions");
-            System.out.println("6. Exit");
+            System.out.println("6. Save State");
+            System.out.println("7. Load State");
+            System.out.println("8. Exit");
 
             System.out.print("Enter your choice: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume newline
+            String choice = scanner.nextLine();
 
-            switch (choice) {
-                case 1:
+            switch (choice.trim()) {
+                case "1":
                     // Load Sheet from XML
                     loadNewXML();
                     break;
-                case 2:
+                case "2":
                     // Present Sheet
-                    presentSheet();
+                    presentCurrentSheet();
                     break;
-                case 3:
+                case "3":
                     // Display Cell
                     displayCell();
                     break;
-                case 4:
+                case "4":
                     // Update Cell
                     setCell();
                     break;
-                case 5:
+                case "5":
                     // Display Versions
-                    //displayVersions();
+                    displayPreviousVersions();
                     break;
-                case 6:
-                    // Exit
+                case "6":
+                    saveState();
+                    break;
+                case "7":
+                    loadState();
+                    break;
+                case "8":
                     System.out.println("Exiting the program.");
                     exit = true;
                     break;
@@ -73,33 +80,38 @@ public class UserInterface {
             }
         }
 
-
-
     }
 
-    public void loadNewXML()
-    {
-        Scanner scanner = new Scanner(System.in);
+    private void displayPreviousVersions() {
+        if(engine.getSheet() != null) {
+            try {
+                System.out.println("Enter the version number you want to peek at range of 1-" + engine.getSheet().getVersion() + ": ");
+                int version = Integer.parseInt(scanner.nextLine());
 
-        System.out.println("Enter the full path to the XML file:");
-        String filePath = scanner.nextLine();
+                // Ask the engine to get the specified version of the sheet
+                SheetDTO sheetVersion = engine.peekVersion(version);
 
-        XMLSheetLoader loader = new XMLSheetLoaderImpl(); // MOVE THE LOADER TO ENGINE
-
-        try {
-            STLSheet sheet = loader.loadXML(filePath);
-            engine.mapSTLSheet(sheet);
-            System.out.println("XML file loaded and validated successfully.");
-        } catch (Exception e) {
-            System.out.println("Failed to load and validate XML: " + e.getMessage());
+                if (sheetVersion != null) {
+                    int cellsChanged = engine.countAmountOfCellsChangedFromPreviousVersions(sheetVersion);
+                    System.out.println("Displaying sheet version (" + version + ") With (" + cellsChanged + ") cells updated in that version:");
+                    presentSpecificSheet(sheetVersion);  // Display the retrieved version
+                } else {
+                    System.out.println("Version " + version + " not found.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid version number. Please enter a valid integer.");
+            } catch (Exception e) {
+                System.out.println("An error occurred while retrieving the version: " + e.getMessage());
+            }
+        }
+        else{
+            System.out.println("No sheet found.");
         }
     }
 
-    public void presentSheet() {
-        SheetDTO sheet = engine.getSheet();
-
+    private void presentSpecificSheet(SheetDTO sheet) {
         // Display the sheet name and version
-        System.out.println("sheet.impl.Sheet Name: " + sheet.getName());
+        System.out.println("Sheet Name: " + sheet.getName());
         System.out.println("Version: " + sheet.getVersion());
         System.out.println();
 
@@ -127,7 +139,7 @@ public class UserInterface {
                 Optional<CellDTO> cellOpt = Optional.ofNullable(sheet.getCellDTO(i+1, j+1));
                 if (cellOpt.isPresent()) {
                     EffectiveValue effectiveValue = cellOpt.get().getEffectiveValue();
-                    String displayValue = effectiveValue.formatValue(Optional.of(columnWidth));
+                    String displayValue = effectiveValue.formatValue(Optional.of(columnWidth)).trim();
 
                     // Ensure that displayValue fits within the columnWidth
                     if (displayValue.length() > columnWidth) {
@@ -152,23 +164,53 @@ public class UserInterface {
         }
     }
 
-    public void displayCell() {
-        while (true) {
-            try {
+    public void loadNewXML()
+    {
+        Scanner scanner = new Scanner(System.in);
 
-                Coordinate coord = inputCell();
+        System.out.println("Enter the full path to the XML file:");
+        String filePath = scanner.nextLine();
 
-                // Retrieve the cell from the engine
-                CellDTO cell = engine.getCell(coord.getRow() , coord.getColumn()); // Adjusting row index (1-based to 0-based)
+        XMLSheetLoader loader = new XMLSheetLoaderImpl(); // MOVE THE LOADER TO ENGINE
 
-                // Display the details of the cell
-                printCell(cell);
-
-                break; // Exit the loop after successful input
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage() + " Please try again.");
-            }
+        try {
+            STLSheet sheet = loader.loadXML(filePath);
+            engine.mapSTLSheet(sheet);
+            System.out.println("XML file loaded and validated successfully.");
+        } catch (Exception e) {
+            System.out.println("Failed to load and validate XML: " + e.getMessage());
         }
+    }
+
+    public void presentCurrentSheet() {
+        SheetDTO sheet = engine.getSheet();
+        if(sheet != null) {
+            presentSpecificSheet(sheet);
+        }
+        else{
+            System.out.println("No sheet found.");
+        }
+    }
+
+    public void displayCell() {
+        SheetDTO sheet = engine.getSheet();
+        try {
+        if(sheet != null) {
+            Coordinate coord = inputCell();
+
+            // Retrieve the cell from the engine
+            CellDTO cell = engine.getCell(coord.getRow(), coord.getColumn()); // Adjusting row index (1-based to 0-based)
+
+            // Display the details of the cell
+            printCell(cell);
+
+            }
+        else{
+            System.out.println("No sheet found.");
+        }
+    } catch (IllegalArgumentException e) {
+        System.out.println(e.getMessage() + " Please try again.");
+    }
     }
 
     private int parseColumn(String input) throws IllegalArgumentException {
@@ -177,7 +219,7 @@ public class UserInterface {
             throw new IllegalArgumentException("Invalid column part in cell reference.");
         }
 
-        int column = 0;
+        int column = 0;//
         for (int i = 0; i < columnPart.length(); i++) {
             column = column * 26 + (columnPart.charAt(i) - 'A' + 1);
         }
@@ -195,10 +237,9 @@ public class UserInterface {
 
     private void printCell(CellDTO cell) {
 
-        if (cell != null) {
-            System.out.println("sheet.cell.impl.Cell Reference: " );
+        if (cell != null && cell.getEffectiveValue().getValue() != null) {
             System.out.println("Original Value: " + cell.getOriginalValue());
-            System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()));
+            System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()).trim());
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
             // Assuming methods to get dependencies are implemented:
             System.out.println("Depends on: " + cell.getDependsOn().toString()); // Adjust based on actual method
@@ -209,38 +250,82 @@ public class UserInterface {
     }
 
     public void setCell() {
-        Coordinate coord = inputCell();
-        System.out.println("Enter your input: ");
-        String input = scanner.nextLine();
-        engine.setCell(coord.getRow(), coord.getColumn(), input);
-        System.out.println("Cell: " + (char)(coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
+        SheetDTO sheet = engine.getSheet();
+        if(sheet != null) {
+        try {
+            Coordinate coord = inputCell();
+            System.out.println("Enter your input: ");
+            String input = scanner.nextLine();
+            engine.setCell(coord.getRow(), coord.getColumn(), input);
+            System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
+            System.out.println();
+            presentCurrentSheet();
+
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        }
+        else{
+            System.out.println("No sheet found.");
+        }
     }
 
     public Coordinate inputCell()
     {
         System.out.println("Enter the cell reference (e.g., A4): ");
         String input;
-        while (true) {
+
             try{
                 input = scanner.nextLine().trim().toUpperCase();
-                int row = Integer.parseInt(input.substring(1)) ; // Assuming rows start from 1
+                int row = Integer.parseInt(input.substring(1)) ;
                 int col = input.charAt(0) - 'A' + 1; // Convert column letter to index
 
                 if (engine.isWithinBounds(row, col)) {
                     return new Coordinate(row, col);
+                } else {
+                    return null;
                 }
             }
             catch(OutOfBoundsException e){
-                System.out.println(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
             catch(NumberFormatException e){
-                System.out.println("Invalid cell. Please enter a valid cell reference (e.g., A4): ");
+                throw new IllegalArgumentException("Invalid cell. Please enter a valid cell reference (e.g., A4). ");
             }
-        }
+
     }
 
     private boolean isValidCoordinate(String cellReference) {
         return cellReference.matches("^[A-Z]+[0-9]+$");
     }
 
+
+    private void saveState() {
+        try {
+            System.out.println("Enter the file path to save the state:");
+            String filePath = scanner.nextLine();
+            engine.saveStateToFile(filePath);
+            System.out.println("State saved successfully.");
+        }
+        catch (Exception e) {
+            System.out.println("An error occurred while saving the state: " + e.getMessage());
+        }
+
+    }
+
+    private void loadState() {
+        try{
+            System.out.println("Enter the file path to load the state:");
+            String filePath = scanner.nextLine();
+            Engine newEngine = new Engine();
+            newEngine = Engine.loadStateFromFile(filePath);
+            engine = Engine.loadStateFromFile(filePath);
+            System.out.println("State loaded successfully.");
+        }
+        catch (Exception e) {
+            System.out.println("An error occurred while loading the state: " + e.getMessage());
+        }
+    }
 }

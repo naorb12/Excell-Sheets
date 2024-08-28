@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<STL-Sheet name="TestSheet6x6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="shtisel-v1.xsd">
+    <STL-Layout rows="6" columns="6">
+        <STL-Size column-width-units="15" rows-height-units="2"/>
+    </STL-Layout>
+    <STL-Cells>
+        <!-- Row 1 -->
+        <STL-Cell row="1" column="A">
+            <STL-Original-Value>Hello</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="B">
+            <STL-Original-Value>123.45</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="C">
+            <STL-Original-Value>{CONCAT, {REF, A1}, World}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="D">
+            <STL-Original-Value>{UPPER_CASE, {CONCAT, {REF, A1}, World}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="1" column="E">
+            <STL-Original-Value>{SUB, {CONCAT, {REF, A1}, World}, 1, 5}</STL-Original-Value>
+        </STL-Cell>
+        <!-- Column F is intentionally left undefined (empty) -->
+
+        <!-- Row 2 -->
+        <STL-Cell row="2" column="A">
+            <STL-Original-Value>World</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="B">
+            <STL-Original-Value>{PLUS, {REF, B1}, {TIMES, {REF, B2}, 2}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="C">
+            <STL-Original-Value>{ABS, {MINUS, {REF, B2}, 1000}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="D">
+            <STL-Original-Value>{REF, A1}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="2" column="E">
+            <STL-Original-Value>{TIMES, {REF, B1}, 4}</STL-Original-Value>
+        </STL-Cell>
+        <!-- Column F is intentionally left undefined (empty) -->
+
+        <!-- Row 3 -->
+        <STL-Cell row="3" column="A">
+            <STL-Original-Value>{PLUS, {REF, B1}, {REF, B2}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="3" column="B">
+            <STL-Original-Value>{MINUS, {REF, B2}, 100}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="3" column="C">
+            <STL-Original-Value>{TIMES, 3, {REF, B2}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="3" column="D">
+            <STL-Original-Value>{DIVIDE, {REF, B2}, {REF, B1}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="3" column="E">
+            <STL-Original-Value>{ABS, -42}</STL-Original-Value>
+        </STL-Cell>
+        <!-- Column F is intentionally left undefined (empty) -->
+
+        <!-- Row 4 -->
+        <STL-Cell row="4" column="A">
+            <STL-Original-Value>{UPPER_CASE, hello}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="4" column="B">
+            <STL-Original-Value>{SUB, HelloWorld, 1, 5}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="4" column="C">
+            <STL-Original-Value>{PLUS, {REF, B1}, {REF, C1}}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="4" column="D">
+            <STL-Original-Value>{MINUS, {REF, C1}, 100}</STL-Original-Value>
+        </STL-Cell>
+        <STL-Cell row="4" column="E">
+            <STL-Original-Value>{TIMES, {REF, B2}, 5}</STL-Original-Value>
+        </STL-Cell>
+        <!-- Column F is intentionally left undefined (empty) -->
+    </STL-Cells>
+</STL-Sheet>
