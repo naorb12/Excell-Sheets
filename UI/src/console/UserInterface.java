@@ -194,9 +194,9 @@ public class UserInterface {
 
     public void displayCell() {
         SheetDTO sheet = engine.getSheet();
+        try {
         if(sheet != null) {
-            while (true) {
-                try {
+
 
                     Coordinate coord = inputCell();
 
@@ -206,15 +206,14 @@ public class UserInterface {
                     // Display the details of the cell
                     printCell(cell);
 
-                    break; // Exit the loop after successful input
-                } catch (IllegalArgumentException e) {
-                    System.out.println(e.getMessage() + " Please try again.");
-                }
+
             }
-        }
         else{
             System.out.println("No sheet found.");
         }
+    } catch (IllegalArgumentException e) {
+        System.out.println(e.getMessage() + " Please try again.");
+    }
     }
 
     private int parseColumn(String input) throws IllegalArgumentException {
@@ -283,7 +282,7 @@ public class UserInterface {
     {
         System.out.println("Enter the cell reference (e.g., A4): ");
         String input;
-        while (true) {
+
             try{
                 input = scanner.nextLine().trim().toUpperCase();
                 int row = Integer.parseInt(input.substring(1)) ;
@@ -291,15 +290,17 @@ public class UserInterface {
 
                 if (engine.isWithinBounds(row, col)) {
                     return new Coordinate(row, col);
+                } else {
+                    return null;
                 }
             }
             catch(OutOfBoundsException e){
-                System.out.println(e.getMessage());
+                throw new IllegalArgumentException(e.getMessage());
             }
             catch(NumberFormatException e){
-                System.out.println("Invalid cell. Please enter a valid cell reference (e.g., A4): ");
+                throw new IllegalArgumentException("Invalid cell. Please enter a valid cell reference (e.g., A4). ");
             }
-        }
+
     }
 
     private boolean isValidCoordinate(String cellReference) {
