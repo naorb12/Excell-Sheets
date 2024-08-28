@@ -7,7 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/Logics/Logics.iml" filepath="$PROJECT_DIR$/Logics/Logics.iml" />
       <module fileurl="file://$PROJECT_DIR$/UI/UI.iml" filepath="$PROJECT_DIR$/UI/UI.iml" />
       <module fileurl="file://$PROJECT_DIR$/Logics/XML/XML.iml" filepath="$PROJECT_DIR$/Logics/XML/XML.iml" />
-      <module fileurl="file://$PROJECT_DIR$/shticell/shticell.iml" filepath="$PROJECT_DIR$/shticell/shticell.iml" />
     </modules>
   </component>
 </project>

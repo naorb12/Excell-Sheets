@@ -189,6 +189,7 @@ public class Engine implements Serializable {
     public void saveStateToFile(String filePath) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
             oos.writeObject(this);
+            oos.writeObject(sheet); // Serialize the static sheet separately
         } catch (IOException e) {
             throw new RuntimeException("Failed to save state to file: " + e.getMessage());
         }
@@ -196,7 +197,9 @@ public class Engine implements Serializable {
 
     public static Engine loadStateFromFile(String filePath) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
-            return (Engine) ois.readObject();
+            Engine engine = (Engine) ois.readObject();
+            sheet = (SheetImpl) ois.readObject(); // Deserialize the static sheet separately
+            return engine;
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Failed to load engine state from file: " + e.getMessage(), e);
         }

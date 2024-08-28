@@ -324,6 +324,8 @@ public class UserInterface {
         try{
             System.out.println("Enter the file path to load the state:");
             String filePath = scanner.nextLine();
+            Engine newEngine = new Engine();
+            newEngine = Engine.loadStateFromFile(filePath);
             engine = Engine.loadStateFromFile(filePath);
             System.out.println("State loaded successfully.");
         }
