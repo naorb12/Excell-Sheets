@@ -1,14 +1,15 @@
 package sheet.impl;
 
+import engine.Engine;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
+import sheet.api.Sheet;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -156,6 +157,23 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     public void setCell(int row, int col, String input) {
         Coordinate coordinate = new Coordinate(row, col);
         Cell cell = activeCells.get(coordinate);
+        Cell oldCell;
+        if(cell != null) {
+             oldCell = new CellImpl(
+                    cell.getCoordinate().getRow(),
+                    cell.getCoordinate().getColumn(),
+                    new String(cell.getOriginalValue()),
+                    new EffectiveValueImpl((EffectiveValueImpl) cell.getEffectiveValue()),  // Deep copy the EffectiveValue
+                    cell.getVersion(),
+                    new HashSet<>(cell.getDependsOn()),
+                    new HashSet<>(cell.getInfluencingOn())
+            );
+        }
+        else{
+            oldCell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), input);
+        }
+
+        SheetImpl oldSheet = (SheetImpl) Engine.createSnapshot();
 
         try {
             Set<Coordinate> oldDependsOnSet = cell != null ? cell.getDependsOn() : null;
@@ -174,12 +192,16 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
             validateAndCheckLoops(coordinate, input);
 
-
             recalculateEffectiveValue(coordinate, cell);
+
+            incrementVersionForCellAndInfluences(coordinate);
 
             incrementVersion();
 
         } catch (Exception e) {
+            activeCells.put(coordinate,cell);
+            this.activeCells = oldSheet.activeCells;
+            this.version = oldSheet.version;
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -223,7 +245,6 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
     private void recalculateEffectiveValue(Coordinate coordinate, Cell cell) {
         cell.calculateEffectiveValue(this);
-        incrementVersionForCellAndInfluences(coordinate);
     }
 
     public void incrementVersionForCellAndInfluences(Coordinate coordinate) {

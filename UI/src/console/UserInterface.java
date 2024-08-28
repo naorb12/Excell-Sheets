@@ -196,16 +196,13 @@ public class UserInterface {
         SheetDTO sheet = engine.getSheet();
         try {
         if(sheet != null) {
+            Coordinate coord = inputCell();
 
+            // Retrieve the cell from the engine
+            CellDTO cell = engine.getCell(coord.getRow(), coord.getColumn()); // Adjusting row index (1-based to 0-based)
 
-                    Coordinate coord = inputCell();
-
-                    // Retrieve the cell from the engine
-                    CellDTO cell = engine.getCell(coord.getRow(), coord.getColumn()); // Adjusting row index (1-based to 0-based)
-
-                    // Display the details of the cell
-                    printCell(cell);
-
+            // Display the details of the cell
+            printCell(cell);
 
             }
         else{
@@ -255,23 +252,20 @@ public class UserInterface {
     public void setCell() {
         SheetDTO sheet = engine.getSheet();
         if(sheet != null) {
+        try {
             Coordinate coord = inputCell();
+            System.out.println("Enter your input: ");
+            String input = scanner.nextLine();
+            engine.setCell(coord.getRow(), coord.getColumn(), input);
+            System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
+            System.out.println();
+            presentCurrentSheet();
 
-            while (true) {
-                try {
-                    System.out.println("Enter your input: ");
-                    String input = scanner.nextLine();
-                    engine.setCell(coord.getRow(), coord.getColumn(), input);
-                    System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
-                    System.out.println();
-                    presentCurrentSheet();
-                    break;
-                } catch (RuntimeException e) {
-                    System.out.println(e.getMessage() + ". Please try again.");
-                } catch (Exception e) {
-                    System.out.println(e.getMessage() + ". Please try again.");
-                }
-            }
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         }
         else{
             System.out.println("No sheet found.");

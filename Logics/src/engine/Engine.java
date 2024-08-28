@@ -146,7 +146,7 @@ public class Engine implements Serializable {
     }
 
     // Method to create a snapshot of the current sheet state
-    public SheetDTO createSnapshot() {
+    public static SheetDTO createSnapshot() {
         // Create a deep copy of the current sheet
         SheetImpl snapshot = new SheetImpl(sheet.getRowCount(), sheet.getColumnCount(), sheet.getRowHeightUnits(), sheet.getColumnsWidthUnits());
         snapshot.setName(sheet.getName());
@@ -177,8 +177,21 @@ public class Engine implements Serializable {
         int currentVersion = sheetVersion.getVersion();
         int count = 0;
 
-        for(CellDTO cell : sheetVersion.getMapOfCellsDTO().values()) {
-            if(cell.getVersion() == currentVersion){
+        // Get the previous version from the history
+        SheetDTO previousVersion = versionHistory.get(currentVersion - 1);
+        if (previousVersion == null) {
+            // If there's no previous version, all cells in the current version are considered "new"
+            return sheetVersion.getMapOfCellsDTO().size();
+        }
+
+        // Compare each cell in the current version with the corresponding cell in the previous version
+        for (Map.Entry<Coordinate, CellDTO> entry : sheetVersion.getMapOfCellsDTO().entrySet()) {
+            Coordinate coord = entry.getKey();
+            CellDTO currentCell = entry.getValue();
+            CellDTO previousCell = previousVersion.getMapOfCellsDTO().get(coord);
+
+            // If the cell exists in both versions but has different version numbers, it has changed
+            if (previousCell == null || currentCell.getVersion() != previousCell.getVersion()) {
                 count++;
             }
         }
