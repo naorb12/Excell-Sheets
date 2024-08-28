@@ -1,7 +1,7 @@
 package exception;
 
-public class OutOfBoundsException extends Exception{
+public class OutOfBoundsException extends RuntimeException {
     public OutOfBoundsException(int maxRow, int maxCol, int row, int col) {
-        super("Input out of bounds! Cell entered: " + ((char)(col + 'A')) + row + ". Row range: 1-" + maxRow + " Columm range: A-" + ((char)(maxCol + 'A' - 1)));
+        super("Input out of bounds! Cell entered: " + ((char)(col + 'A' - 1)) + row + ". Row range: 1-" + maxRow + " Columm range: A-" + ((char)(maxCol + 'A' - 1)) +".");
     }
 }

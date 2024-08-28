@@ -20,7 +20,7 @@ public class AbsExpression implements Expression {
         EffectiveValue eval = expression.eval(sheet);
 
         // Check if the type is NUMERIC
-        if (eval.getCellType() == CellType.NUMERIC) {
+        if (eval.getCellType() == CellType.NUMERIC && eval.getValue() != "NaN") {
             Double value = eval.extractValueWithExpectation(Double.class);
 
             // Return the absolute value if the number is negative

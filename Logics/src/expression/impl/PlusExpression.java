@@ -21,7 +21,8 @@ public class PlusExpression implements Expression {
     public EffectiveValue eval(SheetDTO sheet) {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
-        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC) {
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC
+                && leftVal.getValue() != "NaN" && rightVal.getValue() != "NaN") {
 
             double result = leftVal.extractValueWithExpectation(Double.class) + rightVal.extractValueWithExpectation(Double.class);
 

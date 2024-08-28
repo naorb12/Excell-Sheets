@@ -67,6 +67,9 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
     @Override
     public void calculateEffectiveValue(SheetDTO sheet) {
         try {
+            if(originalValue == null) {
+                return;
+            }
             // Parse and evaluate the expression for this cell
             Expression expression = FunctionParser.parseExpression(this.originalValue);
             effectiveValue = expression.eval(sheet);
@@ -81,7 +84,7 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
 
         }
         catch (IllegalArgumentException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new RuntimeException(e.getMessage() + " at " + this.coordinate);
         }
         catch (CalculationException e) {
             throw new IllegalArgumentException("Error calculating effective value for cell at " + this.coordinate + ". " + e.getMessage());

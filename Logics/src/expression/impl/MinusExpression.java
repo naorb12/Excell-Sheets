@@ -24,7 +24,8 @@ public class MinusExpression implements Expression {
         // do some checking... error handling...
         //double result = (Double) leftValue.getValue() + (Double) rightValue.getValue();
 
-        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC) {
+        if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC
+                && leftVal.getValue() != "NaN" && rightVal.getValue() != "NaN") {
             if (rightVal.extractValueWithExpectation(Double.class) == 0) {
                 return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
             }

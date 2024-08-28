@@ -24,7 +24,9 @@ public class SubExpression implements Expression {
         EffectiveValue startVal = startIndex.eval(sheet);
         EffectiveValue endVal = endIndex.eval(sheet);
 
-        if(sourceVal.getCellType().equals(CellType.STRING) && startVal.getCellType().equals(CellType.NUMERIC) && endVal.getCellType().equals(CellType.NUMERIC)) {
+        if(sourceVal.getCellType().equals(CellType.STRING) && sourceVal.getValue() != "!UNDEFINED!"
+                && startVal.getCellType().equals(CellType.NUMERIC) && endVal.getCellType().equals(CellType.NUMERIC)
+                && startVal.getValue() != "NaN" && endVal.getValue() != "NaN") {
         if(isUndefined(sourceVal, startVal, endVal)) {
             return new EffectiveValueImpl(CellType.STRING, "!UNDEFINED!");
         }

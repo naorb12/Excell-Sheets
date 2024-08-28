@@ -24,7 +24,8 @@ public class ConcatExpression implements Expression {
 
         try {
             // Check if both values are of type String
-            if (leftValue.getCellType() == CellType.STRING && rightValue.getCellType() == CellType.STRING) {
+            if (leftValue.getCellType() == CellType.STRING && rightValue.getCellType() == CellType.STRING
+                    && leftValue.getValue() != "!UNDEFINED!" && leftValue.getValue() != "!UNDEFINED!") {
                 String result = leftValue.extractValueWithExpectation(String.class)
                         .concat(rightValue.extractValueWithExpectation(String.class));
                 return new EffectiveValueImpl(CellType.STRING, result);
@@ -40,6 +41,6 @@ public class ConcatExpression implements Expression {
 
     @Override
     public CellType getFunctionResultType() {
-        return null;
+        return CellType.STRING;
     }
 }

@@ -1,6 +1,7 @@
 package expression.parser;
 
 import engine.Engine;
+import exception.OutOfBoundsException;
 import expression.api.Expression;
 import expression.impl.*;
 import immutable.objects.CellDTO;
@@ -222,7 +223,7 @@ public enum FunctionParser {
             if ( (!source.getFunctionResultType().equals(CellType.STRING) && !source.getFunctionResultType().equals(CellType.UNKNOWN)) ||
                     (!startIndex.getFunctionResultType().equals(CellType.NUMERIC) && !startIndex.getFunctionResultType().equals(CellType.UNKNOWN)) ||
             (!endIndex.getFunctionResultType().equals(CellType.NUMERIC) && !endIndex.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for CONCAT function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
+                throw new IllegalArgumentException("Invalid argument types for SUB function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
             }
 
             return new SubExpression(source, startIndex, endIndex);
@@ -239,6 +240,10 @@ public enum FunctionParser {
 
             String refCell = arguments.get(0).trim().toUpperCase();
             Coordinate target = new Coordinate(refCell.charAt(1) - '0', refCell.charAt(0) - 'A' + 1);
+            if(!Engine.isWithinBounds(target.getRow(), target.getColumn()))
+            {
+                throw new RuntimeException();
+            }
             if (target == null) {
                 throw new IllegalArgumentException("Invalid argument for REF function. Expected a valid cell reference, but got " + arguments.get(0));
             }
@@ -270,7 +275,7 @@ public enum FunctionParser {
 
     };
 
-    abstract public Expression parse(List<String> arguments);
+    abstract public Expression parse(List<String> arguments) ;
 
     public static Expression parseExpression(String input) {
 
@@ -281,13 +286,20 @@ public enum FunctionParser {
 
             String functionName = topLevelParts.get(0).trim().toUpperCase();
 
+            // Check if the function name is valid
+            try {
+                FunctionParser.valueOf(functionName);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid function name: " + functionName);
+            }
+
             //remove the first element from the array
             topLevelParts.remove(0);
             try {
                 return FunctionParser.valueOf(functionName).parse(topLevelParts);
             }
             catch (Exception e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalArgumentException(e.getMessage());
             }
         }
 
@@ -309,7 +321,7 @@ public enum FunctionParser {
 
             if (c == ',' && stack.isEmpty()) {
                 // If we are at a comma and the stack is empty, it's a separator for top-level parts
-                parts.add(buffer.toString().trim().toUpperCase());
+                parts.add(buffer.toString().trim());
                 buffer.setLength(0); // Clear the buffer for the next part
             } else {
                 buffer.append(c);
@@ -327,6 +339,11 @@ public enum FunctionParser {
     public static Set<Coordinate> parseDependsOn(String input) {
         Set<Coordinate> dependencies = new HashSet<>();
 
+        // Empty cell
+        if(input == null) {
+            return dependencies;
+        }
+
         // If the input is enclosed with '{' and '}', remove them
         if (input.startsWith("{") && input.endsWith("}")) {
             input = input.substring(1, input.length() - 1);
@@ -343,7 +360,7 @@ public enum FunctionParser {
                 if (part.startsWith("{REF,")) {
                     // This part is a reference, extract and add it to the set
                     dependencies.add(parseReference(part));
-                } else if (part.startsWith("{")) {
+                } else if (part.startsWith("{") && part.endsWith("}")) {
                     // This part is a nested expression, recurse into it
                     dependencies.addAll(parseDependsOn(part));
                 }
@@ -355,10 +372,16 @@ public enum FunctionParser {
 
     private static Coordinate parseReference(String refPart) {
         int commaIndex = refPart.indexOf(',');
-        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1).toUpperCase();
-        int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
-        int column = cellReference.charAt(0) - 'A' + 1;  // Convert column letter to number
-        return new Coordinate(row, column);
+        String cellReference = refPart.substring(commaIndex + 1, refPart.length() - 1).trim().toUpperCase();
+        try {
+            int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
+            int column = cellReference.charAt(0) - 'A' + 1;
+            Engine.isWithinBounds(row, column);
+            // Convert column letter to number
+            return new Coordinate(row, column);
+        }catch (Exception e) {
+            throw new IllegalArgumentException(" Illegal cell reference: " + cellReference);
+        }
     }
 }
 

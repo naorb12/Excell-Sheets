@@ -158,9 +158,6 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         Cell cell = activeCells.get(coordinate);
 
         try {
-            // Step 1: Validate Input and Detect Dependency Loops
-            validateAndCheckLoops(coordinate, input);
-
             Set<Coordinate> oldDependsOnSet = cell != null ? cell.getDependsOn() : null;
 
             if (cell == null) {
@@ -173,22 +170,21 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
             Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
             cell.setDependsOn(newDependsOnSet);
 
-            // Step 2: Update Dependencies
             updateDependencies(coordinate, cell, oldDependsOnSet, input);
 
-            // Step 3: Recalculate Effective Values
+            validateAndCheckLoops(coordinate, input);
+
+
             recalculateEffectiveValue(coordinate, cell);
 
-            // Step 4: Update Version
             incrementVersion();
 
         } catch (Exception e) {
-            throw e;
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     private void validateAndCheckLoops(Coordinate coordinate, String input) {
-        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
         if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
             throw new IllegalStateException("Dependency loop detected at " + coordinate);
         }

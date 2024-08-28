@@ -19,6 +19,9 @@ import java.io.*;
 import java.util.*;
 
 public class Engine implements Serializable {
+
+    private static final int MAX_ROWS = 50;
+    private static final int MAX_COLS = 20;
     private static SheetImpl sheet;
     // Version history
     private Map<Integer, SheetDTO> versionHistory = new HashMap<>();
@@ -47,7 +50,7 @@ public class Engine implements Serializable {
         return (CellDTO) sheet.getCellDTO(row, col);
     }
 
-    public boolean isWithinBounds(int row, int column) throws OutOfBoundsException {
+    public static boolean isWithinBounds(int row, int column) throws OutOfBoundsException {
         int maxRow = sheet.getRowCount(); // Assuming method to get total rows
         int maxColumn = sheet.getColumnCount(); // Assuming method to get total columns
 
@@ -83,7 +86,17 @@ public class Engine implements Serializable {
             saveCurrentVersion(createSnapshot());
 
         } catch (OutOfBoundsException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
+        }
+        catch (Exception e) {
+            if(versionHistory.size() >= 1){
+                int latestVersionKey = Collections.max(versionHistory.keySet());
+                sheet = (SheetImpl) versionHistory.get(latestVersionKey);
+            }
+            else {
+                sheet = null;
+            }
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -93,8 +106,8 @@ public class Engine implements Serializable {
         int rowHeight = generatedSheet.getSTLLayout().getSTLSize().getRowsHeightUnits();
         int columnWidth = generatedSheet.getSTLLayout().getSTLSize().getColumnWidthUnits();
 
-        if (rows < 1 || rows > 50 || columns < 1 || columns > 20) {
-            throw new InvalidXMLFormatException("Sheet dimensions are out of bounds: " + rows + "x" + columns);
+        if (rows < 1 || rows > MAX_ROWS || columns < 1 || columns > MAX_COLS) {
+            throw new InvalidXMLFormatException("Sheet dimensions are out of bounds: " + rows + "x" + columns + ". Please enter rows from 1 to " + MAX_ROWS + " ,and columns from 1 to " + MAX_COLS);
         }
         if(rowHeight <= 0 || columnWidth <= 0){
             throw new InvalidXMLFormatException("Cell dimensions are non-existing: " + rowHeight + "," + columnWidth);
@@ -106,10 +119,7 @@ public class Engine implements Serializable {
 
         // Set the original value from the generated XML object
         cell.setOriginalValue(generatedCell.getSTLOriginalValue());
-        // Optionally calculate the effective value based on your logic
-        //cell.calculateEffectiveValue();
 
-        // Return the fully constructed and populated cell
         return cell;
     }
 
@@ -120,10 +130,10 @@ public class Engine implements Serializable {
         }
         catch (CalculationException e)
         {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
         catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 

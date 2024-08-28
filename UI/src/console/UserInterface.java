@@ -5,6 +5,7 @@ import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
+import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;
@@ -82,24 +83,29 @@ public class UserInterface {
     }
 
     private void displayPreviousVersions() {
-        try {
-            System.out.println("Enter the version number you want to peek at range of 1-" + engine.getSheet().getVersion() + ": ");
-            int version = Integer.parseInt(scanner.nextLine());
+        if(engine.getSheet() != null) {
+            try {
+                System.out.println("Enter the version number you want to peek at range of 1-" + engine.getSheet().getVersion() + ": ");
+                int version = Integer.parseInt(scanner.nextLine());
 
-            // Ask the engine to get the specified version of the sheet
-            SheetDTO sheetVersion = engine.peekVersion(version);
+                // Ask the engine to get the specified version of the sheet
+                SheetDTO sheetVersion = engine.peekVersion(version);
 
-            if (sheetVersion != null) {
-                int cellsChanged = engine.countAmountOfCellsChangedFromPreviousVersions(sheetVersion);
-                System.out.println("Displaying sheet version (" + version +") With (" + cellsChanged + ") cells updated in that version:");
-                presentSpecificSheet(sheetVersion);  // Display the retrieved version
-            } else {
-                System.out.println("Version " + version + " not found.");
+                if (sheetVersion != null) {
+                    int cellsChanged = engine.countAmountOfCellsChangedFromPreviousVersions(sheetVersion);
+                    System.out.println("Displaying sheet version (" + version + ") With (" + cellsChanged + ") cells updated in that version:");
+                    presentSpecificSheet(sheetVersion);  // Display the retrieved version
+                } else {
+                    System.out.println("Version " + version + " not found.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid version number. Please enter a valid integer.");
+            } catch (Exception e) {
+                System.out.println("An error occurred while retrieving the version: " + e.getMessage());
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid version number. Please enter a valid integer.");
-        } catch (Exception e) {
-            System.out.println("An error occurred while retrieving the version: " + e.getMessage());
+        }
+        else{
+            System.out.println("No sheet found.");
         }
     }
 
@@ -178,25 +184,36 @@ public class UserInterface {
 
     public void presentCurrentSheet() {
         SheetDTO sheet = engine.getSheet();
-        presentSpecificSheet(sheet);
+        if(sheet != null) {
+            presentSpecificSheet(sheet);
+        }
+        else{
+            System.out.println("No sheet found.");
+        }
     }
 
     public void displayCell() {
-        while (true) {
-            try {
+        SheetDTO sheet = engine.getSheet();
+        if(sheet != null) {
+            while (true) {
+                try {
 
-                Coordinate coord = inputCell();
+                    Coordinate coord = inputCell();
 
-                // Retrieve the cell from the engine
-                CellDTO cell = engine.getCell(coord.getRow() , coord.getColumn()); // Adjusting row index (1-based to 0-based)
+                    // Retrieve the cell from the engine
+                    CellDTO cell = engine.getCell(coord.getRow(), coord.getColumn()); // Adjusting row index (1-based to 0-based)
 
-                // Display the details of the cell
-                printCell(cell);
+                    // Display the details of the cell
+                    printCell(cell);
 
-                break; // Exit the loop after successful input
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage() + " Please try again.");
+                    break; // Exit the loop after successful input
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage() + " Please try again.");
+                }
             }
+        }
+        else{
+            System.out.println("No sheet found.");
         }
     }
 
@@ -224,7 +241,7 @@ public class UserInterface {
 
     private void printCell(CellDTO cell) {
 
-        if (cell != null) {
+        if (cell != null && cell.getEffectiveValue().getValue() != null) {
             System.out.println("Original Value: " + cell.getOriginalValue());
             System.out.println("Effective Value: " + cell.getEffectiveValue().formatValue(Optional.empty()).trim());
             System.out.println("Version: " + cell.getVersion()); // Example method to get the cell's version
@@ -237,25 +254,29 @@ public class UserInterface {
     }
 
     public void setCell() {
-        Coordinate coord = inputCell();
+        SheetDTO sheet = engine.getSheet();
+        if(sheet != null) {
+            Coordinate coord = inputCell();
 
-        while (true) {
-        try {
-            System.out.println("Enter your input: ");
-            String input = scanner.nextLine();
-            engine.setCell(coord.getRow(), coord.getColumn(), input);
-            System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
-            System.out.println();
-            presentCurrentSheet();
-            break;
+            while (true) {
+                try {
+                    System.out.println("Enter your input: ");
+                    String input = scanner.nextLine();
+                    engine.setCell(coord.getRow(), coord.getColumn(), input);
+                    System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
+                    System.out.println();
+                    presentCurrentSheet();
+                    break;
+                } catch (RuntimeException e) {
+                    System.out.println(e.getMessage() + ". Please try again.");
+                } catch (Exception e) {
+                    System.out.println(e.getMessage() + ". Please try again.");
+                }
+            }
         }
-        catch (RuntimeException e) {
-            System.out.println(e.getMessage() + ". Please try again.");
+        else{
+            System.out.println("No sheet found.");
         }
-        catch (Exception e) {
-            System.out.println(e.getMessage() + ". Please try again.");
-        }
-      }
     }
 
     public Coordinate inputCell()
