@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="JAXB">
+    <output-path>$PROJECT_DIR$/out/artifacts/JAXB</output-path>
+    <root id="archive" name="JAXB.jar">
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-jxc.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-xjc.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-core.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-impl.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/angus-activation.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jakarta.xml.bind-api.jar" />
+      <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jakarta.activation-api.jar" />
+    </root>
+  </artifact>
+</component>
