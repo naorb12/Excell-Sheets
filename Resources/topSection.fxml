@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.ProgressBar?>
+<VBox spacing="10" alignment="CENTER" prefHeight="120.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="top.TopController">
+    <children>
+        <HBox alignment="CENTER" spacing="10" prefHeight="50.0" prefWidth="800.0">
+            <children>
+                <ComboBox fx:id="styleSelector" prefWidth="150.0" />
+                <Label fx:id="titleLabel" text="Shticell - Spreadsheet Application" textAlignment="CENTER" />
+            </children>
+        </HBox>
+        <HBox spacing="10" alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0">
+            <children>
+                <Button fx:id="loadFileButton" text="Load File" />
+                <Label fx:id="filePathLabel" text="No file loaded" />
+                <ProgressBar fx:id="progressBar" prefWidth="400.0" visible="false" />
+            </children>
+        </HBox>
+
+        <HBox spacing="10" alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0">
+            <children>
+                <Label fx:id="selectedCellIDLabel" text="Selected Cell ID" />
+                <Label fx:id="cellOriginalValueLabel" text="Original Value" />
+                <Button fx:id="updateValueButton" text="Update Value" />
+                <Label fx:id="lastUpdateCellVersionLabel" text="Last Update Cell Version" />
+                <ComboBox fx:id="sheetVersionSelector" prefWidth="170.0" />
+            </children>
+        </HBox>
+    </children>
+</VBox>

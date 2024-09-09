@@ -67,5 +67,7 @@
         </SOURCES>
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="Controller" />
+    <orderEntry type="library" name="javafx-swt" level="project" />
   </component>
 </module>

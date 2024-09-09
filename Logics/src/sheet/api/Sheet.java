@@ -5,6 +5,7 @@ import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,4 +38,21 @@ public interface Sheet {
     void incrementVersion();
 
     void setVersion(int version);
+
+    // Add a new range by name
+    void addRange(String rangeName, List<Coordinate> coordinates);
+
+    void setRanges(Map<String, List<Coordinate>> newRanges);
+
+    // Delete a range by name
+    void removeRange(String rangeName);
+
+    // Retrieve a specific range by name
+    List<Coordinate> getRange(String rangeName);
+
+    // Retrieve all ranges
+    Map<String, List<Coordinate>> getAllRanges();
+
+    // Check if a specific coordinate is part of any range
+    boolean isCoordinateInRange(Coordinate coord);
 }

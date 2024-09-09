@@ -4,7 +4,6 @@ import engine.Engine;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
-import sheet.api.Sheet;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -23,12 +22,15 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     private int columnsWidth;
     private int rowsHeight;
 
+    private Map<String, List<Coordinate>> ranges;
+
     public SheetImpl(int rows, int columns, int rowsHeight, int columnsWidth) {
         this.rowsCount = rows;
         this.columnsCount = columns;
         this.columnsWidth = columnsWidth;
         this.rowsHeight = rowsHeight;
         activeCells = new HashMap<Coordinate, Cell>();
+        ranges = new HashMap<String, List<Coordinate>>();
     }
 
 
@@ -265,5 +267,46 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     @Override
     public void incrementVersion() {
         this.version++;
+    }
+
+    // Add a new range by name
+    @Override
+    public void addRange(String rangeName, List<Coordinate> coordinates) {
+        ranges.put(rangeName, coordinates);  // Add the range to the map
+    }
+
+    @Override
+    public void setRanges(Map<String, List<Coordinate>> newRanges)
+    {
+        ranges = new HashMap<>(newRanges);
+    }
+
+    // Delete a range by name
+    @Override
+    public void removeRange(String rangeName) {
+        ranges.remove(rangeName);  // Remove the range from the map
+    }
+
+    // Retrieve a specific range by name
+    @Override
+    public List<Coordinate> getRange(String rangeName) {
+        return ranges.get(rangeName);  // Return the list of coordinates for the range
+    }
+
+    // Retrieve all ranges
+    @Override
+    public Map<String, List<Coordinate>> getAllRanges() {
+        return Collections.unmodifiableMap(ranges);  // Return an unmodifiable view of the ranges
+    }
+
+    // Check if a specific coordinate is part of any range
+    @Override
+    public boolean isCoordinateInRange(Coordinate coord) {
+        for (List<Coordinate> coordinates : ranges.values()) {
+            if (coordinates.contains(coord)) {
+                return true;  // Coordinate is in one of the ranges
+            }
+        }
+        return false;  // Coordinate not found in any range
     }
 }

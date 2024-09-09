@@ -5,7 +5,6 @@ import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
-import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;

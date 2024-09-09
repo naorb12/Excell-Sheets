@@ -3,16 +3,16 @@ package engine;
 import exception.CalculationException;
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
-import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
-import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 import sheet.impl.SheetImpl;
+import xml.generated.STLBoundaries;
 import xml.generated.STLCell;
+import xml.generated.STLRange;
 import xml.generated.STLSheet;
 
 import java.io.*;
@@ -25,6 +25,7 @@ public class Engine implements Serializable {
     private static SheetImpl sheet;
     // Version history
     private Map<Integer, SheetDTO> versionHistory = new HashMap<>();
+
 
     public Engine(int rowsCount, int colsCount, int rowsHeight, int colsWidth) {
         sheet = new SheetImpl(rowsCount, colsCount, rowsHeight, colsWidth);
@@ -62,18 +63,22 @@ public class Engine implements Serializable {
 
     public void mapSTLSheet(STLSheet generatedSheet) throws InvalidXMLFormatException {
         try {
-            // Validate sheet dimensions
+            // Step 1: Validate sheet dimensions
             validateSheetDimensions(generatedSheet);
 
-            // Initialize the custom SheetImpl object with the validated size
-            sheet = new SheetImpl(generatedSheet.getSTLLayout().getRows(), generatedSheet.getSTLLayout().getColumns(),
-                    generatedSheet.getSTLLayout().getSTLSize().getRowsHeightUnits(), generatedSheet.getSTLLayout().getSTLSize().getColumnWidthUnits());
+            // Step 2: Initialize the custom SheetImpl object with the validated size
+            sheet = new SheetImpl(generatedSheet.getSTLLayout().getRows(),
+                    generatedSheet.getSTLLayout().getColumns(),
+                    generatedSheet.getSTLLayout().getSTLSize().getRowsHeightUnits(),
+                    generatedSheet.getSTLLayout().getSTLSize().getColumnWidthUnits());
             sheet.setName(generatedSheet.getName());
 
+            // Step 3: Translate cells and add them to the sheet
             Map<Coordinate, Cell> cells = new HashMap<>();
             for (STLCell generatedCell : generatedSheet.getSTLCells().getSTLCell()) {
-                // Validate that the cell is within the sheet's bounds
-                isWithinBounds(generatedCell.getRow(), generatedCell.getColumn().toUpperCase().trim().charAt(0) - 'A' + 1);
+                // Validate that the cell is within bounds
+                isWithinBounds(generatedCell.getRow(),
+                        generatedCell.getColumn().toUpperCase().trim().charAt(0) - 'A' + 1);
 
                 // Translate and validate the cell
                 Cell cell = translateSTLCellToCell(generatedCell);
@@ -82,20 +87,18 @@ public class Engine implements Serializable {
                 Coordinate coord = new Coordinate(cell.getCoordinate().getRow(), cell.getCoordinate().getColumn());
                 cells.put(coord, cell);
             }
+            // Step 4: Handle Ranges - Validate and add ranges
+            validateAndAddRanges(generatedSheet);
+
             sheet.setCells(cells);
+
+            // Step 5: Save the current version of the sheet (snapshot)
             saveCurrentVersion(createSnapshot());
 
         } catch (OutOfBoundsException e) {
             throw new RuntimeException(e.getMessage());
-        }
-        catch (Exception e) {
-            if(versionHistory.size() >= 1){
-                int latestVersionKey = Collections.max(versionHistory.keySet());
-                sheet = (SheetImpl) versionHistory.get(latestVersionKey);
-            }
-            else {
-                sheet = null;
-            }
+        } catch (Exception e) {
+            //rollbackToPreviousVersion();
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -122,6 +125,67 @@ public class Engine implements Serializable {
 
         return cell;
     }
+
+    private void validateAndAddRanges(STLSheet generatedSheet) throws InvalidXMLFormatException {
+        if (generatedSheet.getSTLRanges() == null || generatedSheet.getSTLRanges().getSTLRange().isEmpty()) {
+            return;
+        }
+
+        // Step 1: Ensure all ranges have a valid name and are within bounds
+        Set<Coordinate> allRangeCoordinates = new HashSet<>();  // To track overlaps
+        for (STLRange range : generatedSheet.getSTLRanges().getSTLRange()) {
+            String rangeName = range.getName();
+            List<Coordinate> rangeCoordinates = new ArrayList<>();
+
+            if (rangeName == null || rangeName.trim().isEmpty()) {
+                throw new InvalidXMLFormatException("Range with no valid name found.");
+            }
+
+            // Step 2: Validate each boundary and add coordinates
+            // Assuming that STLRange contains STLBoundaries objects
+            STLBoundaries boundaries = range.getSTLBoundaries();  // Adapt this to your actual structure
+            Coordinate fromCoord = parseCoordinate(boundaries.getFrom());
+            Coordinate toCoord = parseCoordinate(boundaries.getTo());
+
+            // Check that boundaries are within the sheet bounds
+            isWithinBounds(fromCoord.getRow(), fromCoord.getColumn());
+            isWithinBounds(toCoord.getRow(), toCoord.getColumn());
+
+            // Collect all coordinates for the range
+            for (int row = fromCoord.getRow(); row <= toCoord.getRow(); row++) {
+                for (int col = fromCoord.getColumn(); col <= toCoord.getColumn(); col++) {
+                    Coordinate coord = new Coordinate(row, col);
+                    if (allRangeCoordinates.contains(coord)) {
+                        throw new InvalidXMLFormatException("Overlapping ranges detected for coordinate: " + coord);
+                    }
+                    rangeCoordinates.add(coord);
+                    allRangeCoordinates.add(coord);  // Track used coordinates to prevent overlap
+                }
+            }
+
+            // Step 3: Add range to the sheet
+            sheet.addRange(rangeName, rangeCoordinates);
+        }
+    }
+
+    /**
+     * Parses a string representation of a coordinate (e.g., "A1", "B2")
+     * into a Coordinate object.
+     */
+    private Coordinate parseCoordinate(String coordStr) throws InvalidXMLFormatException {
+        try {
+            // Assume the string is in the format "A1", "B5", etc.
+            char columnChar = coordStr.toUpperCase().trim().charAt(0);
+            int row = Integer.parseInt(coordStr.substring(1));
+
+            int column = columnChar - 'A' + 1;  // Convert 'A' to 1, 'B' to 2, etc.
+
+            return new Coordinate(row, column);
+        } catch (Exception e) {
+            throw new InvalidXMLFormatException("Invalid coordinate format: " + coordStr);
+        }
+    }
+
 
     public void setCell(int row, int col, String input) {
         try {
@@ -170,8 +234,18 @@ public class Engine implements Serializable {
         }
         snapshot.setCells(deepCopiedCells);
 
+        // Create a deep copy of the ranges map
+        Map<String, List<Coordinate>> deepCopiedRanges = new HashMap<>();
+        for (Map.Entry<String, List<Coordinate>> entry : sheet.getAllRanges().entrySet()) {
+            // Deep copy of the list of coordinates for each range
+            List<Coordinate> copiedCoordinates = new ArrayList<>(entry.getValue()); // Shallow copy of the list (the coordinates are immutable or we assume they won't change)
+            deepCopiedRanges.put(entry.getKey(), copiedCoordinates);
+        }
+        snapshot.setRanges(deepCopiedRanges);  // Ensure SheetImpl has a setRanges method for setting ranges
+
         return (SheetDTO) snapshot;
     }
+
 
     public int countAmountOfCellsChangedFromPreviousVersions(SheetDTO sheetVersion) {
         int currentVersion = sheetVersion.getVersion();
@@ -218,4 +292,7 @@ public class Engine implements Serializable {
         }
     }
 
+    public Map<Integer, SheetDTO> getVersionHistory() {
+        return versionHistory;
+    }
 }

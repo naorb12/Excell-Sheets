@@ -1,0 +1,133 @@
+/* General app background */
+.root {
+    -fx-background-color: #f4f4f9;  /* Light grey background */
+}
+
+/* Title Label */
+#titleLabel {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333;
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+/* Buttons Styling */
+.button {
+    -fx-background-color: #4CAF50;  /* Green background for buttons */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10 20 10 20;
+}
+
+.button:hover {
+    -fx-background-color: #45a049;  /* Slightly darker green on hover */
+}
+
+/* Styling specific buttons */
+#loadFileButton, #updateValueButton, #commandsbutton, #rangesButton {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 15px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+#loadFileButton:hover, #updateValueButton:hover, #commandsbutton:hover, #rangesButton:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Labels Styling (no rounded corners) */
+.label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #555555;
+}
+
+/* Styling for Action Line Labels (Removed rounded corners) */
+#selectedCellIDLabel, #cellOriginalValueLabel, #lastUpdateCellVersionLabel {
+    -fx-background-color: #E0E0E0;
+    -fx-padding: 8px;
+    -fx-border-color: #CCCCCC;
+    -fx-border-width: 1px;
+    -fx-border-radius: 0px;  /* Removed rounded corners */
+    -fx-background-radius: 0px;
+    -fx-text-fill: #333333;
+    -fx-min-width: 100px;
+    -fx-alignment: center-left;
+}
+
+/* Styling for File Path Label (No rounded corners) */
+#filePathLabel {
+    -fx-text-fill: #333333;
+    -fx-background-color: #E0E0E0;
+    -fx-padding: 8px;
+    -fx-border-color: #CCCCCC;
+    -fx-border-width: 1px;
+    -fx-border-radius: 0px;  /* Removed rounded corners */
+    -fx-background-radius: 0px;
+    -fx-min-width: 300px;
+    -fx-alignment: center-left;
+}
+
+/* ScrollPane and GridPane styling for the main grid area */
+.scroll-pane {
+    -fx-background-color: #F0F0F0;
+    -fx-border-color: #CCCCCC;
+    -fx-padding: 10px;
+}
+
+.grid-pane {
+    -fx-background-color: #FAFAFA;
+    -fx-border-color: #CCCCCC;
+    -fx-padding: 10px;
+    -fx-border-radius: 5px;
+}
+
+/* ComboBox Styling */
+.combo-box {
+    -fx-background-color: #FFFFFF; /* Light background */
+    -fx-text-fill: #333333; /* Dark text */
+}
+
+/* ComboBox popup (drop-down) */
+.combo-box-popup {
+    -fx-background-color: #FFFFFF; /* White background for drop-down */
+}
+
+/* ListView inside the ComboBox popup */
+.combo-box-popup .list-view {
+    -fx-background-color: #FFFFFF; /* White background for the list in the combo box */
+    -fx-control-inner-background: #FFFFFF;
+}
+
+/* ListCell inside the ListView (ComboBox items) */
+.combo-box-popup .list-view .list-cell {
+    -fx-background-color: #FFFFFF; /* Background for each item */
+    -fx-text-fill: #333333; /* Dark text for items */
+}
+
+/* Hover effect for ListCell */
+.combo-box-popup .list-view .list-cell:hover {
+    -fx-background-color: #F0F0F0; /* Light grey on hover */
+    -fx-text-fill: #333333; /* Dark text */
+}
+
+/* Selected item in ComboBox */
+.combo-box-popup .list-view .list-cell:selected {
+    -fx-background-color: #E0E0E0; /* Light grey background for selected item */
+    -fx-text-fill: #333333; /* Dark text for selected item */
+}
+
+/* Styling for labels inside the gridpane cells */
+.grid-pane.label {
+    -fx-border-insets: 0;
+    -fx-alignment: center; /* Center the text in the cell */
+    -fx-padding: 0; /* Remove any padding */
+    -fx-border-color: black; /* Add a border to the label */
+    -fx-background-color: #ffffff; /* Adjust background color */
+    -fx-pref-width: 100%; /* Make the label fill the width of the cell */
+    -fx-pref-height: 100%; /* Make the label fill the height of the cell */
+}

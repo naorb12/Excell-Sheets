@@ -1,0 +1,89 @@
+/* General app background */
+.root {
+    -fx-background-color: #e0f7fa;  /* Light blue background */
+}
+
+/* Title Label */
+#titleLabel {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #01579b;  /* Dark blue text */
+    -fx-padding: 10px;
+    -fx-alignment: center;
+}
+
+/* Buttons Styling */
+.button {
+    -fx-background-color: #0288d1;  /* Blue background for buttons */
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10 20 10 20;
+}
+
+.button:hover {
+    -fx-background-color: #0277bd;  /* Darker blue on hover */
+}
+
+/* Styling specific buttons */
+#loadFileButton, #updateValueButton, #commandsbutton, #rangesButton {
+    -fx-background-color: #0288d1;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 15px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+#loadFileButton:hover, #updateValueButton:hover, #commandsbutton:hover, #rangesButton:hover {
+    -fx-background-color: #0277bd;
+}
+
+/* Labels Styling (no rounded corners) */
+.label {
+    -fx-font-family: "Nueva Std Cond";
+    -fx-font-size: 23px;
+    -fx-text-fill: #01579b;  /* Dark blue for labels */
+}
+
+/* Styling for Action Line Labels (Removed rounded corners) */
+#selectedCellIDLabel, #cellOriginalValueLabel, #lastUpdateCellVersionLabel {
+    -fx-background-color: #b3e5fc;  /* Lighter blue for labels */
+    -fx-padding: 8px;
+    -fx-border-color: #81d4fa;
+    -fx-border-width: 1px;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
+    -fx-text-fill: #01579b;  /* Dark blue text */
+    -fx-min-width: 100px;
+    -fx-alignment: center-left;
+}
+
+/* Styling for File Path Label (No rounded corners) */
+#filePathLabel {
+    -fx-text-fill: #01579b;  /* Dark blue text */
+    -fx-background-color: #b3e5fc;
+    -fx-padding: 8px;
+    -fx-border-color: #81d4fa;
+    -fx-border-width: 1px;
+    -fx-border-radius: 0px;
+    -fx-background-radius: 0px;
+    -fx-min-width: 300px;
+    -fx-alignment: center-left;
+}
+
+/* ScrollPane and GridPane styling for the main grid area */
+.scroll-pane {
+    -fx-background-color: #b3e5fc;
+    -fx-border-color: #81d4fa;
+    -fx-padding: 10px;
+}
+
+.grid-pane {
+    -fx-background-color: #b3e5fc;
+    -fx-border-color: #81d4fa;
+    -fx-padding: 10px;
+    -fx-border-radius: 5px;
+}
+
