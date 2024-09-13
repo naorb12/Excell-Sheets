@@ -87,3 +87,31 @@
     -fx-border-radius: 5px;
 }
 
+/* Styling for the grid cells */
+.cell {
+    -fx-border-insets: 0;
+    -fx-alignment: center;
+    -fx-padding: 0;
+    -fx-border-color: black;
+    -fx-border-width: 0.5px; /* Add border width */
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
+    -fx-font-size: 1em;  /* Adjust this value as needed */
+    -fx-font-family: Arial;
+}
+
+/* Styling for headers */
+.header {
+    -fx-border-insets: 0;
+    -fx-alignment: center;
+    -fx-padding: 0;
+    -fx-border-color: black;
+    -fx-border-width: 0.5px; /* Add border width */
+    -fx-text-fill: black;
+    -fx-pref-width: 100%;
+    -fx-pref-height: 100%;
+    -fx-font-size: 1em;  /* Adjust this value as needed */
+    -fx-font-weight: bold;
+}
+
+

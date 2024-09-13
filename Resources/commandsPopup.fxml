@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="left.CommandsPopupController">
+    <children>
+        <!-- Adjust Column Width -->
+        <Label text="Adjust Column Width" />
+        <ComboBox fx:id="columnWidthSelector" promptText="Select Column" />
+        <Spinner fx:id="columnWidthSpinner" editable="true" maxWidth="100" />
+        <Button onAction="#handleUpdateColumnWidth" text="Update Column Width" />
+
+        <!-- Adjust Row Height -->
+        <Label text="Adjust Row Height" />
+        <ComboBox fx:id="rowSelector" promptText="Select Row" />
+        <Spinner fx:id="rowHeightSpinner" editable="true" maxWidth="100" />
+        <Button onAction="#handleUpdateRowHeight" text="Update Row Height" />
+
+        <!-- Text Alignment -->
+        <Label text="Text Alignment" />
+        <ComboBox fx:id="columnAlignmentSelector" promptText="Select Column" />
+        <ComboBox fx:id="alignmentSelector" promptText="Select Alignment">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Left" />
+                    <String fx:value="Center" />
+                    <String fx:value="Right" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+        <Button onAction="#handleUpdateTextAlignment" text="Update Text Alignment" />
+
+        <!-- Change Background Color -->
+        <Label text="Change Cell Background Color" />
+        <ComboBox fx:id="cellSelector" promptText="Select Cell (e.g., A1)" />
+        <ColorPicker fx:id="colorPicker" />
+        <Button onAction="#handleUpdateBackgroundColor" text="Update Background Color" />
+        <Button onAction="#handleUndoBackgroundColor" text="Undo Background Color" />
+    </children>
+</VBox>

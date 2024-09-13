@@ -26,32 +26,42 @@ public class MainController {
 
     private Stage primaryStage;
 
+    private SharedModel sharedModel;
+
     public void initialize() {
         try {
+            // Initialize the shared model
+            sharedModel = new SharedModel();
+
+            // Load and set the center section first (initialize centerController first)
+            FXMLLoader centerLoader = new FXMLLoader(getClass().getResource("/Resources/centerSection.fxml"));
+            ScrollPane centerPane = centerLoader.load();
+            centerController = centerLoader.getController();  // Assign centerController here
+            mainBorderPane.setCenter(centerPane);
+
             // Load and set the top section
             FXMLLoader topLoader = new FXMLLoader(getClass().getResource("/Resources/topSection.fxml"));
             VBox topPane = topLoader.load();
             topController = topLoader.getController();
+            topController.setCenterController(centerController);  // Now set the centerController in top
+            topController.setSharedModel(sharedModel);  // Make sure sharedModel is set before bindings
+            topController.setupBindings();  // Call the method to setup bindings
             mainBorderPane.setTop(topPane);
 
             // Load and set the left section
             FXMLLoader leftLoader = new FXMLLoader(getClass().getResource("/Resources/leftSection.fxml"));
             VBox leftPane = leftLoader.load();
             leftController = leftLoader.getController();
+            leftController.setCenterController(centerController);  // Set centerController here
+            leftController.setSharedModel(sharedModel);  // Make sure sharedModel is set before bindings
+            leftController.setupBindings();  // Call the method to setup bindings
             mainBorderPane.setLeft(leftPane);
 
-            // Load and set the center section
-            FXMLLoader centerLoader = new FXMLLoader(getClass().getResource("/Resources/centerSection.fxml"));
-            ScrollPane centerPane = centerLoader.load();
-            centerController = centerLoader.getController();
-            mainBorderPane.setCenter(centerPane);
-
-            // Set references for cross-controller communication
-            topController.setCenterController(centerController);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;

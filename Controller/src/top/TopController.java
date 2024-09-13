@@ -8,6 +8,8 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import left.LeftController;
+import main.SharedModel;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;
 import xml.handler.XMLSheetLoaderImpl;
@@ -38,7 +40,13 @@ public class TopController {
 
     private Stage primaryStage;
     private CenterController centerController; // For communication with the center grid
-    private SimpleBooleanProperty isFileSelected = new SimpleBooleanProperty(false);
+
+    private SharedModel sharedModel;
+
+    // Method to inject the shared model into this controller
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
+    }
 
     public void initialize() {
         styleSelector.getItems().addAll("Light Theme", "Dark Theme", "Blue Theme");
@@ -54,11 +62,19 @@ public class TopController {
         // Set action for file loading
         loadFileButton.setOnAction(event -> handleLoadFileButtonAction());
 
-        // Bind the update button to file selection
-        updateValueButton.disableProperty().bind(isFileSelected.not());
-        sheetVersionSelector.disableProperty().bind(isFileSelected.not());
+
         sheetVersionSelector.setValue("Select Sheet Version");
         sheetVersionSelector.setOnAction(event -> centerController.renderGridPane());
+
+    }
+
+    public void setupBindings() {
+        // Bind buttons to the sheetLoaded property from sharedModel
+        updateValueButton.disableProperty().bind(sharedModel.isSheetLoaded().not());
+        sheetVersionSelector.disableProperty().bind(sharedModel.isSheetLoaded().not());
+        // Bind the update button to file selection
+        updateValueButton.disableProperty().bind(sharedModel.isSheetLoaded().not());
+        sheetVersionSelector.disableProperty().bind(sharedModel.isSheetLoaded().not());
     }
 
     @FXML
@@ -135,7 +151,7 @@ public class TopController {
         loadTask.setOnSucceeded(event -> {
             populateVersionSelector();
             System.out.println("XML file loaded and validated successfully.");
-            isFileSelected.set(true);
+            sharedModel.setSheetLoaded(true);
             centerController.renderGridPane();  // Trigger rendering of the grid
 
             // Hide the progress bar
@@ -195,4 +211,5 @@ public class TopController {
             sheetVersionSelector.getSelectionModel().selectLast(); // Select the latest version
         }
     }
+
 }

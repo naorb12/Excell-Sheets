@@ -11,5 +11,28 @@
     <orderEntry type="library" name="javafx-swt" level="project" />
     <orderEntry type="module" module-name="XML" />
     <orderEntry type="module" module-name="DTO" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-jxc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-xjc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-core.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-impl.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/angus-activation.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jakarta.xml.bind-api.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jakarta.activation-api.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-jxc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-xjc.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-core.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jaxb-impl.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/angus-activation.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jakarta.xml.bind-api.jar!/" />
+          <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jakarta.activation-api.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
