@@ -1,5 +1,7 @@
 package left;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Spinner;
@@ -8,7 +10,17 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import center.CenterController;
 import immutable.objects.SheetDTO;
-
+import center.CenterController;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import main.MainController;
+import main.SharedModel;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,19 +50,41 @@ public class CommandsPopupController {
     @FXML
     private ColorPicker colorPicker;
 
+    @FXML
+    private Button colorUndoButton;
+
     private CenterController centerController;
 
     public void initialize() {
         // Initialize the spinners with default value factories
-        columnWidthSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(10, 500, 100, 1));
+        columnWidthSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(1, 500, 100, 1));
         columnWidthSpinner.getValueFactory().setValue(null);  // Clear the initial value
-        rowHeightSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(10, 200, 30, 1));
+        columnWidthSpinner
+                .valueProperty()
+                .addListener((observable, oldValue, newValue) -> handleUpdateColumnWidth());
+
+        rowHeightSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(1, 200, 30, 1));
         rowHeightSpinner.getValueFactory().setValue(null);
+        rowHeightSpinner
+                .valueProperty()
+                .addListener((observable, oldValue, newValue) -> handleUpdateRowHeight());
 
         // Add listeners to update spinner values when a column/row is selected
         columnWidthSelector.setOnAction(event -> updateColumnWidthSpinner());
+        columnWidthSpinner.disableProperty().bind(Bindings.isNull(columnWidthSelector.valueProperty()));
+
         rowSelector.setOnAction(event -> updateRowHeightSpinner());
+        rowHeightSpinner.disableProperty().bind(Bindings.isNull(rowSelector.valueProperty()));
+
+        columnAlignmentSelector.setOnAction(event -> resetColumnAlignmentSelector());
+        alignmentSelector.disableProperty().bind(Bindings.isNull((columnAlignmentSelector.valueProperty())));
+
+        cellSelector.setOnAction(event -> resetColorPicker());
+        colorUndoButton.disableProperty().bind(Bindings.isNull(cellSelector.valueProperty()));
+        colorPicker.disableProperty().bind(Bindings.isNull(cellSelector.valueProperty()));
+
     }
+
 
     public void populateSelectors() {
         if (centerController != null) {
@@ -157,6 +191,10 @@ public class CommandsPopupController {
         return index - 1;
     }
 
+    private void resetColorPicker() {
+        colorPicker.setValue(Color.WHITE);
+    }
+
     // Method to update the column width using Spinner
     @FXML
     private void handleUpdateColumnWidth() {
@@ -183,6 +221,12 @@ public class CommandsPopupController {
 
         centerController.updateColumnAlignment(selectedColumn, alignment);  // Pass the alignment update to CenterController
     }
+
+    @FXML
+    private void resetColumnAlignmentSelector() {
+        alignmentSelector.setValue("Center");
+    }
+
 
     // Method to update the background color of a cell
     @FXML

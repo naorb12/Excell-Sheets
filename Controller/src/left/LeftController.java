@@ -8,6 +8,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import main.MainController;
 import main.SharedModel;
 
 import java.io.IOException;
@@ -20,6 +21,10 @@ public class LeftController {
     private Button rangesButton;
 
     private CenterController centerController;  // Reference to CenterController
+
+    Stage commandsPopUp = new Stage();
+
+    Stage rangesPopUp = new Stage();
 
     private SharedModel sharedModel;
 
@@ -43,6 +48,7 @@ public class LeftController {
     @FXML
     private void handleCommandsButtonAction() {
         try {
+            commandsPopUp = new Stage();
             // Load the commands pop-up FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Resources/commandsPopup.fxml"));
             Parent root = loader.load();
@@ -54,16 +60,15 @@ public class LeftController {
             commandsPopupController.setCenterController(centerController);
 
             // Create a new Stage (window) for the pop-up
-            Stage popupStage = new Stage();
-            popupStage.setTitle("Commands");
-            popupStage.setScene(new Scene(root));
-            popupStage.initOwner(commandsButton.getScene().getWindow());  // Set the parent window
+            commandsPopUp.setTitle("Commands");
+            commandsPopUp.setScene(new Scene(root));
+            commandsPopUp.initOwner(commandsButton.getScene().getWindow());  // Set the parent window
 
             // Allow the window to be resizable and movable
-            popupStage.setResizable(true);
-
+            commandsPopUp.setResizable(true);
+            commandsPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
             // Show the pop-up
-            popupStage.show();
+            commandsPopUp.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,7 +76,31 @@ public class LeftController {
 
     @FXML
     private void handleRangesButtonAction() {
-        System.out.println("Ranges button clicked");
+        try {
+            rangesPopUp = new Stage();
+            // Load the commands pop-up FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Resources/rangesPopup.fxml"));
+            Parent root = loader.load();
+
+            // Get the CommandsPopupController from the FXML
+            RangesPopUpController rangesPopUpController = loader.getController();
+
+            // Pass the reference of CenterController to the CommandsPopupController
+            //rangesPopUpController.setCenterController(centerController);
+
+            // Create a new Stage (window) for the pop-up
+            rangesPopUp.setTitle("Commands");
+            rangesPopUp.setScene(new Scene(root));
+            rangesPopUp.initOwner(commandsButton.getScene().getWindow());  // Set the parent window
+
+            // Allow the window to be resizable and movable
+            rangesPopUp.setResizable(true);
+            rangesPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
+            // Show the pop-up
+            rangesPopUp.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Method to set the reference to CenterController
@@ -84,5 +113,9 @@ public class LeftController {
     }
     public Button getRangesButton() {
         return rangesButton;
+    }
+
+    public Stage getCommandsPopUp() {
+        return commandsPopUp;
     }
 }

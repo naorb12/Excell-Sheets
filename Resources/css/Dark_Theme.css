@@ -114,4 +114,12 @@
     -fx-font-weight: bold;
 }
 
+.popUp .label{
+    -fx-text-fill: white;
+}
+
+.popUp ,#colorPicker {
+    -fx-text-fill: black;
+}
+
 

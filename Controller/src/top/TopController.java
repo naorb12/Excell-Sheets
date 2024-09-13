@@ -38,22 +38,16 @@ public class TopController {
     @FXML
     private ComboBox<String> sheetVersionSelector;
 
-    private Stage primaryStage;
     private CenterController centerController; // For communication with the center grid
 
-    private SharedModel sharedModel;
-
-    // Method to inject the shared model into this controller
-    public void setSharedModel(SharedModel sharedModel) {
-        this.sharedModel = sharedModel;
-    }
+    private SharedModel sharedModel = new SharedModel();
 
     public void initialize() {
         styleSelector.getItems().addAll("Light Theme", "Dark Theme", "Blue Theme");
         styleSelector.setValue("Light Theme");
 
         // Apply default style after initializing the controller (if primaryStage is set)
-        if (primaryStage != null && primaryStage.getScene() != null) {
+        if (sharedModel.getPrimaryStage() != null && sharedModel.getPrimaryStage().getScene() != null) {
             applyStyle(styleSelector.getValue());
         }
         // Set action for changing style
@@ -66,6 +60,11 @@ public class TopController {
         sheetVersionSelector.setValue("Select Sheet Version");
         sheetVersionSelector.setOnAction(event -> centerController.renderGridPane());
 
+    }
+
+    // Method to inject the shared model into this controller
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
     }
 
     public void setupBindings() {
@@ -85,18 +84,18 @@ public class TopController {
     @FXML
     private void applyStyle(String selectedStyle) {
         // Clear existing stylesheets
-        primaryStage.getScene().getStylesheets().clear();
+        sharedModel.getPrimaryStage().getScene().getStylesheets().clear();
 
         // Apply the selected stylesheet
         switch (selectedStyle) {
             case "Dark Theme":
-                primaryStage.getScene().getStylesheets().add(getClass().getResource("/Resources/css/Dark_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Resources/css/Dark_Theme.css").toExternalForm());
                 break;
             case "Blue Theme":
-                primaryStage.getScene().getStylesheets().add(getClass().getResource("/Resources/css/Blue_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Resources/css/Blue_Theme.css").toExternalForm());
                 break;
             default:
-                primaryStage.getScene().getStylesheets().add(getClass().getResource("/Resources/css/Light_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Resources/css/Light_Theme.css").toExternalForm());
                 break;
         }
     }
@@ -106,7 +105,7 @@ public class TopController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select XML file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("xml files", "*.xml"));
-        File selectedFile = fileChooser.showOpenDialog(primaryStage);
+        File selectedFile = fileChooser.showOpenDialog(sharedModel.getPrimaryStage());
         if (selectedFile == null) {
             return;
         }
@@ -183,15 +182,11 @@ public class TopController {
     }
 
 
-    // Method to set the primary stage for CSS switching
-    public void setPrimaryStage(Stage stage) {
-        this.primaryStage = stage;
-    }
-
     // Method to set the reference to CenterController
     public void setCenterController(CenterController centerController) {
         this.centerController = centerController;
     }
+
 
     @FXML
     public void populateVersionSelector() {

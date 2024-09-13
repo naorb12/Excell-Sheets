@@ -4,12 +4,15 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="20" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="left.LeftController">
+<VBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" spacing="10.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="left.LeftController">
     <children>
-        <Button fx:id="commandsButton" text="Commands" VBox.vgrow="ALWAYS">
+        <Button fx:id="commandsButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="175.0" prefWidth="121.0" text="Commands" VBox.vgrow="ALWAYS">
          <VBox.margin>
             <Insets />
          </VBox.margin></Button>
-        <Button fx:id="rangesButton" text="Ranges" VBox.vgrow="ALWAYS" />
+        <Button fx:id="rangesButton" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="175.0" prefWidth="121.0" text="Ranges" VBox.vgrow="ALWAYS" />
     </children>
+   <padding>
+      <Insets bottom="8.0" left="8.0" right="8.0" top="10.0" />
+   </padding>
 </VBox>

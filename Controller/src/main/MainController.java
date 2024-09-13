@@ -24,8 +24,6 @@ public class MainController {
     @FXML
     private CenterController centerController;
 
-    private Stage primaryStage;
-
     private SharedModel sharedModel;
 
     public void initialize() {
@@ -64,7 +62,6 @@ public class MainController {
 
 
     public void setPrimaryStage(Stage primaryStage) {
-        this.primaryStage = primaryStage;
-        topController.setPrimaryStage(primaryStage); // Pass primary stage to TopController
+        sharedModel.setPrimaryStage(primaryStage);
     }
 }
