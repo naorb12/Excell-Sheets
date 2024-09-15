@@ -141,31 +141,36 @@ public class Engine implements Serializable {
                 throw new InvalidXMLFormatException("Range with no valid name found.");
             }
 
+            if(sheet.getAllRanges().containsKey(rangeName)){
+                throw new InvalidXMLFormatException("Range with name " + rangeName + " already exists.");
+            }
             // Step 2: Validate each boundary and add coordinates
             // Assuming that STLRange contains STLBoundaries objects
-            STLBoundaries boundaries = range.getSTLBoundaries();  // Adapt this to your actual structure
-            Coordinate fromCoord = parseCoordinate(boundaries.getFrom());
-            Coordinate toCoord = parseCoordinate(boundaries.getTo());
-
-            // Check that boundaries are within the sheet bounds
-            isWithinBounds(fromCoord.getRow(), fromCoord.getColumn());
-            isWithinBounds(toCoord.getRow(), toCoord.getColumn());
-
-            // Collect all coordinates for the range
-            for (int row = fromCoord.getRow(); row <= toCoord.getRow(); row++) {
-                for (int col = fromCoord.getColumn(); col <= toCoord.getColumn(); col++) {
-                    Coordinate coord = new Coordinate(row, col);
-                    if (allRangeCoordinates.contains(coord)) {
-                        throw new InvalidXMLFormatException("Overlapping ranges detected for coordinate: " + coord);
-                    }
-                    rangeCoordinates.add(coord);
-                    allRangeCoordinates.add(coord);  // Track used coordinates to prevent overlap
-                }
-            }
+            STLBoundaries boundaries = range.getSTLBoundaries();
+            rangeCoordinates = validateRange(boundaries.getFrom(), boundaries.getTo());
 
             // Step 3: Add range to the sheet
             sheet.addRange(rangeName, rangeCoordinates);
         }
+    }
+
+    public List<Coordinate> validateRange(String fromCell, String toCell) throws InvalidXMLFormatException {
+        List<Coordinate> rangeCoordinates = new ArrayList<>();
+        Coordinate fromCoord = parseCoordinate(fromCell.trim().toUpperCase());
+        Coordinate toCoord = parseCoordinate(toCell.trim().toUpperCase());
+
+        // Check that boundaries are within the sheet bounds
+        isWithinBounds(fromCoord.getRow(), fromCoord.getColumn());
+        isWithinBounds(toCoord.getRow(), toCoord.getColumn());
+
+        // Collect all coordinates for the range
+        for (int row = fromCoord.getRow(); row <= toCoord.getRow(); row++) {
+            for (int col = fromCoord.getColumn(); col <= toCoord.getColumn(); col++) {
+                Coordinate coord = new Coordinate(row, col);
+                rangeCoordinates.add(coord);
+            }
+        }
+        return List.copyOf(rangeCoordinates);
     }
 
     /**
@@ -294,5 +299,16 @@ public class Engine implements Serializable {
 
     public Map<Integer, SheetDTO> getVersionHistory() {
         return versionHistory;
+    }
+
+    public List<Coordinate> createNewRange(String rangeName, String fromCell, String toCell) throws InvalidXMLFormatException {
+        List<Coordinate> range = new ArrayList<>();
+        range = validateRange(fromCell, toCell);
+        sheet.addRange(rangeName, range);
+        return range;
+    }
+
+    public void removeRange(String rangeToRemove){
+        sheet.removeRange(rangeToRemove);
     }
 }

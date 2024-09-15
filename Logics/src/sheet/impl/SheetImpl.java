@@ -309,4 +309,5 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         }
         return false;  // Coordinate not found in any range
     }
+
 }

@@ -7,20 +7,33 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
-import java.awt.*;
-import java.util.Optional;
+import sheet.coordinate.Coordinate;
+import top.TopController;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class CenterController {
 
     @FXML
     private GridPane spreadsheetGridPane;
+
+    @FXML
+    private Label selectedCellLabel;  // Track the currently selected cell
+
+    @FXML
+    private Set<Label> dependsOnCellLabel = new HashSet<>();  // Track the currently highlighted dependsOn cell
+
+    @FXML
+    private Set<Label> influencingOnCellLabel = new HashSet<>();  // Track the currently highlighted influencingOn cell
+
+
+    private TopController topController;
 
     private Engine engine;
 
@@ -43,13 +56,12 @@ public class CenterController {
             return;
         }
 
-        // Get sheet dimensions
         int rows = engine.getSheet().getRowCount();
         int cols = engine.getSheet().getColumnCount();
-        int rowHeight = engine.getSheet().getRowHeightUnits();  // Assuming these methods exist
+        int rowHeight = engine.getSheet().getRowHeightUnits();  // Assuming you have these methods in the engine
         int colWidth = engine.getSheet().getColumnsWidthUnits();
 
-        // Set row and column constraints based on the size of the sheet
+        // Set up row and column constraints
         for (int i = 0; i <= cols; i++) {
             ColumnConstraints colConstraints = new ColumnConstraints();
             colConstraints.setPrefWidth(colWidth);
@@ -65,37 +77,104 @@ public class CenterController {
         for (int col = 1; col <= cols; col++) {
             Label colHeader = new Label(Character.toString((char) ('A' + col - 1)));
             colHeader.getStyleClass().add("header");
-            colHeader.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); // Make label fill the cell
-            spreadsheetGridPane.add(colHeader, col, 0); // Place in the first row (index 0)
+            colHeader.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            spreadsheetGridPane.add(colHeader, col, 0);
         }
 
         // Add row headers (1, 2, 3, etc.)
         for (int row = 1; row <= rows; row++) {
             Label rowHeader = new Label(Integer.toString(row));
             rowHeader.getStyleClass().add("header");
-            rowHeader.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); // Make label fill the cell
-            spreadsheetGridPane.add(rowHeader, 0, row); // Place in the first column (index 0)
+            rowHeader.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+            spreadsheetGridPane.add(rowHeader, 0, row);
         }
 
+
+        // Add cells with click event
         for (int row = 1; row <= rows; row++) {
             for (int col = 1; col <= cols; col++) {
                 CellDTO cell = engine.getCell(row, col);
-                Label cellLabel = new Label(cell != null ? cell.getEffectiveValue().getValue().toString() : "");
-
+                Label cellLabel;
+                if (cell == null) {
+                    cellLabel = new Label("");
+                }
+                else {
+                    cellLabel = new Label(cell.getEffectiveValue().getValue() != null ? cell.getEffectiveValue().getValue().toString() : "");
+                }
                 // Apply the 'cell' style class
                 cellLabel.getStyleClass().add("cell");
 
                 // Ensure the label takes up the full size of its cell
-                cellLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE); // Allow label to expand fully
+                cellLabel.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-                // Ensure the text is aligned and wraps properly
-                cellLabel.setWrapText(true);
-                cellLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
+                // Handle the cell click event to update the TopController
+                final int selectedRow = row;
+                final int selectedCol = col;
+                cellLabel.setOnMouseClicked(event -> {
+                    // Prevent the event from propagating to the parent (mainBorderPane)
+                    event.consume();
+
+                    // Clear the highlights before setting new ones
+                    clearHighlights();
+
+                    String selectedCellID = Character.toString((char) ('A' + selectedCol - 1)) + selectedRow; // e.g., A1, B2, etc.
+
+                    // Update selected cell color and revert the previous one
+                    if (selectedCellLabel != null) {
+                        selectedCellLabel.getStyleClass().remove("selected-cell");
+                    }
+                    cellLabel.getStyleClass().add("selected-cell");
+                    selectedCellLabel = cellLabel;  // Store the currently selected cell
+
+                    // Highlight dependsOn and influencingOn cells
+                    if (cell != null) {
+                        highlightDependsOnCells(cell.getDependsOn());
+                        highlightInfluencingOnCells(cell.getInfluencingOn());
+
+                        // Update the top controller with selected cell ID and value
+                        topController.updateSelectedCell(selectedCellID, cell.getOriginalValue(), cell.getVersion());
+                    } else {
+                        topController.updateSelectedCell(selectedCellID, null, 1);  // Handle case for empty cells
+                    }
+                });
 
                 spreadsheetGridPane.add(cellLabel, col, row);
             }
         }
+
     }
+
+    // Method to clear previous highlights
+    private void clearHighlights() {
+        for (Node node : spreadsheetGridPane.getChildren()) {
+            if (node instanceof Label) {
+                ((Label) node).getStyleClass().removeAll("selected-cell", "depends-on-cell", "influencing-on-cell");  // Clear all highlight styles
+            }
+        }
+    }
+
+    // Method to highlight cells in the dependsOn set (light blue)
+    private void highlightDependsOnCells(Set<Coordinate> dependsOn) {
+        for (Coordinate coord : dependsOn) {
+            Label cellLabel = getNodeByRowColumnIndex(coord.getRow(), coord.getColumn());  // Get the cell by coordinate
+            if (cellLabel != null) {
+                dependsOnCellLabel.add(cellLabel);
+                cellLabel.getStyleClass().add("depends-on-cell");  // Add the CSS class for dependsOn cells
+            }
+        }
+    }
+
+    // Method to highlight cells in the influencingOn set (light green)
+    private void highlightInfluencingOnCells(Set<Coordinate> influencingOn) {
+        for (Coordinate coord : influencingOn) {
+            Label cellLabel = getNodeByRowColumnIndex(coord.getRow(), coord.getColumn());  // Get the cell by coordinate
+            if (cellLabel != null) {
+                influencingOnCellLabel.add(cellLabel);
+                cellLabel.getStyleClass().add("influencing-on-cell");  // Add the CSS class for influencingOn cells
+            }
+        }
+    }
+
 
     public void updateColumnWidth(String column, double width) {
         int colIndex = getColumnIndex(column);  // Convert column letter to index (A -> 0, B -> 1, etc.)
@@ -174,6 +253,17 @@ public class CenterController {
         return engine;
     }
 
+    @FXML
+    public Label getSelectedCellLabel() {
+        return selectedCellLabel;
+    }
+
+    @FXML
+    public void setSelectedCellLabel(String label) {
+        selectedCellLabel.setText(label);
+    }
+
+
     // Method to get the current width of a column
     public double getColumnWidth(int colIndex) {
         if (colIndex >= 0 && colIndex < spreadsheetGridPane.getColumnConstraints().size()) {
@@ -189,5 +279,17 @@ public class CenterController {
         }
         return 30; // Default value if row index is invalid
     }
+
+    public void setTopController(TopController topController) {
+        this.topController = topController;
+    }
+
+    public Set<Label> getDependsOnCellLabel() {
+        return dependsOnCellLabel;
+    }
+    public Set<Label> getInfluencingOnCellLabel() {
+        return influencingOnCellLabel;
+    }
+
 
 }

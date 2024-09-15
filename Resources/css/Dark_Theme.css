@@ -48,7 +48,7 @@
 }
 
 /* Styling for Action Line Labels (Removed rounded corners) */
-#selectedCellIDLabel, #cellOriginalValueLabel, #lastUpdateCellVersionLabel {
+#selectedCellIDLabel, #lastUpdateCellVersionLabel {
     -fx-background-color: #444444;  /* Dark grey background for labels */
     -fx-padding: 8px;
     -fx-border-color: #666666;  /* Dark border for labels */
@@ -98,6 +98,24 @@
     -fx-pref-height: 100%;
     -fx-font-size: 1em;  /* Adjust this value as needed */
     -fx-font-family: Arial;
+}
+
+/* Apply hover effect for the cells in the grid */
+.scroll-pane .cell:hover {
+    -fx-background-color: rgb(228, 139, 139);  /* Light blue background on hover */
+    -fx-border-color: #000000;  /* Border color for hovered cell */
+    -fx-border-width: 1px;
+    -fx-cursor: pointer;  /* Change cursor to hand on hover */
+}
+
+/* For dependsOn cells */
+.depends-on-cell {
+    -fx-background-color: rgba(204, 255, 255, 0.7);  /* Light blue background for dependsOn cells */
+}
+
+/* For influencingOn cells */
+.influencing-on-cell {
+    -fx-background-color: rgba(204, 255, 207, 0.7);  /* Light green background for influencingOn cells */
 }
 
 /* Styling for headers */

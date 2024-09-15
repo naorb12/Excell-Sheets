@@ -20,7 +20,7 @@
         <TextField fx:id="toCellField" promptText="e.g., B5" />
     </HBox>
 
-    <Button onAction="#handleAddRange" text="Add Range" />
+    <Button fx:id="addRangeButton" onAction="#handleAddRange" text="Add Range" />
 
     <!-- ComboBox to select ranges -->
     <Label text="Select Range" />
@@ -31,6 +31,6 @@
     <TextArea fx:id="rangeDetailsArea" editable="false" prefHeight="100" prefWidth="200" />
 
     <!-- Button to delete the selected range -->
-    <Button onAction="#handleDeleteRange" text="Delete Range" />
+    <Button fx:id="deleteRangeButton" onAction="#handleDeleteRange" text="Delete Range" />
 
 </VBox>

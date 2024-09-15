@@ -273,6 +273,78 @@ public enum FunctionParser {
             return new UpperCaseExpression(arg);
         }
 
+    },
+    EQUAL{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for EQUAL function. Expected 2, but got " + arguments.size());
+            }
+
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            return new EqualExpression(left, right);
+        }
+    },
+    NOT{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly one argument
+            if (arguments.size() != 1) {
+                throw new IllegalArgumentException("Invalid number of arguments for NOT function. Expected 1, but got " + arguments.size());
+            }
+
+            Expression expression = parseExpression(arguments.get(0).trim());
+
+            if((!expression.getFunctionResultType().equals(CellType.BOOLEAN)) && (!expression.getFunctionResultType().equals(CellType.UNKNOWN))) {
+                throw new IllegalArgumentException("Invalid argument types for NOT function. Expected BOOLEAN, but got " + expression.getFunctionResultType());
+            }
+
+            return new NotExpression(expression);
+        }
+    },
+    BIGGER{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for BIGGER function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+                throw new IllegalArgumentException("Invalid argument types for BIGGER function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new BiggerExpression(left, right);
+        }
+    },
+    LESS{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for LESS function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+                throw new IllegalArgumentException("Invalid argument types for LESS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new LessExpression(left, right);
+        }
     };
 
     abstract public Expression parse(List<String> arguments) ;

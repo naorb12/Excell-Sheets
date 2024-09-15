@@ -55,4 +55,5 @@ public interface Sheet {
 
     // Check if a specific coordinate is part of any range
     boolean isCoordinateInRange(Coordinate coord);
+
 }

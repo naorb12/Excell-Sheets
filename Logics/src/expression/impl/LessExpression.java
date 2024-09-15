@@ -2,17 +2,16 @@ package expression.impl;
 
 import expression.api.Expression;
 import immutable.objects.SheetDTO;
-import sheet.api.Sheet;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
 
-public class MinusExpression implements Expression {
+public class LessExpression implements Expression {
 
     private Expression left;
     private Expression right;
 
-    public MinusExpression(Expression left, Expression right) {
+    public LessExpression(Expression left, Expression right) {
         this.left = left;
         this.right = right;
     }
@@ -21,25 +20,21 @@ public class MinusExpression implements Expression {
     public EffectiveValue eval(SheetDTO sheet) {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
-        // do some checking... error handling...
-        //double result = (Double) leftValue.getValue() + (Double) rightValue.getValue();
 
         if (leftVal.getCellType() == CellType.NUMERIC && rightVal.getCellType() == CellType.NUMERIC
                 && leftVal.getValue() != "NaN" && rightVal.getValue() != "NaN") {
 
-            double result = leftVal.extractValueWithExpectation(Double.class) - rightVal.extractValueWithExpectation(Double.class);
+            boolean result = leftVal.extractValueWithExpectation(Double.class) <= rightVal.extractValueWithExpectation(Double.class);
 
-            return new EffectiveValueImpl(CellType.NUMERIC, result);
+            return new EffectiveValueImpl(CellType.BOOLEAN, result);
         }
         else {
-            return new EffectiveValueImpl(CellType.NUMERIC, "NaN");
+            return new EffectiveValueImpl(CellType.BOOLEAN, "!UNDEFINED!");
         }
-
-
     }
 
     @Override
     public CellType getFunctionResultType() {
-        return CellType.NUMERIC;
+        return CellType.BOOLEAN;
     }
 }

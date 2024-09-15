@@ -86,7 +86,7 @@ public class LeftController {
             RangesPopUpController rangesPopUpController = loader.getController();
 
             // Pass the reference of CenterController to the CommandsPopupController
-            //rangesPopUpController.setCenterController(centerController);
+            rangesPopUpController.setCenterController(centerController);
 
             // Create a new Stage (window) for the pop-up
             rangesPopUp.setTitle("Commands");

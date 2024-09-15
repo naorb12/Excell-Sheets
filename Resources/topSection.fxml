@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -24,7 +25,10 @@
         <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0" spacing="10">
             <children>
                 <Label fx:id="selectedCellIDLabel" text="Selected Cell ID" />
-                <Label fx:id="cellOriginalValueLabel" text="Original Value" />
+                <TextArea fx:id="cellOriginalValueTextArea" prefHeight="38.0" prefWidth="121.0" text="Original Value">
+               <cursor>
+                  <Cursor fx:constant="TEXT" />
+               </cursor></TextArea>
                 <Button fx:id="updateValueButton" text="Update Value" />
                 <Label fx:id="lastUpdateCellVersionLabel" text="Last Update Cell Version" />
                 <ComboBox fx:id="sheetVersionSelector" prefWidth="170.0" />

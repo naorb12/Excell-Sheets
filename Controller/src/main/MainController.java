@@ -3,6 +3,7 @@ package main;
 import center.CenterController;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -44,6 +45,7 @@ public class MainController {
             topController.setCenterController(centerController);  // Now set the centerController in top
             topController.setSharedModel(sharedModel);  // Make sure sharedModel is set before bindings
             topController.setupBindings();  // Call the method to setup bindings
+            centerController.setTopController(topController);
             mainBorderPane.setTop(topPane);
 
             // Load and set the left section
@@ -54,6 +56,20 @@ public class MainController {
             leftController.setSharedModel(sharedModel);  // Make sure sharedModel is set before bindings
             leftController.setupBindings();  // Call the method to setup bindings
             mainBorderPane.setLeft(leftPane);
+
+            // Assuming there is a background pane that covers the whole window
+            mainBorderPane.setOnMouseClicked(event -> {
+                if (centerController.getSelectedCellLabel() != null) {
+                    centerController.getSelectedCellLabel().setBackground(null);  // Reset background when clicking outside the grid
+                    for(Label influenceing : centerController.getInfluencingOnCellLabel()){
+                        influenceing.setBackground(null);
+                    }
+                    for(Label depends : centerController.getDependsOnCellLabel()){
+                        depends.setBackground(null);
+                    }
+                    topController.resetLabelsAndText();
+                }
+            });
 
         } catch (IOException e) {
             e.printStackTrace();

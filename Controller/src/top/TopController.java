@@ -2,13 +2,11 @@ package top;
 
 import center.CenterController;
 import immutable.objects.SheetDTO;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import left.LeftController;
 import main.SharedModel;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;
@@ -30,7 +28,7 @@ public class TopController {
     @FXML
     private Label selectedCellIDLabel;
     @FXML
-    private Label cellOriginalValueLabel;
+    private TextArea cellOriginalValueTextArea;
     @FXML
     private Button updateValueButton;
     @FXML
@@ -56,6 +54,7 @@ public class TopController {
         // Set action for file loading
         loadFileButton.setOnAction(event -> handleLoadFileButtonAction());
 
+        updateValueButton.setOnAction(event -> handleUpdateValueButtonAction());
 
         sheetVersionSelector.setValue("Select Sheet Version");
         sheetVersionSelector.setOnAction(event -> centerController.renderGridPane());
@@ -72,8 +71,13 @@ public class TopController {
         updateValueButton.disableProperty().bind(sharedModel.isSheetLoaded().not());
         sheetVersionSelector.disableProperty().bind(sharedModel.isSheetLoaded().not());
         // Bind the update button to file selection
-        updateValueButton.disableProperty().bind(sharedModel.isSheetLoaded().not());
+        updateValueButton.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> !sharedModel.isSheetLoaded().get() || selectedCellIDLabel.getText().equals("Selected Cell ID"),
+                sharedModel.isSheetLoaded(), selectedCellIDLabel.textProperty()
+        ));        
         sheetVersionSelector.disableProperty().bind(sharedModel.isSheetLoaded().not());
+        
+        
     }
 
     @FXML
@@ -172,6 +176,21 @@ public class TopController {
     }
 
     @FXML
+    private void handleUpdateValueButtonAction() {
+        try {
+            String cellID = selectedCellIDLabel.getText();
+            int row = Integer.parseInt(cellID.substring(1));
+            int col = cellID.charAt(0) - 'A' + 1;
+            centerController.getEngine().setCell(row, col, cellOriginalValueTextArea.getText());
+            centerController.renderGridPane();
+        }
+        catch (Exception e) {
+            showErrorPopup("Failed to update value", e.getMessage());
+        }
+
+    }
+
+    @FXML
     private void showErrorPopup(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -207,4 +226,19 @@ public class TopController {
         }
     }
 
+    public void updateSelectedCell(String cellID, String originalValue, int version) {
+        selectedCellIDLabel.setText(cellID);
+        cellOriginalValueTextArea.setText(originalValue);
+        lastUpdateCellVersionLabel.setText(String.valueOf(version));
+    }
+
+    public void setSelectedCellIDLabel(Label selectedCellIDLabel) {
+        this.selectedCellIDLabel = selectedCellIDLabel;
+    }
+
+    public void resetLabelsAndText() {
+        selectedCellIDLabel.setText("Selected Cell ID");
+        cellOriginalValueTextArea.setText("Original Value");
+        lastUpdateCellVersionLabel.setText("Last Update Cell Version");
+    }
 }

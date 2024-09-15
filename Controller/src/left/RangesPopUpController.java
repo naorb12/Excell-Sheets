@@ -1,11 +1,15 @@
 package left;
 
+import center.CenterController;
+import exception.InvalidXMLFormatException;
+import exception.OutOfBoundsException;
+import immutable.objects.SheetDTO;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import sheet.coordinate.Coordinate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,15 +33,32 @@ public class RangesPopUpController {
     @FXML
     private TextArea rangeDetailsArea;
 
+    @FXML
+    private Button addRangeButton;
+
+    @FXML
+    private Button deleteRangeButton;
+
+    private CenterController centerController;
 
     // Stores ranges with their corresponding list of cells
-    private Map<String, List<String>> ranges = new HashMap<>();
     private ObservableList<String> rangeNames = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
         // Set up the ComboBox with the list of range names
         rangeComboBox.setItems(rangeNames);
+        addRangeButton.disableProperty().bind(
+                Bindings.createBooleanBinding(
+                        () -> rangeNameField.getText().trim().isEmpty() ||
+                                fromCellField.getText().trim().isEmpty() ||
+                                toCellField.getText().trim().isEmpty(),
+                        rangeNameField.textProperty(),
+                        fromCellField.textProperty(),
+                        toCellField.textProperty()
+                )
+        );
+        deleteRangeButton.disableProperty().bind(Bindings.isNull(rangeComboBox.valueProperty()));
     }
 
     // Handle adding a new range
@@ -49,21 +70,38 @@ public class RangesPopUpController {
 
         // Validate inputs (You can add more validation as necessary)
         if (rangeName.isEmpty() || fromCell.isEmpty() || toCell.isEmpty()) {
-            rangeDetailsArea.setText("Please fill all fields.");
+            showErrorPopup("Error","Please fill all fields.");
             return;
         }
 
-        // Generate list of cells in the range
-        List<String> cellsInRange = generateRange(fromCell, toCell);
+        if(rangeNames.contains(rangeName)) {
+            showErrorPopup("Error","Range already exists.");
+            return;
+        }
 
-        // Add the range to the map and update the ComboBox
-        ranges.put(rangeName, cellsInRange);
-        rangeNames.add(rangeName);
+        try {
+            // Generate list of cells in the range
+            List<Coordinate> cellsInRange = centerController.getEngine().createNewRange(rangeName, fromCell, toCell);
 
-        // Clear the input fields
-        rangeNameField.clear();
-        fromCellField.clear();
-        toCellField.clear();
+            // Add the range to the map and update the ComboBox
+            rangeNames.add(rangeName);
+
+            // Clear the input fields
+            rangeNameField.clear();
+            fromCellField.clear();
+            toCellField.clear();
+        }
+        catch(OutOfBoundsException e)
+        {
+            showErrorPopup("Out of Bounds",e.getMessage());
+        }
+        catch (InvalidXMLFormatException e)
+        {
+            showErrorPopup("Invalid", e.getMessage());
+        }
+        catch (Exception e){
+            showErrorPopup("Error", e.getMessage());
+        }
     }
 
     // Handle selecting a range from the ComboBox
@@ -71,8 +109,8 @@ public class RangesPopUpController {
     private void handleSelectRange() {
         String selectedRange = rangeComboBox.getValue();
         if (selectedRange != null) {
-            List<String> cellsInRange = ranges.get(selectedRange);
-            rangeDetailsArea.setText(String.join(", ", cellsInRange));
+            List<Coordinate> cellsInRange = centerController.getEngine().getSheet().getRange(selectedRange);
+            rangeDetailsArea.setText(formatCoordinates(cellsInRange));  // Display formatted coordinates
         }
     }
 
@@ -81,20 +119,44 @@ public class RangesPopUpController {
     private void handleDeleteRange() {
         String selectedRange = rangeComboBox.getValue();
         if (selectedRange != null) {
-            ranges.remove(selectedRange);
+            centerController.getEngine().removeRange(selectedRange);
             rangeNames.remove(selectedRange);
             rangeDetailsArea.clear();
         }
     }
 
-    // Generate a list of cells between the 'from' and 'to' cells
-    private List<String> generateRange(String fromCell, String toCell) {
-        // For simplicity, assume we work within a single column or row range
-        // You may add more complex logic for cross-column and cross-row ranges
-        List<String> cells = new ArrayList<>();
-        cells.add(fromCell);  // Add the "from" cell
-        cells.add(toCell);    // Add the "to" cell
-        // You can add logic here to generate the full range
-        return cells;
+    public void setCenterController(CenterController centerController) {
+        this.centerController = centerController;
+        populateSelectors();
+    }
+
+    // Populate the ComboBox with ranges from the sheet
+    private void populateSelectors() {
+        if (centerController != null) {
+            SheetDTO sheet = centerController.getEngine().getSheet();
+
+            // Clear and populate the ComboBox with range names
+            rangeNames.clear();
+            rangeNames.addAll(centerController.getEngine().getSheet().getAllRanges().keySet());
+        }
+    }
+
+    // Helper method to format a list of coordinates as a string for display
+    private String formatCoordinates(List<Coordinate> coordinates) {
+        StringBuilder formatted = new StringBuilder();
+        for (Coordinate coord : coordinates) {
+            formatted.append(coord.toString()).append(", ");
+        }
+        return formatted.length() > 0 ? formatted.substring(0, formatted.length() - 2) : "";  // Remove the last comma
+    }
+
+    @FXML
+    private void showErrorPopup(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();  // Shows the alert and waits for the user to close it
     }
 }
