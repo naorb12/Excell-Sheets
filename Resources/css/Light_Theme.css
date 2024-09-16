@@ -42,6 +42,7 @@
 
 /* Labels Styling (no rounded corners) */
 .label {
+    -fx-font-family: Arial;
     -fx-font-size: 16px;
     -fx-text-fill: #555555;
 }
@@ -102,7 +103,8 @@
 }
 
 /* Apply hover effect for the cells in the grid */
-.scroll-pane .cell:hover {
+.scroll-pane .cell:hover,
+.selected-cell {
     -fx-background-color: rgba(204, 255, 207, 0.73);  /* Light blue background on hover */
     -fx-border-color: #000000;  /* Border color for hovered cell */
     -fx-border-width: 1px;

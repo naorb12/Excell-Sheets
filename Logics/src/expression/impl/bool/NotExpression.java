@@ -1,4 +1,4 @@
-package expression.impl;
+package expression.impl.bool;
 
 import expression.api.Expression;
 import immutable.objects.SheetDTO;
@@ -18,13 +18,13 @@ public class NotExpression implements Expression {
     public EffectiveValue eval(SheetDTO sheet) {
         EffectiveValue effectiveValue = expression.eval(sheet);
 
-        if (effectiveValue.getCellType().equals(CellType.BOOLEAN) && effectiveValue.getValue() != "!UNDEFINED!")
+        if (effectiveValue.getCellType().equals(CellType.BOOLEAN) && effectiveValue.getValue() != "UNKNOWN")
         {
-            boolean notResult = !effectiveValue.extractValueWithExpectation(boolean.class);
+            boolean notResult = !effectiveValue.extractValueWithExpectation(Boolean.class);
             return new EffectiveValueImpl(CellType.BOOLEAN, notResult);
         }
         else {
-            return new EffectiveValueImpl(CellType.BOOLEAN, "!UNDEFINED!");
+            return new EffectiveValueImpl(CellType.BOOLEAN, "UNKNOWN");
         }
     }
 

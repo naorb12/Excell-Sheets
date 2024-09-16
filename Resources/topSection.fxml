@@ -4,12 +4,14 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="120.0" prefWidth="800.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="top.TopController">
+<VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="top.TopController">
     <children>
-        <HBox alignment="CENTER" prefHeight="50.0" prefWidth="800.0" spacing="10">
+        <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="800.0" spacing="10">
             <children>
-                <ComboBox fx:id="styleSelector" prefWidth="150.0" />
-                <Label fx:id="titleLabel" text="Shticell - Spreadsheet Application" textAlignment="CENTER" />
+            <ComboBox fx:id="styleSelector" prefHeight="25.0" prefWidth="132.0" />
+                <Region prefHeight="50.0" prefWidth="10.0" HBox.hgrow="SOMETIMES" />
+                <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefWidth="500.0" text="Shticell - Spreadsheet Application" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
+                <Region prefHeight="50.0" prefWidth="142" HBox.hgrow="SOMETIMES" />
             </children>
         </HBox>
         <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0" spacing="10">

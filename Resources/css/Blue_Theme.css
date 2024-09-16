@@ -42,8 +42,8 @@
 
 /* Labels Styling (no rounded corners) */
 .label {
-    -fx-font-family: "Nueva Std Cond";
-    -fx-font-size: 23px;
+    -fx-font-family: "Berlin Sans FB";
+    -fx-font-size: 17px;
     -fx-text-fill: #01579b;  /* Dark blue for labels */
 }
 

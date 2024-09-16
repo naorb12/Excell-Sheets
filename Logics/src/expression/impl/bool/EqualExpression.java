@@ -1,4 +1,4 @@
-package expression.impl;
+package expression.impl.bool;
 
 import expression.api.Expression;
 import immutable.objects.SheetDTO;
@@ -21,9 +21,11 @@ public class EqualExpression implements Expression {
         EffectiveValue leftVal = left.eval(sheet);
         EffectiveValue rightVal = right.eval(sheet);
 
-        // Check if are the same type
-        if((!left.getFunctionResultType().equals(right.getFunctionResultType().getClass())) &&
-                (!right.getFunctionResultType().equals(CellType.UNKNOWN)) && (!left.getFunctionResultType().equals(CellType.UNKNOWN)))
+        CellType leftCellType = leftVal.getCellType();
+        CellType rightCellType = rightVal.getCellType();
+        // Check if are not the same type
+        if(!(leftCellType.equals(rightCellType)) &&
+                (!(rightCellType.equals(CellType.UNKNOWN)) || !(rightCellType.equals(CellType.UNKNOWN))))
         {
             return new EffectiveValueImpl(CellType.BOOLEAN, false);
         }

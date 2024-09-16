@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.*;
 import javafx.geometry.Insets;
+import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 import top.TopController;
 
@@ -100,6 +101,9 @@ public class CenterController {
                 }
                 else {
                     cellLabel = new Label(cell.getEffectiveValue().getValue() != null ? cell.getEffectiveValue().getValue().toString() : "");
+                    if(cell.getEffectiveValue().getCellType().equals(CellType.BOOLEAN)){
+                        cellLabel.setText(cellLabel.getText().toUpperCase());
+                    }
                 }
                 // Apply the 'cell' style class
                 cellLabel.getStyleClass().add("cell");
@@ -145,7 +149,7 @@ public class CenterController {
     }
 
     // Method to clear previous highlights
-    private void clearHighlights() {
+    public void clearHighlights() {
         for (Node node : spreadsheetGridPane.getChildren()) {
             if (node instanceof Label) {
                 ((Label) node).getStyleClass().removeAll("selected-cell", "depends-on-cell", "influencing-on-cell");  // Clear all highlight styles

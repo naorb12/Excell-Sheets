@@ -60,14 +60,15 @@ public class MainController {
             // Assuming there is a background pane that covers the whole window
             mainBorderPane.setOnMouseClicked(event -> {
                 if (centerController.getSelectedCellLabel() != null) {
-                    centerController.getSelectedCellLabel().setBackground(null);  // Reset background when clicking outside the grid
-                    for(Label influenceing : centerController.getInfluencingOnCellLabel()){
-                        influenceing.setBackground(null);
-                    }
-                    for(Label depends : centerController.getDependsOnCellLabel()){
-                        depends.setBackground(null);
-                    }
-                    topController.resetLabelsAndText();
+                    centerController.clearHighlights();
+//                    centerController.getSelectedCellLabel().setBackground(null);  // Reset background when clicking outside the grid
+//                    for(Label influenceing : centerController.getInfluencingOnCellLabel()){
+//                        influenceing.setBackground(null);
+//                    }
+//                    for(Label depends : centerController.getDependsOnCellLabel()){
+//                        depends.setBackground(null);
+//                    }
+                      topController.resetLabelsAndText();
                 }
             });
 

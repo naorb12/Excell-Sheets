@@ -1,10 +1,18 @@
 package expression.parser;
 
 import engine.Engine;
-import exception.OutOfBoundsException;
 import expression.api.Expression;
-import expression.impl.*;
+import expression.impl.bool.*;
+import expression.impl.numeric.*;
+import expression.impl.numeric.ranges.AverageExpression;
+import expression.impl.numeric.ranges.SumExpression;
+import expression.impl.string.ConcatExpression;
+import expression.impl.string.SubExpression;
+import expression.impl.string.UpperCaseExpression;
+import expression.impl.system.IdentityExpression;
+import expression.impl.system.RefExpression;
 import immutable.objects.CellDTO;
+import sheet.api.Sheet;
 import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 
@@ -345,7 +353,104 @@ public enum FunctionParser {
 
             return new LessExpression(left, right);
         }
+    },
+    OR{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for OR function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if ( (!left.getFunctionResultType().equals(CellType.BOOLEAN) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+                    (!right.getFunctionResultType().equals(CellType.BOOLEAN) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+                throw new IllegalArgumentException("Invalid argument types for OR function. Expected BOOLEAN, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new OrExpression(left, right);
+        }
+    },
+    AND{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("Invalid number of arguments for AND function. Expected 2, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression left = parseExpression(arguments.get(0).trim());
+            Expression right = parseExpression(arguments.get(1).trim());
+
+            // more validations on the expected argument types
+            if ( (!left.getFunctionResultType().equals(CellType.BOOLEAN) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+                    (!right.getFunctionResultType().equals(CellType.BOOLEAN) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+                throw new IllegalArgumentException("Invalid argument types for AND function. Expected BOOLEAN, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+            }
+
+            return new AndExpression(left, right);
+        }
+    },
+    IF{
+        @Override
+        public Expression parse(List<String> arguments) {
+            // validations of the function. it should have exactly two arguments
+            if (arguments.size() != 3) {
+                throw new IllegalArgumentException("Invalid number of arguments for IF function. Expected 3, but got " + arguments.size());
+            }
+            // structure is good. parse arguments
+            Expression condition = parseExpression(arguments.get(0).trim());
+            Expression thenExp = parseExpression(arguments.get(1).trim());
+            Expression elseExp = parseExpression(arguments.get(2).trim());
+
+            if((!condition.getFunctionResultType().equals(CellType.BOOLEAN) && !condition.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+            !(thenExp.getFunctionResultType().equals(elseExp.getFunctionResultType()))){
+                throw new IllegalArgumentException("Invalid argument types for IF function. Expected a BOOLEAN as a condition and two results from smae type, but got " + condition.getFunctionResultType()  + " and " + thenExp.getFunctionResultType() + " and " + elseExp.getFunctionResultType());
+            }
+
+            return new IfExpression(condition, thenExp, elseExp);
+        }
+    },
+    SUM {
+        @Override
+        public Expression parse(List<String> arguments) {
+            if (arguments.size() != 1) {
+                throw new IllegalArgumentException("SUM function expects 1 argument (the range name), but got " + arguments.size());
+            }
+            // Pass the range name to the SumExpression
+            String rangeName = arguments.get(0).trim();
+            return new SumExpression(rangeName);
+        }
+    },
+    AVERAGE {
+        @Override
+        public Expression parse(List<String> arguments) {
+            if (arguments.size() != 1) {
+                throw new IllegalArgumentException("AVERAGE function expects 1 argument (the range name), but got " + arguments.size());
+            }
+            // Pass the range name to the AverageExpression
+            String rangeName = arguments.get(0).trim();
+            return new AverageExpression(rangeName);
+        }
+    },
+    PERCENT {
+        @Override
+        public Expression parse(List<String> arguments) {
+            if (arguments.size() != 2) {
+                throw new IllegalArgumentException("PERCENT function expects 2 arguments (part, whole), but got " + arguments.size());
+            }
+
+            // Parse the part and whole arguments
+            Expression part = parseExpression(arguments.get(0).trim());
+            Expression whole = parseExpression(arguments.get(1).trim());
+
+            return new PercentExpression(part, whole);
+        }
     };
+
 
     abstract public Expression parse(List<String> arguments) ;
 
