@@ -18,7 +18,7 @@ import java.util.Set;
 public class CellImpl<T> implements Cell, CellDTO, Serializable {
 
 
-    private final Coordinate coordinate;
+    private Coordinate coordinate;
 
     private String originalValue;
     private EffectiveValue effectiveValue;
@@ -42,6 +42,15 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
         this.effectiveValue = new EffectiveValueImpl();
         this.dependsOn = new HashSet<Coordinate>();
         this.influencingOn = new HashSet<Coordinate>();
+    }
+
+    public CellImpl(Cell other) {
+        this.coordinate = new Coordinate(other.getCoordinate().getRow(), other.getCoordinate().getColumn()); // Assuming Coordinate is immutable or copied safely
+        this.originalValue = new String(other.getOriginalValue()); // Deep copy of string
+        this.effectiveValue = new EffectiveValueImpl((EffectiveValueImpl) other.getEffectiveValue()); // Assuming EffectiveValueImpl is deep-copyable
+        this.versionNumber = other.getVersion();
+        this.dependsOn = new HashSet<>(other.getDependsOn()); // Deep copy of set
+        this.influencingOn = new HashSet<>(other.getInfluencingOn()); // Deep copy of set
     }
 
     @Override
@@ -121,6 +130,11 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
     @Override
     public void incrementVersionNumber() {
         this.versionNumber++;
+    }
+
+    @Override
+    public void setCoordinate(Coordinate newCoordinate) {
+        this.coordinate = new Coordinate(coordinate.getRow(), coordinate.getColumn());
     }
 
 

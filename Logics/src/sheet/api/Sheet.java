@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface Sheet {
 
 
+    Map<Coordinate, Cell> copyActiveCells();
 
     Map<Coordinate, Cell> getMapOfCells();
 
@@ -55,5 +56,7 @@ public interface Sheet {
 
     // Check if a specific coordinate is part of any range
     boolean isCoordinateInRange(Coordinate coord);
+
+    SheetDTO sortSheet(List<Coordinate> range, List<Integer> columnsToSortBy);
 
 }

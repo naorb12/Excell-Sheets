@@ -159,18 +159,37 @@ public class Engine implements Serializable {
         Coordinate fromCoord = parseCoordinate(fromCell.trim().toUpperCase());
         Coordinate toCoord = parseCoordinate(toCell.trim().toUpperCase());
 
-        // Check that boundaries are within the sheet bounds
+        // Step 1: Check that boundaries are within the sheet bounds
         isWithinBounds(fromCoord.getRow(), fromCoord.getColumn());
         isWithinBounds(toCoord.getRow(), toCoord.getColumn());
 
-        // Collect all coordinates for the range
-        for (int row = fromCoord.getRow(); row <= toCoord.getRow(); row++) {
+        // Step 2: Determine valid range type (left to right, top to bottom, or top left to bottom right)
+        // Left to right (same row, from left column to right column)
+        if (fromCoord.getRow() == toCoord.getRow() && fromCoord.getColumn() <= toCoord.getColumn()) {
             for (int col = fromCoord.getColumn(); col <= toCoord.getColumn(); col++) {
-                Coordinate coord = new Coordinate(row, col);
-                rangeCoordinates.add(coord);
+                rangeCoordinates.add(new Coordinate(fromCoord.getRow(), col));
             }
         }
-        return List.copyOf(rangeCoordinates);
+        // Top to bottom (same column, from top row to bottom row)
+        else if (fromCoord.getColumn() == toCoord.getColumn() && fromCoord.getRow() <= toCoord.getRow()) {
+            for (int row = fromCoord.getRow(); row <= toCoord.getRow(); row++) {
+                rangeCoordinates.add(new Coordinate(row, fromCoord.getColumn()));
+            }
+        }
+        // Top left to bottom right (diagonal range: row and column both increase)
+        else if (fromCoord.getRow() <= toCoord.getRow() && fromCoord.getColumn() <= toCoord.getColumn()) {
+            for (int row = fromCoord.getRow(); row <= toCoord.getRow(); row++) {
+                for (int col = fromCoord.getColumn(); col <= toCoord.getColumn(); col++) {
+                    rangeCoordinates.add(new Coordinate(row, col));
+                }
+            }
+        }
+        // Step 3: Invalid case (right to left, bottom to top, etc.)
+        else {
+            throw new InvalidXMLFormatException("Invalid range boundaries: " + fromCell + " to " + toCell);
+        }
+
+        return List.copyOf(rangeCoordinates);  // Return an immutable list of the coordinates
     }
 
     /**
@@ -237,7 +256,6 @@ public class Engine implements Serializable {
             );
             deepCopiedCells.put(entry.getKey(), cell);
         }
-        snapshot.setCells(deepCopiedCells);
 
         // Create a deep copy of the ranges map
         Map<String, List<Coordinate>> deepCopiedRanges = new HashMap<>();
@@ -247,6 +265,8 @@ public class Engine implements Serializable {
             deepCopiedRanges.put(entry.getKey(), copiedCoordinates);
         }
         snapshot.setRanges(deepCopiedRanges);  // Ensure SheetImpl has a setRanges method for setting ranges
+
+        snapshot.setCells(deepCopiedCells);
 
         return (SheetDTO) snapshot;
     }
@@ -310,5 +330,20 @@ public class Engine implements Serializable {
 
     public void removeRange(String rangeToRemove){
         sheet.removeRange(rangeToRemove);
+    }
+
+    public SheetDTO sortSheet(String fromCell, String toCell, List<Integer> columnsToSortBy) throws InvalidXMLFormatException {
+        try {
+            List<Coordinate> range = validateRange(fromCell, toCell);
+            SheetDTO sortedSheet = sheet.sortSheet(range, columnsToSortBy);
+
+            return sortedSheet;
+        }
+        catch (InvalidXMLFormatException e) {
+            throw new InvalidXMLFormatException(e.getMessage());
+        }
+        catch (RuntimeException e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

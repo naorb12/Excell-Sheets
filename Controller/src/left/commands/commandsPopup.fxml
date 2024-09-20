@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox styleClass="popUp" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="left.commands.CommandsPopupController">
+    <children>
+        <!--Left Part (design)-->
+        <VBox alignment="CENTER" maxWidth="-Infinity" prefHeight="525.0" prefWidth="278.0" spacing="10">
+            <children>
+        <!-- Adjust Column Width -->
+        <Label text="Adjust Column Width" />
+        <ComboBox fx:id="columnWidthSelector" maxWidth="-Infinity" prefHeight="25.0" prefWidth="168.0" promptText="Select Column" />
+        <Spinner fx:id="columnWidthSpinner" editable="true" maxWidth="100" />
+
+        <!-- Adjust Row Height -->
+        <Label text="Adjust Row Height" />
+        <ComboBox fx:id="rowSelector" maxWidth="-Infinity" prefHeight="25.0" prefWidth="119.0" promptText="Select Row" />
+        <Spinner fx:id="rowHeightSpinner" editable="true" maxWidth="100" />
+
+        <!-- Text Alignment -->
+        <Label text="Text Alignment" />
+        <ComboBox fx:id="columnAlignmentSelector" maxWidth="-Infinity" prefHeight="25.0" prefWidth="158.0" promptText="Select Column" />
+        <ComboBox fx:id="alignmentSelector" maxWidth="-Infinity" onAction="#handleUpdateTextAlignment" prefHeight="25.0" prefWidth="147.0" promptText="Select Alignment">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="Left" />
+                    <String fx:value="Center" />
+                    <String fx:value="Right" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+        <!-- Change Background Color -->
+        <Label text="Change Cell Background Color" />
+        <ComboBox fx:id="cellSelector" maxWidth="-Infinity" prefHeight="25.0" prefWidth="161.0" promptText="Select Cell (e.g., A1)" />
+        <ColorPicker fx:id="colorPicker" maxHeight="-Infinity" maxWidth="-Infinity" onAction="#handleUpdateBackgroundColor" prefHeight="48.0" prefWidth="135.0" />
+        <Button fx:id="colorUndoButton" onAction="#handleUndoBackgroundColor" text="Undo Background Color" />
+            </children>
+        </VBox>
+
+
+        <!--Right Part (sorting and filtering)-->
+        <VBox alignment="CENTER" maxWidth="-Infinity" prefHeight="525.0" prefWidth="278.0" spacing="10" HBox.hgrow="ALWAYS">
+         <children>
+            <!--Sorting-->
+            <Label text="Sort" textAlignment="CENTER" />
+            <GridPane alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10">
+                      <Label text="From Cell:" />
+                      <TextField fx:id="fromCellFieldSortField" prefHeight="25.0" prefWidth="59.0" promptText="e.g., A1" />
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="30.0" prefWidth="175.0" spacing="10" GridPane.columnIndex="1">
+                      <Label text="To Cell:" />
+                      <TextField fx:id="toCellFieldSortField" prefHeight="25.0" prefWidth="59.0" promptText="e.g., B5" />
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10" GridPane.rowIndex="1">
+                     <children>
+                        <Label text="Sort By" />
+                         <ListView fx:id="checkboxListView" prefHeight="25.0" prefWidth="59.0" />
+                     </children>
+                  </HBox>
+               </children>
+            </GridPane>
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Button fx:id="applySortButton" mnemonicParsing="false" text="Apply" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                     <children>
+                        <Button fx:id="revertSortButton" mnemonicParsing="false" text="Revert" />
+                     </children>
+                  </HBox>
+               </children>
+            </GridPane>
+
+             <!--Filtering-->
+             <Label text="Filter">
+               <VBox.margin>
+                  <Insets top="60.0" />
+               </VBox.margin>
+            </Label>
+             <GridPane alignment="TOP_CENTER">
+                 <columnConstraints>
+                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                 </columnConstraints>
+                 <rowConstraints>
+                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                 </rowConstraints>
+                 <children>
+                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10">
+                         <Label text="From Cell:" />
+                         <TextField fx:id="fromCellField" prefHeight="25.0" prefWidth="59.0" promptText="e.g., A1" />
+                     </HBox>
+                     <HBox alignment="CENTER" prefHeight="30.0" prefWidth="175.0" spacing="10" GridPane.columnIndex="1">
+                         <Label text="To Cell:" />
+                         <TextField fx:id="toCellField" prefHeight="25.0" prefWidth="66.0" promptText="e.g., B5" />
+                     </HBox>
+                 </children>
+             </GridPane>
+             <Button mnemonicParsing="false" text="Apply" />
+         </children>
+        </VBox>
+    </children>
+</HBox>

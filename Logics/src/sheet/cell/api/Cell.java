@@ -22,4 +22,6 @@ public interface Cell {
     void setDependsOn(Set<Coordinate> dependencies);
 
     void incrementVersionNumber();
+
+    void setCoordinate(Coordinate newCoordinate);
 }

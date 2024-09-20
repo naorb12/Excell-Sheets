@@ -66,6 +66,10 @@ public class TopController {
         this.sharedModel = sharedModel;
     }
 
+    public void enableCellOriginalValueTExtField() {
+        cellOriginalValueTextArea.setEditable(true);
+    }
+
     public void setupBindings() {
         // Bind buttons to the sheetLoaded property from sharedModel
         updateValueButton.disableProperty().bind(sharedModel.isSheetLoaded().not());
@@ -93,13 +97,13 @@ public class TopController {
         // Apply the selected stylesheet
         switch (selectedStyle) {
             case "Dark Theme":
-                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Resources/css/Dark_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Dark_Theme.css").toExternalForm());
                 break;
             case "Blue Theme":
-                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Resources/css/Blue_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Blue_Theme.css").toExternalForm());
                 break;
             default:
-                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Resources/css/Light_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Light_Theme.css").toExternalForm());
                 break;
         }
     }
@@ -229,7 +233,7 @@ public class TopController {
     public void updateSelectedCell(String cellID, String originalValue, int version) {
         selectedCellIDLabel.setText(cellID);
         cellOriginalValueTextArea.setText(originalValue);
-        lastUpdateCellVersionLabel.setText(String.valueOf(version));
+        lastUpdateCellVersionLabel.setText("Cell Version: " + String.valueOf(version));
     }
 
     public void setSelectedCellIDLabel(Label selectedCellIDLabel) {
@@ -239,6 +243,7 @@ public class TopController {
     public void resetLabelsAndText() {
         selectedCellIDLabel.setText("Selected Cell ID");
         cellOriginalValueTextArea.setText("Original Value");
+        cellOriginalValueTextArea.setEditable(false);
         lastUpdateCellVersionLabel.setText("Last Update Cell Version");
     }
 }

@@ -1,61 +1,66 @@
-package left;
+package left.commands;
 
+import exception.InvalidXMLFormatException;
+import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.StringProperty;
+import javafx.scene.control.CheckBox;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.ColorPicker;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import center.CenterController;
 import immutable.objects.SheetDTO;
-import center.CenterController;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import main.MainController;
-import main.SharedModel;
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import sheet.coordinate.Coordinate;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CommandsPopupController {
 
+    private CenterController centerController;
+
+    // Design
     @FXML
     private ComboBox<String> columnWidthSelector;
-
     @FXML
     private ComboBox<String> columnAlignmentSelector;
-
     @FXML
     private Spinner<Double> columnWidthSpinner;
-
     @FXML
     private ComboBox<String> rowSelector;
     @FXML
     private Spinner<Double> rowHeightSpinner;
-
     @FXML
     private ComboBox<String> alignmentSelector;
-
     @FXML
     private ComboBox<String> cellSelector;
     @FXML
     private ColorPicker colorPicker;
-
     @FXML
     private Button colorUndoButton;
 
-    private CenterController centerController;
+    // Sorting and Filtering
+    @FXML
+    private TextField fromCellFieldSortField;
+    @FXML
+    private TextField toCellFieldSortField;
+    @FXML
+    private ListView<CheckBox> checkboxListView;
+    @FXML
+    private Button applySortButton;
+    @FXML
+    private Button revertSortButton;
+    private List<Integer> columnsToSortBy;
+
 
     public void initialize() {
+        initializeDesign();
+       initializeSortAndFilter();
+    }
+
+    private void initializeDesign() {
         // Initialize the spinners with default value factories
         columnWidthSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(1, 500, 100, 1));
         columnWidthSpinner.getValueFactory().setValue(null);  // Clear the initial value
@@ -85,8 +90,89 @@ public class CommandsPopupController {
 
     }
 
+    private void initializeSortAndFilter() {
+        // Initially disable the applySortButton
+        applySortButton.setDisable(true);
+        revertSortButton.setDisable(true);
+        // Add listeners to the text fields to track their state
+        fromCellFieldSortField.textProperty().addListener((observable, oldValue, newValue) -> updateApplyButtonState());
+        toCellFieldSortField.textProperty().addListener((observable, oldValue, newValue) -> updateApplyButtonState());
 
-    public void populateSelectors() {
+        // Add listeners to the checkboxes when they are populated
+        ChangeListener<String> listener = (observable, oldValue, newValue) -> {
+            if (!fromCellFieldSortField.getText().trim().isEmpty() && !toCellFieldSortField.getText().trim().isEmpty()) {
+                String fromCell = fromCellFieldSortField.getText().trim();
+                String toCell = toCellFieldSortField.getText().trim();
+                try {
+                    populateCheckboxListView(fromCell, toCell);
+                } catch (InvalidXMLFormatException e) {
+                    //showErrorPopup("Invalid Range", e.getMessage());
+                }
+            }
+        };
+        fromCellFieldSortField.textProperty().addListener(listener);
+        toCellFieldSortField.textProperty().addListener(listener);
+
+        applySortButton.setOnAction(event -> {
+            try {
+                handleApplySort();
+            } catch (InvalidXMLFormatException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        revertSortButton.setOnAction(event -> handleRemoveSort());
+    }
+
+    // Method to update the apply button's state based on text fields and checkbox selections
+    private void updateApplyButtonState() {
+        boolean areTextFieldsFilled = !fromCellFieldSortField.getText().trim().isEmpty() && !toCellFieldSortField.getText().trim().isEmpty();
+        boolean isAnyCheckboxSelected = checkboxListView.getItems().stream().anyMatch(CheckBox::isSelected);
+
+        // Enable or disable the applySortButton based on the conditions
+        applySortButton.setDisable(!(areTextFieldsFilled && isAnyCheckboxSelected));
+    }
+
+    private void populateCheckboxListView(String fromCell, String toCell) throws InvalidXMLFormatException {
+        // Clear previous items
+        checkboxListView.getItems().clear();
+        columnsToSortBy = new ArrayList<>();  // Clear the columnsToSortBy list
+
+        List<Coordinate> range = centerController.getEngine().validateRange(fromCell, toCell);
+        Set<Integer> columnsSet = parseRangeToColumns(range);
+
+        for (Integer columnIndex : columnsSet) {
+            String columnName = getColumnName(columnIndex - 1);
+            CheckBox checkBox = new CheckBox(columnName);
+
+            // Add listener to track the state of each checkbox and update columnsToSortBy list
+            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    // Checkbox is selected: add the column (in order) to columnsToSortBy
+                    columnsToSortBy.add(columnIndex);
+                } else {
+                    // Checkbox is deselected: remove the column from columnsToSortBy
+                    columnsToSortBy.remove(Integer.valueOf(columnIndex));
+                }
+                updateApplyButtonState();
+            });
+
+            // Add the CheckBox to the ListView
+            checkboxListView.getItems().add(checkBox);
+        }
+    }
+
+
+
+    private Set<Integer> parseRangeToColumns(List<Coordinate> range) {
+        Set<Integer> columnsToSortBy = new HashSet<>();
+        for (Coordinate coordinate : range) {
+            columnsToSortBy.add(coordinate.getColumn());
+        }
+        return columnsToSortBy;
+    }
+
+    private void populateSelectors() {
         if (centerController != null) {
             SheetDTO sheet = centerController.getEngine().getSheet();
             int columnCount = sheet.getColumnCount();
@@ -145,7 +231,7 @@ public class CommandsPopupController {
     private void updateColumnWidthSpinner() {
         String selectedColumn = columnWidthSelector.getValue();
         if (selectedColumn != null) {
-            int colIndex = getColumnIndex(selectedColumn);
+            int colIndex = getColumnIndex(selectedColumn) + 1;
             if (colIndex >= 0) {
                 // Get the current column width from the GridPane
                 double currentWidth = centerController.getColumnWidth(colIndex);
@@ -160,7 +246,7 @@ public class CommandsPopupController {
     private void updateRowHeightSpinner() {
         String selectedRow = rowSelector.getValue();
         if (selectedRow != null) {
-            int rowIndex = Integer.parseInt(selectedRow) - 1;
+            int rowIndex = Integer.parseInt(selectedRow);
             if (rowIndex >= 0) {
                 // Get the current row height from the GridPane
                 double currentHeight = centerController.getRowHeight(rowIndex);
@@ -245,9 +331,43 @@ public class CommandsPopupController {
         centerController.undoCellBackgroundColor(selectedCell);  // Undo background color in CenterController
     }
 
+
+
+    @FXML
+    private void handleApplySort() throws InvalidXMLFormatException {
+        try {
+            if (!columnsToSortBy.isEmpty()) {
+                // Perform sorting based on the selected columns
+                centerController.applySorting(fromCellFieldSortField.getText().trim(), toCellFieldSortField.getText().trim(), columnsToSortBy);
+                revertSortButton.setDisable(false);
+            }
+        } catch (InvalidXMLFormatException e) {
+            showErrorPopup("Range not valid", e.getMessage());
+        } catch (RuntimeException e) {
+            showErrorPopup("Runtime Error", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleRemoveSort() {
+        centerController.removeSorting();
+    }
+
+
     // Set the reference to CenterController and populate selectors after it's set
     public void setCenterController(CenterController centerController) {
         this.centerController = centerController;
         populateSelectors();  // Populate the selectors after setting centerController
     }
+
+    @FXML
+    private void showErrorPopup(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();  // Shows the alert and waits for the user to close it
+    }
+
 }

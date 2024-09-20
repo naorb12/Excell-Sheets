@@ -1,11 +1,14 @@
 package sheet.impl;
 
 import engine.Engine;
+import expression.api.Expression;
+import expression.api.RangeBasedExpression;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
+import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
@@ -33,6 +36,15 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         ranges = new HashMap<String, List<Coordinate>>();
     }
 
+    @Override
+    public Map<Coordinate, Cell> copyActiveCells(){
+        Map<Coordinate, Cell> copiedActiveCells = new HashMap<Coordinate,Cell>();
+        for(Map.Entry<Coordinate, Cell> entry : activeCells.entrySet()){
+            Cell copiedCell = new CellImpl<>(entry.getValue());
+            copiedActiveCells.put(copiedCell.getCoordinate(), copiedCell);
+        }
+        return copiedActiveCells;
+    }
 
     @Override
     public Map<Coordinate, Cell> getMapOfCells() {
@@ -106,34 +118,21 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
             Coordinate coordinate = entry.getKey();
             Cell cell = entry.getValue();
 
-            // Parse and set the dependencies (dependsOn) for the current cell
-            Set<Coordinate> dependsOnSet = FunctionParser.parseDependsOn(cell.getOriginalValue());
-            cell.setDependsOn(dependsOnSet);
+            // Step 3: Update the dependencies for the current cell
+            updateDependencies(coordinate, cell, cell.getDependsOn(), cell.getOriginalValue());
 
             // Check for dependency loops starting from the current cell
             if (hasDependencyLoop(coordinate, coordinate, new HashSet<>())) {
                 throw new IllegalStateException("Dependency loop detected at " + coordinate.toString());
             }
-
-            // Update the influencingOn set for each dependent cell
-            for (Coordinate dependsOnCoordinate : dependsOnSet) {
-                Cell dependentCell = activeCells.get(dependsOnCoordinate);
-                if (dependentCell != null) {
-                    dependentCell.getInfluencingOn().add(coordinate);
-                }
-                else {
-                    dependentCell = new CellImpl(dependsOnCoordinate.getRow(), dependsOnCoordinate.getColumn(), "");
-                    activeCells.put(dependsOnCoordinate, dependentCell);
-                    dependentCell.getInfluencingOn().add(coordinate); // Now safely add the influence
-                }
-            }
         }
 
-        // Step 3: Loop through each cell again to calculate its effective value
+        // Step 4: Loop through each cell again to calculate its effective value
         for (Cell cell : activeCells.values()) {
             cell.calculateEffectiveValue(this);
         }
     }
+
 
     private boolean hasDependencyLoop(Coordinate start, Coordinate current, Set<Coordinate> visited) {
         if (visited.contains(current)) {
@@ -215,34 +214,84 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     }
 
     private void updateDependencies(Coordinate coordinate, Cell cell, Set<Coordinate> oldDependsOnSet, String input) {
-        // Remove the cell's influence from old dependencies
+        // Step 1: Remove old dependencies
+        removeOldDependencies(coordinate, oldDependsOnSet);
+
+        // Step 2: Parse and add new dependencies
+        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+
+        if (isRangeFunction(input)) {
+            addRangeDependencies(coordinate, input, newDependsOnSet);  // Handle ranges
+        } else {
+            addNewDependencies(coordinate, newDependsOnSet);  // Handle regular references
+        }
+
+        // Step 3: Set the new dependencies for the cell
+        cell.setDependsOn(newDependsOnSet);
+    }
+
+    private void removeOldDependencies(Coordinate coordinate, Set<Coordinate> oldDependsOnSet) {
         if (oldDependsOnSet != null) {
             for (Coordinate dependsOnCoordinate : oldDependsOnSet) {
                 Cell dependentCell = activeCells.get(dependsOnCoordinate);
                 if (dependentCell != null) {
                     dependentCell.getInfluencingOn().remove(coordinate);
                 } else {
-                    // If the cell is null but there's a reference, create it
-                    dependentCell = new CellImpl(dependsOnCoordinate.getRow(), dependsOnCoordinate.getColumn(), "");
-                    activeCells.put(dependsOnCoordinate, dependentCell);
-                    dependentCell.getInfluencingOn().remove(coordinate); // Now safely remove the influence
+                    // Create and remove the influence if the cell was null
+                    dependentCell = createEmptyCell(dependsOnCoordinate);
+                    dependentCell.getInfluencingOn().remove(coordinate);
                 }
             }
         }
+    }
 
-        // Update the influencingOn sets for the new dependencies
-        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+    private void addNewDependencies(Coordinate coordinate, Set<Coordinate> newDependsOnSet) {
         for (Coordinate dependsOnCoordinate : newDependsOnSet) {
             Cell dependentCell = activeCells.get(dependsOnCoordinate);
             if (dependentCell != null) {
                 dependentCell.getInfluencingOn().add(coordinate);
             } else {
-                // If the cell is null but there's a reference, create it
-                dependentCell = new CellImpl(dependsOnCoordinate.getRow(), dependsOnCoordinate.getColumn(), "");
-                activeCells.put(dependsOnCoordinate, dependentCell);
-                dependentCell.getInfluencingOn().add(coordinate); // Now safely add the influence
+                // Create and add the influence if the cell was null
+                dependentCell = createEmptyCell(dependsOnCoordinate);
+                dependentCell.getInfluencingOn().add(coordinate);
             }
         }
+    }
+
+    private void addRangeDependencies(Coordinate coordinate, String input, Set<Coordinate> newDependsOnSet) {
+        String rangeName = extractRangeNameFromInput(input);
+        List<Coordinate> rangeCoordinates = getRange(rangeName);  // Use the getRange method
+
+        if (rangeCoordinates == null || rangeCoordinates.isEmpty()) {
+            throw new IllegalArgumentException("Invalid range: " + rangeName);
+        }
+
+        newDependsOnSet.addAll(rangeCoordinates);  // Add all coordinates from the range to the dependsOn set
+        for (Coordinate dependsOnCoordinate : rangeCoordinates) {
+            Cell dependentCell = activeCells.get(dependsOnCoordinate);
+            if (dependentCell != null) {
+                dependentCell.getInfluencingOn().add(coordinate);
+            } else {
+                // Create and add the influence if the cell was null
+                dependentCell = createEmptyCell(dependsOnCoordinate);
+                dependentCell.getInfluencingOn().add(coordinate);
+            }
+        }
+    }
+
+    private boolean isRangeFunction(String input) {
+        return input.toUpperCase().contains("SUM") || input.toUpperCase().contains("AVG");  // Add more as needed
+    }
+
+    private String extractRangeNameFromInput(String input) {
+        String[] parts = input.substring(1, input.length() - 1).split(",");
+        return parts.length > 1 ? parts[1].trim() : null;
+    }
+
+    private Cell createEmptyCell(Coordinate coordinate) {
+        Cell newCell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), "");
+        activeCells.put(coordinate, newCell);
+        return newCell;
     }
 
     private void recalculateEffectiveValue(Coordinate coordinate, Cell cell) {
@@ -281,10 +330,49 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         ranges = new HashMap<>(newRanges);
     }
 
-    // Delete a range by name
     @Override
     public void removeRange(String rangeName) {
+        // Step 1: Check if any cell uses the range
+        boolean isRangeUsed = isRangeInUse(rangeName);
+
+        // Step 2: If the range is being used, throw an exception to prevent deletion
+        if (isRangeUsed) {
+            throw new IllegalArgumentException("Cannot remove range " + rangeName + " because it is being used by one or more cells.");
+        }
+
+        // Step 3: If the range is not in use, proceed to remove it
         ranges.remove(rangeName);  // Remove the range from the map
+    }
+
+    // Helper method to check if a range is being used by any cell in the sheet
+    private boolean isRangeInUse(String rangeName) {
+        // Loop through all the active cells
+        for (Cell cell : activeCells.values()) {
+            String originalValue = cell.getOriginalValue();
+            if (originalValue != null) {
+                // Check if the range name is directly referenced in the original value
+                if (originalValue.contains(rangeName)) {
+                    // Parse the expression to ensure it's a valid reference
+                    Expression expression = FunctionParser.parseExpression(originalValue);
+
+                    // If the expression involves the range, return true
+                    if (expressionUsesRange(expression, rangeName)) {
+                        return true;  // The range is being used in this cell
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    // Helper method to check if the expression involves a specific range
+    private boolean expressionUsesRange(Expression expression, String rangeName) {
+        // If the expression is a function that directly uses the range, return true
+        if (expression instanceof RangeBasedExpression) {
+            return true;
+        }
+        // Add more checks if necessary to ensure all range-based expressions are detected
+        return false;
     }
 
     // Retrieve a specific range by name
@@ -308,6 +396,114 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
             }
         }
         return false;  // Coordinate not found in any range
+    }
+
+    @Override
+    public SheetDTO sortSheet(List<Coordinate> range, List<Integer> columnsToSortBy) {
+        List<List<Cell>> rowsToSort = prepareRowsToSort(range);  // Extract rows from range
+
+        filterNonNumericColumns(range, columnsToSortBy);  // Filter out non-numeric columns
+
+        Comparator<List<Cell>> comparator = createComparator(columnsToSortBy);  // Create a comparator for sorting
+
+        rowsToSort.sort(comparator);  // Sort the rows
+
+        return createSortedSheet(rowsToSort);  // Create and return the sorted sheet
+    }
+
+    // Helper method to prepare rows to sort based on the range
+    private List<List<Cell>> prepareRowsToSort(List<Coordinate> range) {
+        List<List<Cell>> rowsToSort = new ArrayList<>();
+
+        for (int row = 1; row <= rowsCount; row++) {
+            List<Cell> rowCells = new ArrayList<>();
+            for (Coordinate coord : range) {
+                if (coord.getRow() == row) {
+                    Cell cell = activeCells.get(coord);
+                    rowCells.add(cell);
+                }
+            }
+            rowsToSort.add(rowCells);
+        }
+
+        return rowsToSort;
+    }
+
+    // Helper method to filter out non-numeric columns from the sort list
+    private void filterNonNumericColumns(List<Coordinate> range, List<Integer> columnsToSortBy) {
+        List<Integer> columnsToRemove = new ArrayList<>();
+
+        for (int column : columnsToSortBy) {
+            for (Coordinate coord : range) {
+                if(coord.getColumn() == column) {
+                    Cell cell = activeCells.get(coord);
+                    if(cell != null && cell.getEffectiveValue().getCellType() != CellType.NUMERIC) {
+                        columnsToRemove.add(column);
+                    }
+                }
+            }
+        }
+
+        // Now remove the collected columns after the iteration
+        columnsToSortBy.removeAll(columnsToRemove);
+
+        if (columnsToSortBy.isEmpty()) {
+            throw new RuntimeException("Please provide at least one numeric column");
+        }
+    }
+
+    // Helper method to create a comparator for sorting rows
+    private Comparator<List<Cell>> createComparator(List<Integer> columnsToSortBy) {
+        return (row1, row2) -> {
+            for (Integer col : columnsToSortBy) {
+                Cell cell1 = row1.stream().filter(c -> c != null && c.getCoordinate().getColumn() == col).findFirst().orElse(null);
+                Cell cell2 = row2.stream().filter(c -> c != null && c.getCoordinate().getColumn() == col).findFirst().orElse(null);
+
+                if (cell1 != null && cell2 != null) {
+                    Double value1 = cell1.getEffectiveValue().extractValueWithExpectation(Double.class);
+                    Double value2 = cell2.getEffectiveValue().extractValueWithExpectation(Double.class);
+
+                    int compareResult = value1.compareTo(value2);
+                    if (compareResult != 0) {
+                        return compareResult;
+                    }
+                }
+            }
+            return 0;  // Maintain original order if comparisons are equal
+        };
+    }
+
+    // Helper method to create and return the sorted sheet
+    private SheetDTO createSortedSheet(List<List<Cell>> rowsToSort) {
+        SheetImpl sortedSheet = new SheetImpl(rowsCount, columnsCount, rowsHeight, columnsWidth);
+        Map<Coordinate, Cell> mutableMap = copyActiveCells();
+
+        for (int rowIndex = 0; rowIndex < rowsToSort.size(); rowIndex++) {
+            List<Cell> sortedRow = rowsToSort.get(rowIndex);
+
+            for (Cell cell : sortedRow) {
+                if (cell != null) {
+                    Coordinate newCoordinate = new Coordinate(rowIndex + 1, cell.getCoordinate().getColumn());  // Adjust row and column
+                    cell.setCoordinate(newCoordinate);  // Set new coordinate
+                    mutableMap.put(newCoordinate, new CellImpl(cell));  // Deep copy the cell
+                }
+            }
+        }
+
+        sortedSheet.setCellsForSortAndFilter(mutableMap);
+        return (SheetDTO) sortedSheet;
+    }
+
+
+    private void setCellsForSortAndFilter(Map<Coordinate, Cell> cells) {
+        // Step 1: Initialize activeCells with a copy of the provided cells map
+        this.activeCells = new HashMap<>(cells);
+
+        // Step 2: Loop through each cell to update dependencies and check for loops
+        for (Map.Entry<Coordinate, Cell> entry : activeCells.entrySet()) {
+            Coordinate coordinate = entry.getKey();
+            Cell cell = entry.getValue();
+        }
     }
 
 }

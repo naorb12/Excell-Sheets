@@ -11,12 +11,18 @@ import java.net.URL;
 
 public class JavaFXShticellApplication extends Application {
 
-    private static final String SPREAD_SHEET_FXML_PATH = "/Resources/borderpane.fxml";
+    private static final String SPREAD_SHEET_FXML_PATH = "/Controller/src/main/borderpane.fxml";
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(SPREAD_SHEET_FXML_PATH));
+        URL fxmlLocation = getClass().getResource(SPREAD_SHEET_FXML_PATH);
+        if (fxmlLocation == null) {
+            System.out.println("FXML file not found at: " + SPREAD_SHEET_FXML_PATH);
+        } else {
+            System.out.println("FXML file found at: " + fxmlLocation);
+        }
         Parent root = fxmlLoader.load();
 
         MainController mainController = fxmlLoader.getController();
@@ -26,7 +32,7 @@ public class JavaFXShticellApplication extends Application {
 
         primaryStage.setTitle("Shticell");
         primaryStage.setScene(scene);
-        primaryStage.getScene().getStylesheets().add(getClass().getResource("/Resources/css/Light_Theme.css").toExternalForm());
+        primaryStage.getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Light_Theme.css").toExternalForm());
         primaryStage.show();
     }
 

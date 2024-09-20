@@ -1,6 +1,7 @@
 package center;
 
 import engine.Engine;
+import exception.InvalidXMLFormatException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -16,6 +17,7 @@ import top.TopController;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -38,6 +40,13 @@ public class CenterController {
 
     private Engine engine;
 
+    // Track original states of the grid for undoing sort
+    private Map<Coordinate, CellDTO> originalCells;
+    private Set<Label> originalStyledLabels;
+
+    // Track sorted state
+    private boolean isSorted = false;
+
     private SimpleBooleanProperty isFileSelected = new SimpleBooleanProperty(false);
 
     public void initialize() {
@@ -46,12 +55,16 @@ public class CenterController {
 
     @FXML
     public void renderGridPane() {
+        // Render the grid from the engine's sheet data
+        renderGrid(engine.getSheet());
+    }
+
+    private void renderGrid(SheetDTO sheet) {
         isFileSelected.set(true);
         spreadsheetGridPane.getChildren().clear();
         spreadsheetGridPane.getColumnConstraints().clear();
         spreadsheetGridPane.getRowConstraints().clear();
 
-        SheetDTO sheet = engine.getSheet();
         if (sheet == null) {
             System.out.println("No sheet data available to render.");
             return;
@@ -94,7 +107,7 @@ public class CenterController {
         // Add cells with click event
         for (int row = 1; row <= rows; row++) {
             for (int col = 1; col <= cols; col++) {
-                CellDTO cell = engine.getCell(row, col);
+                CellDTO cell = sheet.getCellDTO(row, col);
                 Label cellLabel;
                 if (cell == null) {
                     cellLabel = new Label("");
@@ -129,6 +142,7 @@ public class CenterController {
                     }
                     cellLabel.getStyleClass().add("selected-cell");
                     selectedCellLabel = cellLabel;  // Store the currently selected cell
+                    topController.enableCellOriginalValueTExtField();
 
                     // Highlight dependsOn and influencingOn cells
                     if (cell != null) {
@@ -240,6 +254,65 @@ public class CenterController {
         }
     }
 
+    public void applySorting(String fromCell, String toCell, List<Integer> columnsToSortBy) throws InvalidXMLFormatException {
+        try {
+            SheetDTO sortedSheet = engine.sortSheet(fromCell, toCell, columnsToSortBy);
+            // render gridpane by sortedSheet.
+            renderGrid(sortedSheet);
+
+            isSorted = true; // Mark that sorting has been applied
+        }
+        catch (InvalidXMLFormatException e) {
+            throw new InvalidXMLFormatException(e.getMessage());
+        }
+        catch (RuntimeException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+    // Save original state of the grid (before sorting)
+    private void saveOriginalState() {
+        // Save the original cell data and their styles
+        originalCells = engine.getSheet().getMapOfCellsDTO(); // Assuming the engine provides this method
+
+        // Save styled labels (e.g., with colors)
+        originalStyledLabels = new HashSet<>();
+        for (Node node : spreadsheetGridPane.getChildren()) {
+            if (node instanceof Label && !((Label) node).getStyleClass().isEmpty()) {
+                originalStyledLabels.add((Label) node); // Save labels with custom styles
+            }
+        }
+    }
+
+    // Method to remove sorting and restore the original grid state
+    public void removeSorting() {
+        if (isSorted) {
+            // Re-render the original grid
+            renderGrid(engine.getSheet());
+
+            isSorted = false; // Mark that sorting has been removed
+        }
+    }
+
+    // Restore original cell styles (e.g., colors)
+    private void restoreOriginalStyles() {
+        // Clear any existing styles
+        for (Node node : spreadsheetGridPane.getChildren()) {
+            if (node instanceof Label) {
+                ((Label) node).getStyleClass().clear(); // Clear styles
+            }
+        }
+
+        // Re-apply original styles to the labels
+        for (Label styledLabel : originalStyledLabels) {
+            Label currentLabel = getNodeByRowColumnIndex(
+                    GridPane.getRowIndex(styledLabel), GridPane.getColumnIndex(styledLabel));
+
+            if (currentLabel != null) {
+                currentLabel.getStyleClass().addAll(styledLabel.getStyleClass());
+            }
+        }
+    }
+
     private int getColumnIndex(String columnLetter) {
         return columnLetter.toUpperCase().charAt(0) - 'A';
     }
@@ -295,5 +368,8 @@ public class CenterController {
         return influencingOnCellLabel;
     }
 
+    public void lock(){
+        topController.resetLabelsAndText();
+    }
 
 }

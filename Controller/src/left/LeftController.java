@@ -1,14 +1,15 @@
 package left;
 
+import javafx.stage.Modality;
 import center.CenterController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import main.MainController;
+import left.commands.CommandsPopupController;
+import left.ranges.RangesPopUpController;
 import main.SharedModel;
 
 import java.io.IOException;
@@ -19,6 +20,10 @@ public class LeftController {
     private Button commandsButton;
     @FXML
     private Button rangesButton;
+    @FXML
+    private Button sortButton;
+    @FXML
+    private Button filterButton;
 
     private CenterController centerController;  // Reference to CenterController
 
@@ -50,7 +55,7 @@ public class LeftController {
         try {
             commandsPopUp = new Stage();
             // Load the commands pop-up FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Resources/commandsPopup.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/commands/commandsPopup.fxml"));
             Parent root = loader.load();
 
             // Get the CommandsPopupController from the FXML
@@ -63,6 +68,9 @@ public class LeftController {
             commandsPopUp.setTitle("Commands");
             commandsPopUp.setScene(new Scene(root));
             commandsPopUp.initOwner(commandsButton.getScene().getWindow());  // Set the parent window
+
+            // Set the stage modality to WINDOW_MODAL to lock interaction with the parent window
+            commandsPopUp.initModality(Modality.WINDOW_MODAL);
 
             // Allow the window to be resizable and movable
             commandsPopUp.setResizable(true);
@@ -79,7 +87,7 @@ public class LeftController {
         try {
             rangesPopUp = new Stage();
             // Load the commands pop-up FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Resources/rangesPopup.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/ranges/rangesPopup.fxml"));
             Parent root = loader.load();
 
             // Get the CommandsPopupController from the FXML
@@ -92,6 +100,9 @@ public class LeftController {
             rangesPopUp.setTitle("Commands");
             rangesPopUp.setScene(new Scene(root));
             rangesPopUp.initOwner(commandsButton.getScene().getWindow());  // Set the parent window
+
+            // Set the stage modality to WINDOW_MODAL to lock interaction with the parent window
+            commandsPopUp.initModality(Modality.WINDOW_MODAL);
 
             // Allow the window to be resizable and movable
             rangesPopUp.setResizable(true);

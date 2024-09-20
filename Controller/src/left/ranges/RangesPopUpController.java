@@ -1,4 +1,4 @@
-package left;
+package left.ranges;
 
 import center.CenterController;
 import exception.InvalidXMLFormatException;
@@ -11,10 +11,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import sheet.coordinate.Coordinate;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class RangesPopUpController {
 
@@ -118,10 +115,21 @@ public class RangesPopUpController {
     @FXML
     private void handleDeleteRange() {
         String selectedRange = rangeComboBox.getValue();
-        if (selectedRange != null) {
-            centerController.getEngine().removeRange(selectedRange);
-            rangeNames.remove(selectedRange);
-            rangeDetailsArea.clear();
+        try {
+            if (selectedRange != null) {
+                centerController.getEngine().removeRange(selectedRange);
+                rangeNames.remove(selectedRange);
+                rangeDetailsArea.clear();
+
+                // Trigger selection of the next available range after deletion
+                if (!rangeNames.isEmpty()) {
+                    handleSelectRange();  // Trigger the select range event to display the new selection
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            showErrorPopup("Error Removing Range", e.getMessage());
+        } catch (Exception e) {
+            showErrorPopup("Error", e.getMessage());
         }
     }
 
