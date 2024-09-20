@@ -5,14 +5,13 @@ import expression.api.Expression;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
-import sheet.api.Sheet;
+import javafx.scene.paint.Color;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class CellImpl<T> implements Cell, CellDTO, Serializable {
@@ -26,6 +25,9 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
 
     private Set<Coordinate> dependsOn;
     private Set<Coordinate> influencingOn;
+
+    private javafx.scene.paint.Color backgroundColor = null;
+    private javafx.scene.paint.Color foregroundColor = null;
 
     public CellImpl(int row, int column, String originalValue, EffectiveValue effectiveValue, int version, Set<Coordinate> dependsOn, Set<Coordinate> influencingOn) {
         this.coordinate = new Coordinate(row, column);
@@ -51,6 +53,28 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
         this.versionNumber = other.getVersion();
         this.dependsOn = new HashSet<>(other.getDependsOn()); // Deep copy of set
         this.influencingOn = new HashSet<>(other.getInfluencingOn()); // Deep copy of set
+        this.backgroundColor = other.getBackgroundColor();
+        this.foregroundColor = other.getForegroundColor();
+    }
+
+    @Override
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    @Override
+    public Color getForegroundColor() {
+        return foregroundColor;
+    }
+
+    @Override
+    public void setBackgroundColor(javafx.scene.paint.Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    @Override
+    public void setForegroundColor(Color foregroundColor) {
+        this.foregroundColor = foregroundColor;
     }
 
     @Override

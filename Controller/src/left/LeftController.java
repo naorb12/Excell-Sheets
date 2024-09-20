@@ -45,8 +45,13 @@ public class LeftController {
 
     public void setupBindings() {
         // Bind buttons to the sheetLoaded property from sharedModel
-        commandsButton.disableProperty().bind(sharedModel.sheetLoadedProperty().not());
-        rangesButton.disableProperty().bind(sharedModel.sheetLoadedProperty().not());
+        commandsButton.disableProperty().bind(
+                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+        );
+
+        rangesButton.disableProperty().bind(
+                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+        );
         // Additional bindings
     }
 
@@ -77,6 +82,7 @@ public class LeftController {
             commandsPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
             // Show the pop-up
             commandsPopUp.show();
+            commandsPopupController.handleRemoveSort();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,7 +108,7 @@ public class LeftController {
             rangesPopUp.initOwner(commandsButton.getScene().getWindow());  // Set the parent window
 
             // Set the stage modality to WINDOW_MODAL to lock interaction with the parent window
-            commandsPopUp.initModality(Modality.WINDOW_MODAL);
+            rangesPopUp.initModality(Modality.WINDOW_MODAL);
 
             // Allow the window to be resizable and movable
             rangesPopUp.setResizable(true);
@@ -128,5 +134,15 @@ public class LeftController {
 
     public Stage getCommandsPopUp() {
         return commandsPopUp;
+    }
+
+    public void setDisabled() {
+        commandsButton.setMouseTransparent(true);
+        rangesButton.setMouseTransparent(true);
+    }
+
+    public void setEnabled() {
+        commandsButton.setMouseTransparent(false);
+        rangesButton.setMouseTransparent(false);
     }
 }

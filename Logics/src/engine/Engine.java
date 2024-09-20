@@ -5,6 +5,7 @@ import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
+import javafx.scene.paint.Color;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -92,13 +93,14 @@ public class Engine implements Serializable {
 
             sheet.setCells(cells);
 
+            versionHistory = new HashMap<>();
+
             // Step 5: Save the current version of the sheet (snapshot)
             saveCurrentVersion(createSnapshot());
 
         } catch (OutOfBoundsException e) {
             throw new RuntimeException(e.getMessage());
         } catch (Exception e) {
-            //rollbackToPreviousVersion();
             throw new RuntimeException(e.getMessage());
         }
     }
@@ -345,5 +347,9 @@ public class Engine implements Serializable {
         catch (RuntimeException e){
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public void setBackgroundColor(int row, int col, Color color) {
+        sheet.setBackgroundColor(row, col, color);
     }
 }

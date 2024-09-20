@@ -1,13 +1,12 @@
 package sheet.api;
 
-import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
+import javafx.scene.paint.Color;
 import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface Sheet {
 
@@ -59,4 +58,5 @@ public interface Sheet {
 
     SheetDTO sortSheet(List<Coordinate> range, List<Integer> columnsToSortBy);
 
+    void setBackgroundColor(int row, int col, javafx.scene.paint.Color color);
 }

@@ -6,14 +6,17 @@ import expression.api.RangeBasedExpression;
 import expression.parser.FunctionParser;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
+import javafx.scene.paint.Color;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.List;
 
 public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
@@ -408,7 +411,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
         rowsToSort.sort(comparator);  // Sort the rows
 
-        return createSortedSheet(rowsToSort);  // Create and return the sorted sheet
+        return createSortedSheet(rowsToSort, range);  // Create and return the sorted sheet
     }
 
     // Helper method to prepare rows to sort based on the range
@@ -473,19 +476,26 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         };
     }
 
-    // Helper method to create and return the sorted sheet
-    private SheetDTO createSortedSheet(List<List<Cell>> rowsToSort) {
+    private SheetDTO createSortedSheet(List<List<Cell>> rowsToSort, List<Coordinate> range) {
         SheetImpl sortedSheet = new SheetImpl(rowsCount, columnsCount, rowsHeight, columnsWidth);
         Map<Coordinate, Cell> mutableMap = copyActiveCells();
 
         for (int rowIndex = 0; rowIndex < rowsToSort.size(); rowIndex++) {
             List<Cell> sortedRow = rowsToSort.get(rowIndex);
 
-            for (Cell cell : sortedRow) {
+            for (int colIndex = 0; colIndex < sortedRow.size(); colIndex++) {
+                Cell cell = sortedRow.get(colIndex);
+
                 if (cell != null) {
-                    Coordinate newCoordinate = new Coordinate(rowIndex + 1, cell.getCoordinate().getColumn());  // Adjust row and column
+                    // Calculate the new coordinate for the cell
+                    Coordinate newCoordinate = new Coordinate(rowIndex + 1, cell.getCoordinate().getColumn());
                     cell.setCoordinate(newCoordinate);  // Set new coordinate
                     mutableMap.put(newCoordinate, new CellImpl(cell));  // Deep copy the cell
+                } else {
+                    // Handle null cells
+                    int column = range.get(colIndex).getColumn();  // Get column from the original range
+                    Coordinate newCoordinate = new Coordinate(rowIndex + 1, column);
+                    mutableMap.put(newCoordinate, new CellImpl(newCoordinate.getRow(), newCoordinate.getColumn(), null));
                 }
             }
         }
@@ -493,6 +503,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         sortedSheet.setCellsForSortAndFilter(mutableMap);
         return (SheetDTO) sortedSheet;
     }
+
 
 
     private void setCellsForSortAndFilter(Map<Coordinate, Cell> cells) {
@@ -506,4 +517,8 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         }
     }
 
+    @Override
+    public void setBackgroundColor(int row, int col, Color color) {
+        activeCells.get(new Coordinate(row,col)).setBackgroundColor(color);
+    }
 }

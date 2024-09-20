@@ -1,9 +1,7 @@
 package left.commands;
 
 import exception.InvalidXMLFormatException;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.StringProperty;
 import javafx.scene.control.CheckBox;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -14,8 +12,6 @@ import immutable.objects.SheetDTO;
 import sheet.coordinate.Coordinate;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CommandsPopupController {
 
@@ -54,10 +50,25 @@ public class CommandsPopupController {
     private Button revertSortButton;
     private List<Integer> columnsToSortBy;
 
+    @FXML
+    private TextField fromCellFieldFilter;
+    @FXML
+    private TextField toCellFieldFilter;
+    @FXML
+    private ListView<CheckBox> checkboxListViewFilterColumns;
+    @FXML
+    private ListView<CheckBox> checkboxListViewFilterWords;
+    @FXML
+    private Button applyFilterButton;
+    @FXML
+    private Button revertFilterButton;
+    private List<Integer> columnsToFilterBy;
+
 
     public void initialize() {
         initializeDesign();
-       initializeSortAndFilter();
+        initializeSort();
+        initializeFilter();
     }
 
     private void initializeDesign() {
@@ -90,13 +101,13 @@ public class CommandsPopupController {
 
     }
 
-    private void initializeSortAndFilter() {
+    private void initializeSort() {
         // Initially disable the applySortButton
         applySortButton.setDisable(true);
         revertSortButton.setDisable(true);
         // Add listeners to the text fields to track their state
-        fromCellFieldSortField.textProperty().addListener((observable, oldValue, newValue) -> updateApplyButtonState());
-        toCellFieldSortField.textProperty().addListener((observable, oldValue, newValue) -> updateApplyButtonState());
+        fromCellFieldSortField.textProperty().addListener((observable, oldValue, newValue) -> updateApplySortButtonState());
+        toCellFieldSortField.textProperty().addListener((observable, oldValue, newValue) -> updateApplySortButtonState());
 
         // Add listeners to the checkboxes when they are populated
         ChangeListener<String> listener = (observable, oldValue, newValue) -> {
@@ -104,7 +115,13 @@ public class CommandsPopupController {
                 String fromCell = fromCellFieldSortField.getText().trim();
                 String toCell = toCellFieldSortField.getText().trim();
                 try {
-                    populateCheckboxListView(fromCell, toCell);
+                    populateCheckboxListView(fromCell, toCell, checkboxListView, ()->{
+                        try {
+                            updateApplySortButtonState();
+                        } catch (RuntimeException e) {
+                            //
+                        }
+                    });
                 } catch (InvalidXMLFormatException e) {
                     //showErrorPopup("Invalid Range", e.getMessage());
                 }
@@ -124,8 +141,38 @@ public class CommandsPopupController {
         revertSortButton.setOnAction(event -> handleRemoveSort());
     }
 
+    private void initializeFilter() {
+        // Initially disable the applySortButton
+        applyFilterButton.setDisable(true);
+        revertFilterButton.setDisable(true);
+        // Add listeners to the text fields to track their state
+        fromCellFieldFilter.textProperty().addListener((observable, oldValue, newValue) -> updateApplyFilterButtonState());
+        toCellFieldFilter.textProperty().addListener((observable, oldValue, newValue) -> updateApplyFilterButtonState());
+
+        // Add listeners to the checkboxes when they are populated
+        ChangeListener<String> listener = (observable, oldValue, newValue) -> {
+            if (!fromCellFieldFilter.getText().trim().isEmpty() && !toCellFieldFilter.getText().trim().isEmpty()) {
+                String fromCell = fromCellFieldFilter.getText().trim();
+                String toCell = toCellFieldFilter.getText().trim();
+                try {
+                    populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, ()->{populateCheckboxListViewFilterWords();});
+                } catch (InvalidXMLFormatException e) {
+                    //showErrorPopup("Invalid Range", e.getMessage());
+                }
+            }
+        };
+        fromCellFieldFilter.textProperty().addListener(listener);
+        toCellFieldFilter.textProperty().addListener(listener);
+
+        applyFilterButton.setOnAction(event -> {
+            handleApplyFilter();
+        });
+
+        revertFilterButton.setOnAction(event -> handleRemoveFilter());
+    }
+
     // Method to update the apply button's state based on text fields and checkbox selections
-    private void updateApplyButtonState() {
+    private void updateApplySortButtonState() {
         boolean areTextFieldsFilled = !fromCellFieldSortField.getText().trim().isEmpty() && !toCellFieldSortField.getText().trim().isEmpty();
         boolean isAnyCheckboxSelected = checkboxListView.getItems().stream().anyMatch(CheckBox::isSelected);
 
@@ -133,9 +180,22 @@ public class CommandsPopupController {
         applySortButton.setDisable(!(areTextFieldsFilled && isAnyCheckboxSelected));
     }
 
-    private void populateCheckboxListView(String fromCell, String toCell) throws InvalidXMLFormatException {
+    private void updateApplyFilterButtonState() {
+        boolean areTextFieldsFilled = !fromCellFieldFilter.getText().trim().isEmpty() && !toCellFieldFilter.getText().trim().isEmpty();
+        boolean isAnyColumnCheckboxSelected = checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected);
+        boolean isAnyWordCheckboxSelected = checkboxListViewFilterWords.getItems().stream().anyMatch(CheckBox::isSelected);
+
+        // Enable or disable the applySortButton based on the conditions
+        applyFilterButton.setDisable(!(areTextFieldsFilled && isAnyColumnCheckboxSelected && isAnyWordCheckboxSelected));
+    }
+
+    private void populateCheckboxListViewFilterWords(){
+        updateApplyFilterButtonState();
+    }
+
+    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView,  Runnable runnable) throws InvalidXMLFormatException {
         // Clear previous items
-        checkboxListView.getItems().clear();
+        listView.getItems().clear();
         columnsToSortBy = new ArrayList<>();  // Clear the columnsToSortBy list
 
         List<Coordinate> range = centerController.getEngine().validateRange(fromCell, toCell);
@@ -154,11 +214,12 @@ public class CommandsPopupController {
                     // Checkbox is deselected: remove the column from columnsToSortBy
                     columnsToSortBy.remove(Integer.valueOf(columnIndex));
                 }
-                updateApplyButtonState();
+
+                runnable.run();
             });
 
             // Add the CheckBox to the ListView
-            checkboxListView.getItems().add(checkBox);
+            listView.getItems().add(checkBox);
         }
     }
 
@@ -325,10 +386,10 @@ public class CommandsPopupController {
 
     // Method to undo the background color of a cell
     @FXML
-    private void handleUndoBackgroundColor() {
+    private void handleUndoColor() {
         String selectedCell = cellSelector.getValue();
 
-        centerController.undoCellBackgroundColor(selectedCell);  // Undo background color in CenterController
+        centerController.undoCellColor(selectedCell);  // Undo background color in CenterController
     }
 
 
@@ -349,10 +410,18 @@ public class CommandsPopupController {
     }
 
     @FXML
-    private void handleRemoveSort() {
+    public void handleRemoveSort() {
         centerController.removeSorting();
     }
 
+
+    @FXML
+    private void handleRemoveFilter() {
+    }
+
+    @FXML
+    private void handleApplyFilter() {
+    }
 
     // Set the reference to CenterController and populate selectors after it's set
     public void setCenterController(CenterController centerController) {

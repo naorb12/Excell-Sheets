@@ -37,7 +37,7 @@
         <Label text="Change Cell Background Color" />
         <ComboBox fx:id="cellSelector" maxWidth="-Infinity" prefHeight="25.0" prefWidth="161.0" promptText="Select Cell (e.g., A1)" />
         <ColorPicker fx:id="colorPicker" maxHeight="-Infinity" maxWidth="-Infinity" onAction="#handleUpdateBackgroundColor" prefHeight="48.0" prefWidth="135.0" />
-        <Button fx:id="colorUndoButton" onAction="#handleUndoBackgroundColor" text="Undo Background Color" />
+        <Button fx:id="colorUndoButton" onAction="#handleUndoColor" text="Undo Background Color" />
             </children>
         </VBox>
 
@@ -109,19 +109,63 @@
                  </columnConstraints>
                  <rowConstraints>
                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                  </rowConstraints>
                  <children>
                      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10">
                          <Label text="From Cell:" />
-                         <TextField fx:id="fromCellField" prefHeight="25.0" prefWidth="59.0" promptText="e.g., A1" />
+                         <TextField fx:id="fromCellFieldFilter" prefHeight="25.0" prefWidth="59.0" promptText="e.g., A1" />
                      </HBox>
                      <HBox alignment="CENTER" prefHeight="30.0" prefWidth="175.0" spacing="10" GridPane.columnIndex="1">
                          <Label text="To Cell:" />
-                         <TextField fx:id="toCellField" prefHeight="25.0" prefWidth="66.0" promptText="e.g., B5" />
+                         <TextField fx:id="toCellFieldFilter" prefHeight="25.0" prefWidth="66.0" promptText="e.g., B5" />
                      </HBox>
-                 </children>
+                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10" GridPane.rowIndex="1">
+                         <children>
+                             <Label text="Columns: " />
+                             <ListView fx:id="checkboxListViewFilterColumns" prefHeight="25.0" prefWidth="59.0" />
+                         </children>
+                     </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
+                     <children>
+                        <Label text="Filter By ">
+                           <HBox.margin>
+                              <Insets right="10.0" />
+                           </HBox.margin>
+                        </Label>
+                        <ListView fx:id="checkboxListViewFilterWords" prefHeight="41.0" prefWidth="57.0">
+                           <HBox.margin>
+                              <Insets />
+                           </HBox.margin>
+                        </ListView>
+                     </children>
+                     <GridPane.margin>
+                        <Insets top="5.0" />
+                     </GridPane.margin>
+                  </HBox>                 </children>
              </GridPane>
-             <Button mnemonicParsing="false" text="Apply" />
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                         <Button fx:id="applyFilterButton" mnemonicParsing="false" text="Apply" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                     <children>
+                        <Button fx:id="revertFilterButton" mnemonicParsing="false" text="Revert" />
+                     </children>
+                  </HBox>
+               </children>
+            </GridPane>
          </children>
         </VBox>
     </children>

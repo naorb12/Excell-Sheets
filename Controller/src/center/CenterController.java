@@ -59,7 +59,7 @@ public class CenterController {
         renderGrid(engine.getSheet());
     }
 
-    private void renderGrid(SheetDTO sheet) {
+    public void renderGrid(SheetDTO sheet) {
         isFileSelected.set(true);
         spreadsheetGridPane.getChildren().clear();
         spreadsheetGridPane.getColumnConstraints().clear();
@@ -117,7 +117,15 @@ public class CenterController {
                     if(cell.getEffectiveValue().getCellType().equals(CellType.BOOLEAN)){
                         cellLabel.setText(cellLabel.getText().toUpperCase());
                     }
+                    if(cell.getBackgroundColor() != null){
+                        cellLabel.setBackground(new Background(new BackgroundFill(cell.getBackgroundColor(), CornerRadii.EMPTY, new Insets(0))));
+                    }
+                    if(cell.getForegroundColor() != null){
+                        cellLabel.setTextFill(cell.getForegroundColor());
+                    }
                 }
+
+
                 // Apply the 'cell' style class
                 cellLabel.getStyleClass().add("cell");
 
@@ -242,15 +250,18 @@ public class CenterController {
         if (label != null) {
             label.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, new Insets(0))));
         }
+
+        engine.setBackgroundColor(row, col, color);
     }
 
-    public void undoCellBackgroundColor(String cell) {
+    public void undoCellColor(String cell) {
         int row = Integer.parseInt(cell.substring(1));  // Extract row number
         int col = getColumnIndex(cell.substring(0, 1)) + 1;  // Extract column letter
 
         Label label = (Label) getNodeByRowColumnIndex(row, col);
         if (label != null) {
             label.setBackground(null);  // Reset the background color
+            label.setStyle("");
         }
     }
 
@@ -372,4 +383,11 @@ public class CenterController {
         topController.resetLabelsAndText();
     }
 
+    public void setDisabled() {
+        spreadsheetGridPane.setMouseTransparent(true);
+    }
+
+    public void setEnabled() {
+        spreadsheetGridPane.setMouseTransparent(false);
+    }
 }

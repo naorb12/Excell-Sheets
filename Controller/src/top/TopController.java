@@ -7,6 +7,7 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
+import left.LeftController;
 import main.SharedModel;
 import xml.generated.STLSheet;
 import xml.handler.XMLSheetLoader;
@@ -38,6 +39,8 @@ public class TopController {
 
     private CenterController centerController; // For communication with the center grid
 
+    private LeftController leftController;
+
     private SharedModel sharedModel = new SharedModel();
 
     public void initialize() {
@@ -57,7 +60,7 @@ public class TopController {
         updateValueButton.setOnAction(event -> handleUpdateValueButtonAction());
 
         sheetVersionSelector.setValue("Select Sheet Version");
-        sheetVersionSelector.setOnAction(event -> centerController.renderGridPane());
+        sheetVersionSelector.setOnAction(event -> handleSheetVersionSelected());
 
     }
 
@@ -186,12 +189,37 @@ public class TopController {
             int row = Integer.parseInt(cellID.substring(1));
             int col = cellID.charAt(0) - 'A' + 1;
             centerController.getEngine().setCell(row, col, cellOriginalValueTextArea.getText());
+            populateVersionSelector();
             centerController.renderGridPane();
         }
         catch (Exception e) {
             showErrorPopup("Failed to update value", e.getMessage());
         }
 
+    }
+
+    @FXML
+    private void handleSheetVersionSelected() {
+        if (sheetVersionSelector != null && sheetVersionSelector.getValue() != null) {
+            String selectedValue = sheetVersionSelector.getValue();
+
+            if (!selectedValue.equals("Select Sheet Version")) {
+                if (selectedValue.equals(sheetVersionSelector.getItems().get(sheetVersionSelector.getItems().size() - 1))) {
+                    centerController.renderGridPane();
+                    centerController.setEnabled();
+                    sharedModel.setLatestVersionSelected(true);
+                    //leftController.setEnabled();
+                } else {
+                    String versionNumber = selectedValue.replaceAll("\\D+", ""); // Removes all non-digit characters
+                    int version = Integer.parseInt(versionNumber);
+                    centerController.renderGrid(centerController.getEngine().peekVersion(version));
+                    resetLabelsAndText();
+                    sharedModel.setLatestVersionSelected(false);
+                    centerController.setDisabled();
+                    //leftController.setDisabled();
+                }
+            }
+        }
     }
 
     @FXML
@@ -210,6 +238,9 @@ public class TopController {
         this.centerController = centerController;
     }
 
+    public void setLeftController(LeftController leftController) {
+        this.leftController = leftController;
+    }
 
     @FXML
     public void populateVersionSelector() {
@@ -246,4 +277,5 @@ public class TopController {
         cellOriginalValueTextArea.setEditable(false);
         lastUpdateCellVersionLabel.setText("Last Update Cell Version");
     }
+
 }

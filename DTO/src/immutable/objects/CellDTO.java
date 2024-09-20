@@ -1,7 +1,7 @@
 package immutable.objects;
 
+import javafx.scene.paint.Color;
 import sheet.cell.api.EffectiveValue;
-import sheet.cell.api.Cell;
 import sheet.coordinate.Coordinate;
 
 import java.util.Set;
@@ -21,5 +21,9 @@ public interface CellDTO {
     Set<Coordinate> getInfluencingOn();
 
     void calculateEffectiveValue(SheetDTO sheet);
+
+    Color getBackgroundColor();
+
+    javafx.scene.paint.Color getForegroundColor();
 
 }

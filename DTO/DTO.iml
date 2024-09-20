@@ -9,5 +9,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="Logics" />
     <orderEntry type="module" module-name="UI" />
+    <orderEntry type="library" name="javafx-swt" level="project" />
   </component>
 </module>
