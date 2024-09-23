@@ -5,6 +5,7 @@ import sheet.coordinate.Coordinate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface SheetDTO {
 
@@ -30,4 +31,6 @@ public interface SheetDTO {
     Map<String, List<Coordinate>> getAllRanges();
 
     boolean isCoordinateInRange(Coordinate coord);
+
+    Set<String> getWordsFromColumnAndRange(String column, List<Coordinate> range);
 }

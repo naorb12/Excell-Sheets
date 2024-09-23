@@ -73,7 +73,7 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
     }
 
     @Override
-    public void setForegroundColor(Color foregroundColor) {
+    public void setForegroundColor(javafx.scene.paint.Color foregroundColor) {
         this.foregroundColor = foregroundColor;
     }
 

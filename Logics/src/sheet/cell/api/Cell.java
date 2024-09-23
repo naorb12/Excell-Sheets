@@ -2,10 +2,8 @@ package sheet.cell.api;
 
 import immutable.objects.SheetDTO;
 import javafx.scene.paint.Color;
-import sheet.api.Sheet;
 import sheet.coordinate.Coordinate;
 
-import java.awt.*;
 import java.util.Set;
 
 public interface Cell {
@@ -20,7 +18,7 @@ public interface Cell {
 
     void setBackgroundColor(javafx.scene.paint.Color backgroundColor);
 
-    void setForegroundColor(Color foregroundColor);
+    void setForegroundColor(javafx.scene.paint.Color foregroundColor);
 
     EffectiveValue getEffectiveValue();
     void calculateEffectiveValue(SheetDTO sheet);

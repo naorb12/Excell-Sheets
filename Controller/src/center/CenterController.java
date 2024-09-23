@@ -46,6 +46,8 @@ public class CenterController {
 
     // Track sorted state
     private boolean isSorted = false;
+    // Track filtered state
+    private boolean isFiltered = false;
 
     private SimpleBooleanProperty isFileSelected = new SimpleBooleanProperty(false);
 
@@ -119,9 +121,11 @@ public class CenterController {
                     }
                     if(cell.getBackgroundColor() != null){
                         cellLabel.setBackground(new Background(new BackgroundFill(cell.getBackgroundColor(), CornerRadii.EMPTY, new Insets(0))));
+                        System.out.println("Rendering " + cell.getCoordinate() + " background color: " + cell.getBackgroundColor());
                     }
                     if(cell.getForegroundColor() != null){
                         cellLabel.setTextFill(cell.getForegroundColor());
+                        System.out.println("Rendering " + cell.getCoordinate() + " textFill color: " + cell.getForegroundColor());
                     }
                 }
 
@@ -254,6 +258,18 @@ public class CenterController {
         engine.setBackgroundColor(row, col, color);
     }
 
+    public void updateCellTextColor(String cell, Color color) {
+        int row = Integer.parseInt(cell.substring(1));  // Extract row number (e.g., A1 -> row 1) and convert to index
+        int col = getColumnIndex(cell.substring(0, 1)) + 1;  // Extract column letter (e.g., A1 -> column A)
+
+        Label label = (Label) getNodeByRowColumnIndex(row, col);
+        if (label != null) {
+            label.setTextFill(color);
+        }
+
+        engine.setTextColor(row, col, color);
+    }
+
     public void undoCellColor(String cell) {
         int row = Integer.parseInt(cell.substring(1));  // Extract row number
         int col = getColumnIndex(cell.substring(0, 1)) + 1;  // Extract column letter
@@ -261,7 +277,8 @@ public class CenterController {
         Label label = (Label) getNodeByRowColumnIndex(row, col);
         if (label != null) {
             label.setBackground(null);  // Reset the background color
-            label.setStyle("");
+            label.getStyleClass().add("label");    // Reset the text color, allowing the theme to apply
+            engine.undoColor(row,col);
         }
     }
 
@@ -280,6 +297,7 @@ public class CenterController {
             throw new RuntimeException(e.getMessage());
         }
     }
+
     // Save original state of the grid (before sorting)
     private void saveOriginalState() {
         // Save the original cell data and their styles
@@ -302,6 +320,22 @@ public class CenterController {
 
             isSorted = false; // Mark that sorting has been removed
         }
+    }
+
+    public void removeFiltering() {
+        if (isFiltered) {
+            renderGrid(engine.getSheet());
+            isFiltered = false;
+        }
+    }
+
+
+    public void applyFiltering(String fromCell, String toCell, Set<String> selectedWordsSet ) throws InvalidXMLFormatException {
+        SheetDTO filteredSheet = engine.filterSheet(fromCell, toCell, selectedWordsSet );
+        // render gridpane by sortedSheet.
+        renderGrid(filteredSheet);
+
+        isFiltered = true;
     }
 
     // Restore original cell styles (e.g., colors)
@@ -390,4 +424,5 @@ public class CenterController {
     public void setEnabled() {
         spreadsheetGridPane.setMouseTransparent(false);
     }
+
 }

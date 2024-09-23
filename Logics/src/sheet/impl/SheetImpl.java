@@ -13,7 +13,6 @@ import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
-import java.awt.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.List;
@@ -504,6 +503,80 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         return (SheetDTO) sortedSheet;
     }
 
+    @Override
+    public SheetDTO filterSheet(List<Coordinate> range, Set<String> selectedWordsSet) {
+        // Create a new sheet for filtered results
+        SheetImpl filteredSheet = new SheetImpl(rowsCount, columnsCount, rowsHeight, columnsWidth);
+        Map<Coordinate, Cell> mutableMap = copyActiveCells();  // Copy all active cells as a base
+
+        int rangeStartRow = range.get(0).getRow();
+        int rangeEndRow = range.get(range.size() - 1).getRow();
+        int newRowIndex = rangeStartRow;  // Track the next available row for matching rows (starts from the range start)
+
+        // Iterate through the range and filter matching rows
+        for (int rowIndex = rangeStartRow; rowIndex <= rangeEndRow; rowIndex++) {
+            Set<String> wordsFoundInRow = new HashSet<>();  // Track the words found in the current row
+            List<Cell> rowCells = new ArrayList<>();  // Collect cells for the current row
+
+            // Iterate through the range to find cells from the current row
+            for (Coordinate coord : range) {
+                if (coord.getRow() == rowIndex) {  // Match the row in the range
+                    Cell cell = activeCells.get(coord);
+
+                    // Check for matching cells
+                    if (cell != null) {
+                        if (cell.getEffectiveValue().getCellType() == CellType.STRING) {
+                            String cellValue = cell.getEffectiveValue().extractValueWithExpectation(String.class);
+                            if (selectedWordsSet.contains(cellValue)) {
+                                wordsFoundInRow.add(cellValue);
+                            }
+                        } else if (cell.getEffectiveValue().getCellType() == CellType.NUMERIC) {
+                            Double cellValue = cell.getEffectiveValue().extractValueWithExpectation(Double.class);
+                            if (selectedWordsSet.contains(String.valueOf(cellValue))) {
+                                wordsFoundInRow.add(String.valueOf(cellValue));
+                            }
+                        } else if (cell.getEffectiveValue().getCellType() == CellType.BOOLEAN) {
+                            Boolean cellValue = cell.getEffectiveValue().extractValueWithExpectation(Boolean.class);
+                            if (selectedWordsSet.contains(String.valueOf(cellValue).toUpperCase())) {
+                                wordsFoundInRow.add(String.valueOf(cellValue).toUpperCase());
+                            }
+                        }
+                    }
+
+                    rowCells.add(cell);  // Add the cell to the current row
+                }
+            }
+
+            // If the row matches all selected words, move it to the top of the range
+            if (wordsFoundInRow.containsAll(selectedWordsSet)) {
+                for (Cell cell : rowCells) {
+                    if (cell != null) {
+                        // Move the row to the top of the range
+                        Coordinate newCoordinate = new Coordinate(newRowIndex, cell.getCoordinate().getColumn());
+                        cell.setCoordinate(newCoordinate);  // Set new coordinate
+                        mutableMap.put(newCoordinate, new CellImpl(cell));  // Deep copy the cell
+                    }
+                }
+                newRowIndex++;  // Increment row index for the next matching row
+            }
+        }
+
+        // Clear the rest of the rows within the range (those that didn't match)
+        for (int rowIndex = newRowIndex; rowIndex <= rangeEndRow; rowIndex++) {
+            for (Coordinate coord : range) {
+                if (coord.getRow() == rowIndex) {
+                    mutableMap.put(coord, new CellImpl(coord.getRow(), coord.getColumn(), null));  // Clear the non-matching rows
+                }
+            }
+        }
+
+        // Set the filtered cells back into the sheet
+        filteredSheet.setCellsForSortAndFilter(mutableMap);
+
+        // Return the filtered sheet as a DTO
+        return (SheetDTO) filteredSheet;
+    }
+
 
 
     private void setCellsForSortAndFilter(Map<Coordinate, Cell> cells) {
@@ -521,4 +594,30 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     public void setBackgroundColor(int row, int col, Color color) {
         activeCells.get(new Coordinate(row,col)).setBackgroundColor(color);
     }
+
+    @Override
+    public void setTextColor(int row, int col, Color color) {
+        activeCells.get(new Coordinate(row,col)).setForegroundColor(color);
+    }
+
+    @Override
+    public void undoColor(int row, int col){
+        activeCells.get(new Coordinate(row,col)).setForegroundColor(null);
+        activeCells.get(new Coordinate(row,col)).setBackgroundColor(null);
+    }
+
+    public Set<String> getWordsFromColumnAndRange(String column, List<Coordinate> range) {
+        Set<String> words = new HashSet<>();
+        int columnIndex = column.charAt(0) - 'A' + 1;
+        for (Coordinate coord : range) {
+            Cell cell = activeCells.get(coord);
+            if (cell != null && cell.getCoordinate().getColumn() == columnIndex) {
+                words.add(cell.getEffectiveValue().getValue().toString());
+            }
+        }
+
+        return words;
+    }
+
+
 }

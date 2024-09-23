@@ -7,6 +7,7 @@ import sheet.coordinate.Coordinate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface Sheet {
 
@@ -58,5 +59,12 @@ public interface Sheet {
 
     SheetDTO sortSheet(List<Coordinate> range, List<Integer> columnsToSortBy);
 
+    SheetDTO filterSheet(List<Coordinate> range, Set<String> selectedWordsSet);
+
     void setBackgroundColor(int row, int col, javafx.scene.paint.Color color);
+
+    void setTextColor(int row, int col, Color color);
+
+    void undoColor(int row, int col);
+
 }

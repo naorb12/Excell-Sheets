@@ -349,7 +349,29 @@ public class Engine implements Serializable {
         }
     }
 
+    public SheetDTO filterSheet(String fromCell, String toCell, Set<String> selectedWordsSet ) throws InvalidXMLFormatException {
+        List<Coordinate> range = validateRange(fromCell, toCell);
+        SheetDTO filteredSheet = sheet.filterSheet(range, selectedWordsSet );
+
+        return filteredSheet;
+    }
+
     public void setBackgroundColor(int row, int col, Color color) {
         sheet.setBackgroundColor(row, col, color);
     }
+
+    public void setTextColor(int row, int col, Color color) {
+        sheet.setTextColor(row, col, color);
+    }
+
+    public void undoColor(int row, int col) {
+        sheet.undoColor(row, col);
+    }
+
+    public Set<String> getWordsFromColumnAndRange(String column, String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
+        List<Coordinate> range = validateRange(fromCellFieldFilter, toCellFieldFilter);
+        return sheet.getWordsFromColumnAndRange(column, range);
+    }
+
+
 }

@@ -34,10 +34,41 @@
             </items>
         </ComboBox>
         <!-- Change Background Color -->
-        <Label text="Change Cell Background Color" />
+        <Label text="Change Cell Color" />
         <ComboBox fx:id="cellSelector" maxWidth="-Infinity" prefHeight="25.0" prefWidth="161.0" promptText="Select Cell (e.g., A1)" />
-        <ColorPicker fx:id="colorPicker" maxHeight="-Infinity" maxWidth="-Infinity" onAction="#handleUpdateBackgroundColor" prefHeight="48.0" prefWidth="135.0" />
-        <Button fx:id="colorUndoButton" onAction="#handleUndoColor" text="Undo Background Color" />
+            <GridPane>
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                     <children>
+                    <ColorPicker fx:id="colorPickerBackground" maxHeight="-Infinity" maxWidth="-Infinity" onAction="#handleUpdateBackgroundColor" prefHeight="27.0" prefWidth="113.0" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                     <children>
+                        <ColorPicker fx:id="colorPickerTextColor" onAction="#handleUpdateTextColor" prefHeight="27.0" prefWidth="113.0" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Background Color" />
+                     </children>
+                  </HBox>
+                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                     <children>
+                        <Label text="Text Color" />
+                     </children>
+                  </HBox>
+               </children>
+            </GridPane>
+        <Button fx:id="colorUndoButton" onAction="#handleUndoColor" text="Undo Color" />
             </children>
         </VBox>
 
@@ -110,7 +141,6 @@
                  <rowConstraints>
                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                  </rowConstraints>
                  <children>
                      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="10">
@@ -126,25 +156,22 @@
                              <Label text="Columns: " />
                              <ListView fx:id="checkboxListViewFilterColumns" prefHeight="25.0" prefWidth="59.0" />
                          </children>
-                     </HBox>
-                  <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="2">
-                     <children>
-                        <Label text="Filter By ">
-                           <HBox.margin>
-                              <Insets right="10.0" />
-                           </HBox.margin>
-                        </Label>
-                        <ListView fx:id="checkboxListViewFilterWords" prefHeight="41.0" prefWidth="57.0">
-                           <HBox.margin>
-                              <Insets />
-                           </HBox.margin>
-                        </ListView>
-                     </children>
-                     <GridPane.margin>
-                        <Insets top="5.0" />
-                     </GridPane.margin>
-                  </HBox>                 </children>
+                     </HBox>                 </children>
              </GridPane>
+            <HBox alignment="CENTER" prefHeight="42.0" prefWidth="278.0">
+               <children>
+                  <Label text="Filter By ">
+                     <HBox.margin>
+                        <Insets right="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <ListView fx:id="checkboxListViewFilterWords" prefHeight="20.0" prefWidth="142.0">
+                     <HBox.margin>
+                        <Insets />
+                     </HBox.margin>
+                  </ListView>
+               </children>
+            </HBox>
             <GridPane>
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

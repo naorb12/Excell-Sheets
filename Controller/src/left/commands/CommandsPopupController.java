@@ -33,7 +33,9 @@ public class CommandsPopupController {
     @FXML
     private ComboBox<String> cellSelector;
     @FXML
-    private ColorPicker colorPicker;
+    private ColorPicker colorPickerBackground;
+    @FXML
+    private ColorPicker colorPickerTextColor;
     @FXML
     private Button colorUndoButton;
 
@@ -48,7 +50,7 @@ public class CommandsPopupController {
     private Button applySortButton;
     @FXML
     private Button revertSortButton;
-    private List<Integer> columnsToSortBy;
+    private List<Integer> columnsToSortBy = new ArrayList<>();;
 
     @FXML
     private TextField fromCellFieldFilter;
@@ -62,7 +64,9 @@ public class CommandsPopupController {
     private Button applyFilterButton;
     @FXML
     private Button revertFilterButton;
-    private List<Integer> columnsToFilterBy;
+    private List<Integer> columnsToFilterBy = new ArrayList<>();;
+    private Set<String> selectedWordsSet = new HashSet<>();
+
 
 
     public void initialize() {
@@ -97,7 +101,8 @@ public class CommandsPopupController {
 
         cellSelector.setOnAction(event -> resetColorPicker());
         colorUndoButton.disableProperty().bind(Bindings.isNull(cellSelector.valueProperty()));
-        colorPicker.disableProperty().bind(Bindings.isNull(cellSelector.valueProperty()));
+        colorPickerBackground.disableProperty().bind(Bindings.isNull(cellSelector.valueProperty()));
+        colorPickerTextColor.disableProperty().bind(Bindings.isNull(cellSelector.valueProperty()));
 
     }
 
@@ -121,7 +126,7 @@ public class CommandsPopupController {
                         } catch (RuntimeException e) {
                             //
                         }
-                    });
+                    }, columnsToSortBy);
                 } catch (InvalidXMLFormatException e) {
                     //showErrorPopup("Invalid Range", e.getMessage());
                 }
@@ -155,7 +160,13 @@ public class CommandsPopupController {
                 String fromCell = fromCellFieldFilter.getText().trim();
                 String toCell = toCellFieldFilter.getText().trim();
                 try {
-                    populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, ()->{populateCheckboxListViewFilterWords();});
+                    populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, ()->{
+                        try {
+                            populateCheckboxListViewFilterWords(fromCellFieldFilter.getText().trim(), toCellFieldFilter.getText().trim());
+                        } catch (InvalidXMLFormatException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }, columnsToFilterBy);
                 } catch (InvalidXMLFormatException e) {
                     //showErrorPopup("Invalid Range", e.getMessage());
                 }
@@ -165,10 +176,25 @@ public class CommandsPopupController {
         toCellFieldFilter.textProperty().addListener(listener);
 
         applyFilterButton.setOnAction(event -> {
-            handleApplyFilter();
+            try {
+                handleApplyFilter();
+            } catch (InvalidXMLFormatException e) {
+                throw new RuntimeException(e);
+            }
         });
 
         revertFilterButton.setOnAction(event -> handleRemoveFilter());
+        // Add listener to checkboxes in checkboxListViewFilterColumns
+        checkboxListViewFilterColumns.getItems().forEach(checkbox -> {
+            checkbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                try {
+                    populateCheckboxListViewFilterWords(fromCellFieldFilter.getText().trim(), toCellFieldFilter.getText().trim());
+                } catch (InvalidXMLFormatException e) {
+
+                }
+            });
+        });
+
     }
 
     // Method to update the apply button's state based on text fields and checkbox selections
@@ -189,14 +215,56 @@ public class CommandsPopupController {
         applyFilterButton.setDisable(!(areTextFieldsFilled && isAnyColumnCheckboxSelected && isAnyWordCheckboxSelected));
     }
 
-    private void populateCheckboxListViewFilterWords(){
+    private void populateCheckboxListViewFilterWords(String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
+        checkboxListViewFilterWords.getItems().clear(); // Clear existing items
+
+        // Loop through each checkbox in checkboxListViewFilterColumns
+        for (CheckBox columnCheckbox : checkboxListViewFilterColumns.getItems()) {
+            if (columnCheckbox.isSelected()) {
+                String column = columnCheckbox.getText(); // Get the column name
+
+                // Retrieve the words for the selected column and add them as checkboxes
+                Set<String> words = getWordsForColumn(column, fromCellFieldFilter, toCellFieldFilter); // Implement this method to retrieve words for the column
+                for (String word : words) {
+                    CheckBox wordCheckbox = new CheckBox(word);
+
+                    // Add a listener to update the set when the checkbox is selected/unselected
+                    wordCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                        if (newValue) {
+                            // If selected, add the word to the set
+                            selectedWordsSet.add(word);
+                        } else {
+                            // If unselected, remove the word from the set
+                            selectedWordsSet.remove(word);
+                        }
+                        updateApplyFilterButtonState();
+                    });
+
+                    checkboxListViewFilterWords.getItems().add(wordCheckbox);
+                }
+            }
+        }
+
         updateApplyFilterButtonState();
     }
 
-    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView,  Runnable runnable) throws InvalidXMLFormatException {
+    private Set<String> getWordsForColumn(String column, String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
+        Set<String> words = new HashSet<>();
+        words = centerController.getEngine().getWordsFromColumnAndRange(column, fromCellFieldFilter, toCellFieldFilter);
+
+        return words;
+    }
+
+    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView, Runnable runnable, List<Integer> columnsToXBy) throws InvalidXMLFormatException {
         // Clear previous items
         listView.getItems().clear();
-        columnsToSortBy = new ArrayList<>();  // Clear the columnsToSortBy list
+
+        // If columnsToXBy is null, initialize it. Do not reassign to a new list.
+        if (columnsToXBy == null) {
+            columnsToXBy = new ArrayList<>();
+        } else {
+            columnsToXBy.clear();  // Clear the columnsToSortBy list
+        }
 
         List<Coordinate> range = centerController.getEngine().validateRange(fromCell, toCell);
         Set<Integer> columnsSet = parseRangeToColumns(range);
@@ -206,13 +274,14 @@ public class CommandsPopupController {
             CheckBox checkBox = new CheckBox(columnName);
 
             // Add listener to track the state of each checkbox and update columnsToSortBy list
+            List<Integer> finalColumnsToXBy = columnsToXBy;
             checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
                 if (newValue) {
                     // Checkbox is selected: add the column (in order) to columnsToSortBy
-                    columnsToSortBy.add(columnIndex);
+                    finalColumnsToXBy.add(columnIndex);
                 } else {
                     // Checkbox is deselected: remove the column from columnsToSortBy
-                    columnsToSortBy.remove(Integer.valueOf(columnIndex));
+                    finalColumnsToXBy.remove(Integer.valueOf(columnIndex));
                 }
 
                 runnable.run();
@@ -339,7 +408,8 @@ public class CommandsPopupController {
     }
 
     private void resetColorPicker() {
-        colorPicker.setValue(Color.WHITE);
+        colorPickerBackground.setValue(Color.WHITE);
+        colorPickerTextColor.setValue(Color.BLACK);
     }
 
     // Method to update the column width using Spinner
@@ -379,9 +449,17 @@ public class CommandsPopupController {
     @FXML
     private void handleUpdateBackgroundColor() {
         String selectedCell = cellSelector.getValue();
-        Color color = colorPicker.getValue();
+        Color color = colorPickerBackground.getValue();
 
         centerController.updateCellBackgroundColor(selectedCell, color);  // Pass color update to CenterController
+    }
+
+    @FXML
+    private void handleUpdateTextColor(){
+        String selectedCell = cellSelector.getValue();
+        Color color = colorPickerTextColor.getValue();
+
+        centerController.updateCellTextColor(selectedCell, color);
     }
 
     // Method to undo the background color of a cell
@@ -414,13 +492,23 @@ public class CommandsPopupController {
         centerController.removeSorting();
     }
 
-
     @FXML
-    private void handleRemoveFilter() {
+    private void handleApplyFilter() throws InvalidXMLFormatException {
+        try {
+            if (!selectedWordsSet.isEmpty()) {
+                centerController.applyFiltering(fromCellFieldFilter.getText().trim(), toCellFieldFilter.getText().trim(), selectedWordsSet);
+                revertFilterButton.setDisable(false);
+            }
+        }catch (InvalidXMLFormatException e) {
+            showErrorPopup("Range not valid", e.getMessage());
+        } catch (RuntimeException e) {
+            showErrorPopup("Runtime Error", e.getMessage());
+        }
     }
 
     @FXML
-    private void handleApplyFilter() {
+    private void handleRemoveFilter() {
+        centerController.removeFiltering();
     }
 
     // Set the reference to CenterController and populate selectors after it's set
