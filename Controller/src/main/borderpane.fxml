@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.control.ScrollPane?>
 
-<BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.MainController">
+<ScrollPane fitToWidth="true" fitToHeight="true" xmlns="http://javafx.com/javafx/17.0.2-ea"  xmlns:fx="http://javafx.com/fxml/1" fx:controller="main.MainController">
+    <content>
+        <BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0">
 
-    <top>
-        <fx:include source="/Controller/src/top/topSection.fxml" />
-    </top>
+            <top>
+                <fx:include source="/Controller/src/top/topSection.fxml" />
+            </top>
 
-    <left>
-        <fx:include source="/Controller/src/left/leftSection.fxml" />
-    </left>
+            <left>
+                <fx:include source="/Controller/src/left/leftSection.fxml" />
+            </left>
 
-    <center>
-        <fx:include source="/Controller/src/center/centerSection.fxml" />
-    </center>
+            <center>
+                <fx:include source="/Controller/src/center/centerSection.fxml" />
+            </center>
 
-</BorderPane>
+        </BorderPane>
+    </content>
+</ScrollPane>

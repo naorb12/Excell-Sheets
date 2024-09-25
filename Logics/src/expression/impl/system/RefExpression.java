@@ -21,7 +21,7 @@ public class RefExpression implements Expression {
         if(sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()) == null ||
                 sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue().getCellType() == CellType.EMPTY)
         {
-            return new EffectiveValueImpl(CellType.EMPTY, "Empty cell");
+            return new EffectiveValueImpl(CellType.EMPTY, "");
         }
         else {
             EffectiveValue effectiveValue = sheet.getCellDTO(coordinate.getRow(), coordinate.getColumn()).getEffectiveValue();

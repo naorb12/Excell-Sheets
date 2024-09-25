@@ -36,6 +36,10 @@ public class TopController {
     private Label lastUpdateCellVersionLabel;
     @FXML
     private ComboBox<String> sheetVersionSelector;
+    @FXML
+    private CheckBox bonus1CheckBox;
+    @FXML
+    private CheckBox bonus2CheckBox;
 
     private CenterController centerController; // For communication with the center grid
 
@@ -89,7 +93,10 @@ public class TopController {
 
     @FXML
     private void changeStyle() {
-        applyStyle(styleSelector.getValue());
+        try {
+            applyStyle(styleSelector.getValue());
+        }
+        catch (Exception e) {}
     }
 
     @FXML

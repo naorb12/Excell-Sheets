@@ -105,7 +105,7 @@
 /* Apply hover effect for the cells in the grid */
 .scroll-pane .cell:hover,
 .selected-cell {
-    -fx-background-color: rgba(204, 255, 207, 0.73);  /* Light blue background on hover */
+    -fx-background-color: rgba(255, 248, 204, 0.86);  /* Light blue background on hover */
     -fx-border-color: #000000;  /* Border color for hovered cell */
     -fx-border-width: 1px;
     -fx-cursor: pointer;  /* Change cursor to hand on hover */

@@ -80,7 +80,7 @@ public class LeftController {
             // Allow the window to be resizable and movable
             commandsPopUp.setResizable(true);
             commandsPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
-            commandsPopUp.setOnCloseRequest(event -> commandsPopupController.handleRemoveSort());
+            commandsPopUp.setOnCloseRequest(event -> commandsPopupController.handleRemoveSortAndFilter());
 
             // Show the pop-up
             commandsPopUp.show();

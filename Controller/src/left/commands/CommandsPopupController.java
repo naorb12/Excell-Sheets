@@ -147,33 +147,13 @@ public class CommandsPopupController {
     }
 
     private void initializeFilter() {
-        // Initially disable the applySortButton
+        // Initially disable the applyFilterButton and revertFilterButton
         applyFilterButton.setDisable(true);
         revertFilterButton.setDisable(true);
-        // Add listeners to the text fields to track their state
-        fromCellFieldFilter.textProperty().addListener((observable, oldValue, newValue) -> updateApplyFilterButtonState());
-        toCellFieldFilter.textProperty().addListener((observable, oldValue, newValue) -> updateApplyFilterButtonState());
 
-        // Add listeners to the checkboxes when they are populated
-        ChangeListener<String> listener = (observable, oldValue, newValue) -> {
-            if (!fromCellFieldFilter.getText().trim().isEmpty() && !toCellFieldFilter.getText().trim().isEmpty()) {
-                String fromCell = fromCellFieldFilter.getText().trim();
-                String toCell = toCellFieldFilter.getText().trim();
-                try {
-                    populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, ()->{
-                        try {
-                            populateCheckboxListViewFilterWords(fromCellFieldFilter.getText().trim(), toCellFieldFilter.getText().trim());
-                        } catch (InvalidXMLFormatException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }, columnsToFilterBy);
-                } catch (InvalidXMLFormatException e) {
-                    //showErrorPopup("Invalid Range", e.getMessage());
-                }
-            }
-        };
-        fromCellFieldFilter.textProperty().addListener(listener);
-        toCellFieldFilter.textProperty().addListener(listener);
+        // Add listeners to the text fields to track their state
+        fromCellFieldFilter.textProperty().addListener((observable, oldValue, newValue) -> handleFilterRangeChange());
+        toCellFieldFilter.textProperty().addListener((observable, oldValue, newValue) -> handleFilterRangeChange());
 
         applyFilterButton.setOnAction(event -> {
             try {
@@ -184,18 +164,61 @@ public class CommandsPopupController {
         });
 
         revertFilterButton.setOnAction(event -> handleRemoveFilter());
-        // Add listener to checkboxes in checkboxListViewFilterColumns
+
+        // Add listener to checkboxes in the columns list to reset the words when columns change
         checkboxListViewFilterColumns.getItems().forEach(checkbox -> {
-            checkbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                try {
-                    populateCheckboxListViewFilterWords(fromCellFieldFilter.getText().trim(), toCellFieldFilter.getText().trim());
-                } catch (InvalidXMLFormatException e) {
-
-                }
-            });
+            checkbox.selectedProperty().addListener((observable, oldValue, newValue) -> handleColumnSelectionChange());
         });
-
     }
+
+    private void handleFilterRangeChange() {
+        if (!fromCellFieldFilter.getText().trim().isEmpty() && !toCellFieldFilter.getText().trim().isEmpty()) {
+            String fromCell = fromCellFieldFilter.getText().trim();
+            String toCell = toCellFieldFilter.getText().trim();
+            try {
+                // Populate column selector
+                populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, () -> {
+                    if (checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected)) {
+                        try {
+                            populateCheckboxListViewFilterWords(fromCell, toCell);
+                        } catch (InvalidXMLFormatException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        checkboxListViewFilterWords.getItems().clear();  // Clear words if no columns are selected
+                    }
+                }, columnsToFilterBy);
+            } catch (InvalidXMLFormatException e) {
+                checkboxListViewFilterColumns.getItems().clear();
+                checkboxListViewFilterWords.getItems().clear();  // Clear both lists if range is invalid
+            }
+        } else {
+            // Clear both columns and words if the range fields are empty
+            checkboxListViewFilterColumns.getItems().clear();
+            checkboxListViewFilterWords.getItems().clear();
+        }
+
+        updateApplyFilterButtonState();
+    }
+
+    private void handleColumnSelectionChange() {
+        if (checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected)) {
+            String fromCell = fromCellFieldFilter.getText().trim();
+            String toCell = toCellFieldFilter.getText().trim();
+            try {
+                populateCheckboxListViewFilterWords(fromCell, toCell);
+            } catch (InvalidXMLFormatException e) {
+                checkboxListViewFilterWords.getItems().clear();
+            }
+        } else {
+            checkboxListViewFilterWords.getItems().clear();
+        }
+
+        updateApplyFilterButtonState();
+    }
+
+
+
 
     // Method to update the apply button's state based on text fields and checkbox selections
     private void updateApplySortButtonState() {
@@ -216,25 +239,29 @@ public class CommandsPopupController {
     }
 
     private void populateCheckboxListViewFilterWords(String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
-        checkboxListViewFilterWords.getItems().clear(); // Clear existing items
+        checkboxListViewFilterWords.getItems().clear();  // Clear existing items
+
+        boolean anyColumnSelected = checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected);
+
+        if (!anyColumnSelected) {
+            return;  // If no columns are selected, exit early and leave the word list empty
+        }
 
         // Loop through each checkbox in checkboxListViewFilterColumns
         for (CheckBox columnCheckbox : checkboxListViewFilterColumns.getItems()) {
             if (columnCheckbox.isSelected()) {
-                String column = columnCheckbox.getText(); // Get the column name
+                String column = columnCheckbox.getText();  // Get the column name
 
                 // Retrieve the words for the selected column and add them as checkboxes
-                Set<String> words = getWordsForColumn(column, fromCellFieldFilter, toCellFieldFilter); // Implement this method to retrieve words for the column
+                Set<String> words = getWordsForColumn(column, fromCellFieldFilter, toCellFieldFilter);
                 for (String word : words) {
                     CheckBox wordCheckbox = new CheckBox(word);
 
                     // Add a listener to update the set when the checkbox is selected/unselected
                     wordCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
                         if (newValue) {
-                            // If selected, add the word to the set
                             selectedWordsSet.add(word);
                         } else {
-                            // If unselected, remove the word from the set
                             selectedWordsSet.remove(word);
                         }
                         updateApplyFilterButtonState();
@@ -247,6 +274,7 @@ public class CommandsPopupController {
 
         updateApplyFilterButtonState();
     }
+
 
     private Set<String> getWordsForColumn(String column, String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
         Set<String> words = new HashSet<>();
@@ -488,8 +516,18 @@ public class CommandsPopupController {
     }
 
     @FXML
-    public void handleRemoveSort() {
+    private void handleRemoveSort() {
         centerController.removeSorting();
+        columnsToSortBy.clear();
+        checkboxListView.getItems().forEach(checkBox -> checkBox.setSelected(false));
+    }
+
+    @FXML
+    public void handleRemoveSortAndFilter() {
+        centerController.removeSorting();
+        centerController.removeFiltering();
+        columnsToSortBy.clear();
+        selectedWordsSet.clear();
     }
 
     @FXML
@@ -509,6 +547,10 @@ public class CommandsPopupController {
     @FXML
     private void handleRemoveFilter() {
         centerController.removeFiltering();
+        selectedWordsSet.clear();
+        checkboxListViewFilterColumns.getItems().forEach(checkBox -> checkBox.setSelected(false));
+        checkboxListViewFilterWords.getItems().forEach(checkBox -> checkBox.setSelected(false));
+        applyFilterButton.setDisable(true);
     }
 
     // Set the reference to CenterController and populate selectors after it's set

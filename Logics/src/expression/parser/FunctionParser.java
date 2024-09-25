@@ -65,11 +65,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for PLUS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for PLUS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             // all is good. create the relevant function instance
             return new PlusExpression(left, right);
@@ -87,11 +87,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
-                throw new IllegalArgumentException("Invalid argument types for MINUS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types  - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+//                throw new IllegalArgumentException("Invalid argument types for MINUS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             // all is good. create the relevant function instance
             return new MinusExpression(left, right);
@@ -108,11 +108,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for TIMES function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for TIMES function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new TimesExpression(left, right);
         }
@@ -128,11 +128,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for DIVIDE function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for DIVIDE function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new DivideExpression(left, right);
         }
@@ -148,11 +148,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
-                throw new IllegalArgumentException("Invalid argument types for MOD function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+//                throw new IllegalArgumentException("Invalid argument types for MOD function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new ModExpression(left, right);
         }
@@ -169,11 +169,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for POW function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for POW function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new PowExpression(left, right);
         }
@@ -188,9 +188,10 @@ public enum FunctionParser {
 
             Expression expression = parseExpression(arguments.get(0).trim());
 
-            if((!expression.getFunctionResultType().equals(CellType.NUMERIC)) && (!expression.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for ABS function. Expected NUMERIC, but got " + expression.getFunctionResultType());
-            }
+            //- used in exercise 1
+//            if((!expression.getFunctionResultType().equals(CellType.NUMERIC)) && (!expression.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for ABS function. Expected NUMERIC, but got " + expression.getFunctionResultType());
+//            }
 
             return new AbsExpression(expression);
         }
@@ -206,11 +207,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.STRING) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.STRING) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for CONCAT function. Expected STRING, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.STRING) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.STRING) && !right.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for CONCAT function. Expected STRING, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new ConcatExpression(left, right);
         }
@@ -227,12 +228,12 @@ public enum FunctionParser {
             Expression startIndex = parseExpression(arguments.get(1).trim());
             Expression endIndex = parseExpression(arguments.get(2).trim());
 
-            // more validations on the expected argument types
-            if ( (!source.getFunctionResultType().equals(CellType.STRING) && !source.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!startIndex.getFunctionResultType().equals(CellType.NUMERIC) && !startIndex.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-            (!endIndex.getFunctionResultType().equals(CellType.NUMERIC) && !endIndex.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for SUB function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!source.getFunctionResultType().equals(CellType.STRING) && !source.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!startIndex.getFunctionResultType().equals(CellType.NUMERIC) && !startIndex.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//            (!endIndex.getFunctionResultType().equals(CellType.NUMERIC) && !endIndex.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for SUB function. Expected a STRING and two NUMERICS, but got " + source.getFunctionResultType() + ", " + startIndex.getFunctionResultType() + " and " + endIndex.getFunctionResultType());
+//            }
 
             return new SubExpression(source, startIndex, endIndex);
 
@@ -272,10 +273,10 @@ public enum FunctionParser {
             // structure is good. parse arguments
             Expression arg = parseExpression(arguments.get(0).trim());
 
-            // more validations on the expected argument types
-            if (!arg.getFunctionResultType().equals(CellType.STRING)) {
-                throw new IllegalArgumentException("Invalid argument types for UPPER_CASE function. Expected STRING, but got " + arg.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if (!arg.getFunctionResultType().equals(CellType.STRING)) {
+//                throw new IllegalArgumentException("Invalid argument types for UPPER_CASE function. Expected STRING, but got " + arg.getFunctionResultType());
+//            }
 
             // all is good. create the relevant function instance
             return new UpperCaseExpression(arg);
@@ -307,9 +308,10 @@ public enum FunctionParser {
 
             Expression expression = parseExpression(arguments.get(0).trim());
 
-            if((!expression.getFunctionResultType().equals(CellType.BOOLEAN)) && (!expression.getFunctionResultType().equals(CellType.UNKNOWN))) {
-                throw new IllegalArgumentException("Invalid argument types for NOT function. Expected BOOLEAN, but got " + expression.getFunctionResultType());
-            }
+            // - used in exercise 1
+//            if((!expression.getFunctionResultType().equals(CellType.BOOLEAN)) && (!expression.getFunctionResultType().equals(CellType.UNKNOWN))) {
+//                throw new IllegalArgumentException("Invalid argument types for NOT function. Expected BOOLEAN, but got " + expression.getFunctionResultType());
+//            }
 
             return new NotExpression(expression);
         }
@@ -325,11 +327,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
-                throw new IllegalArgumentException("Invalid argument types for BIGGER function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+//                throw new IllegalArgumentException("Invalid argument types for BIGGER function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new BiggerExpression(left, right);
         }
@@ -345,11 +347,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
-                throw new IllegalArgumentException("Invalid argument types for LESS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.NUMERIC) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.NUMERIC) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+//                throw new IllegalArgumentException("Invalid argument types for LESS function. Expected NUMERIC, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new LessExpression(left, right);
         }
@@ -365,11 +367,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.BOOLEAN) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.BOOLEAN) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
-                throw new IllegalArgumentException("Invalid argument types for OR function. Expected BOOLEAN, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types - used in exercise 1
+//            if ( (!left.getFunctionResultType().equals(CellType.BOOLEAN) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.BOOLEAN) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+//                throw new IllegalArgumentException("Invalid argument types for OR function. Expected BOOLEAN, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new OrExpression(left, right);
         }
@@ -385,11 +387,11 @@ public enum FunctionParser {
             Expression left = parseExpression(arguments.get(0).trim());
             Expression right = parseExpression(arguments.get(1).trim());
 
-            // more validations on the expected argument types
-            if ( (!left.getFunctionResultType().equals(CellType.BOOLEAN) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-                    (!right.getFunctionResultType().equals(CellType.BOOLEAN) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
-                throw new IllegalArgumentException("Invalid argument types for AND function. Expected BOOLEAN, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
-            }
+//            // more validations on the expected argument types
+//            if ( (!left.getFunctionResultType().equals(CellType.BOOLEAN) && !left.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//                    (!right.getFunctionResultType().equals(CellType.BOOLEAN) && !right.getFunctionResultType().equals(CellType.UNKNOWN))){
+//                throw new IllegalArgumentException("Invalid argument types for AND function. Expected BOOLEAN, but got " + left.getFunctionResultType() + " and " + right.getFunctionResultType());
+//            }
 
             return new AndExpression(left, right);
         }
@@ -406,10 +408,11 @@ public enum FunctionParser {
             Expression thenExp = parseExpression(arguments.get(1).trim());
             Expression elseExp = parseExpression(arguments.get(2).trim());
 
-            if((!condition.getFunctionResultType().equals(CellType.BOOLEAN) && !condition.getFunctionResultType().equals(CellType.UNKNOWN)) ||
-            !(thenExp.getFunctionResultType().equals(elseExp.getFunctionResultType()))){
-                throw new IllegalArgumentException("Invalid argument types for IF function. Expected a BOOLEAN as a condition and two results from smae type, but got " + condition.getFunctionResultType()  + " and " + thenExp.getFunctionResultType() + " and " + elseExp.getFunctionResultType());
-            }
+//            //- used in exercise 1
+//            if((!condition.getFunctionResultType().equals(CellType.BOOLEAN) && !condition.getFunctionResultType().equals(CellType.UNKNOWN)) ||
+//            !(thenExp.getFunctionResultType().equals(elseExp.getFunctionResultType()))){
+//                throw new IllegalArgumentException("Invalid argument types for IF function. Expected a BOOLEAN as a condition and two results from smae type, but got " + condition.getFunctionResultType()  + " and " + thenExp.getFunctionResultType() + " and " + elseExp.getFunctionResultType());
+//            }
 
             return new IfExpression(condition, thenExp, elseExp);
         }

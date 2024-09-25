@@ -1,24 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <VBox alignment="CENTER" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="top.TopController">
     <children>
-        <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="800.0" spacing="10">
-            <children>
-            <ComboBox fx:id="styleSelector" prefHeight="25.0" prefWidth="132.0" />
-                <Region prefHeight="50.0" prefWidth="10.0" HBox.hgrow="SOMETIMES" />
-                <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefWidth="500.0" text="Shticell - Spreadsheet Application" textAlignment="CENTER" HBox.hgrow="ALWAYS" />
-                <Region prefHeight="50.0" prefWidth="142" HBox.hgrow="SOMETIMES" />
-            </children>
-        </HBox>
+      <GridPane>
+          <columnConstraints>
+              <!-- First column takes 25% -->
+              <ColumnConstraints minWidth="25.0" percentWidth="15" prefWidth="100.0" />
+              <!-- Middle column takes 50% -->
+              <ColumnConstraints minWidth="50.0" percentWidth="70" prefWidth="100.0" />
+              <!-- Third column takes 25% -->
+              <ColumnConstraints minWidth="25.0" percentWidth="15" prefWidth="100.0" />
+          </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+                <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefHeight="17.0" prefWidth="561.0" text="Shticell - Spreadsheet Application" textAlignment="CENTER" GridPane.columnIndex="1" />
+            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+               <children>
+                  <ComboBox fx:id="styleSelector" prefHeight="25.0" prefWidth="132.0" />
+               </children></HBox>
+            <HBox alignment="CENTER_RIGHT" prefHeight="32.0" prefWidth="202.0" GridPane.columnIndex="2">
+               <children>
+                  <VBox alignment="CENTER" prefHeight="49.0" prefWidth="100.0">
+                     <children>
+                        <Label fx:id="bonus1Label" text="Bonus 1">
+                           <font>
+                              <Font size="10.0" />
+                           </font></Label>
+                        <CheckBox fx:id="bonus1CheckBox" mnemonicParsing="false" prefHeight="17.0" prefWidth="14.0" />
+                     </children>
+                     <padding>
+                        <Insets right="1.0" />
+                     </padding>
+                  </VBox>
+                  <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0">
+                     <children>
+                        <Label fx:id="bonus2Label" text="Bonus 2">
+                           <font>
+                              <Font size="10.0" />
+                           </font></Label>
+                        <CheckBox fx:id="bonus2CheckBox" mnemonicParsing="false" />
+                     </children></VBox>
+               </children>
+            </HBox>
+         </children>
+      </GridPane>
         <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0" spacing="10">
             <children>
-                <Button fx:id="loadFileButton" maxWidth="Infinity" prefHeight="25.0" prefWidth="132.0" text="Load File" textAlignment="CENTER" />
-                <Label fx:id="filePathLabel" prefHeight="17.0" prefWidth="186.0" text="No file loaded" />
-                <ProgressBar fx:id="progressBar" maxWidth="Infinity" prefHeight="18.0" prefWidth="400.0" visible="false" />
+                <Button fx:id="loadFileButton" maxWidth="Infinity" prefHeight="25.0" prefWidth="146.0" text="Load File" textAlignment="CENTER" />
+                <Label fx:id="filePathLabel" prefHeight="17.0" prefWidth="188.0" text="No file loaded" />
+                <ProgressBar fx:id="progressBar" maxWidth="Infinity" prefHeight="18.0" prefWidth="409.0" visible="false" />
             </children>
         </HBox>
 

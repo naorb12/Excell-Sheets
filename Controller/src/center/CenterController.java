@@ -116,6 +116,7 @@ public class CenterController {
                 }
                 else {
                     cellLabel = new Label(cell.getEffectiveValue().getValue() != null ? cell.getEffectiveValue().getValue().toString() : "");
+                    cellLabel.setStyle("-fx-text-overrun: clip;");
                     if(cell.getEffectiveValue().getCellType().equals(CellType.BOOLEAN)){
                         cellLabel.setText(cellLabel.getText().toUpperCase());
                     }
@@ -123,10 +124,15 @@ public class CenterController {
                         cellLabel.setBackground(new Background(new BackgroundFill(cell.getBackgroundColor(), CornerRadii.EMPTY, new Insets(0))));
                         System.out.println("Rendering " + cell.getCoordinate() + " background color: " + cell.getBackgroundColor());
                     }
-                    if(cell.getForegroundColor() != null){
-                        cellLabel.setTextFill(cell.getForegroundColor());
-                        System.out.println("Rendering " + cell.getCoordinate() + " textFill color: " + cell.getForegroundColor());
+                    if (cell.getForegroundColor() != null) {
+                        String color = String.format("#%02x%02x%02x",
+                                (int)(cell.getForegroundColor().getRed() * 255),
+                                (int)(cell.getForegroundColor().getGreen() * 255),
+                                (int)(cell.getForegroundColor().getBlue() * 255));
+
+                        cellLabel.setStyle("-fx-text-fill: " + color + ";");
                     }
+
                 }
 
 
@@ -277,6 +283,8 @@ public class CenterController {
         Label label = (Label) getNodeByRowColumnIndex(row, col);
         if (label != null) {
             label.setBackground(null);  // Reset the background color
+            label.setTextFill(null);
+            label.setStyle("");
             label.getStyleClass().add("label");    // Reset the text color, allowing the theme to apply
             engine.undoColor(row,col);
         }
