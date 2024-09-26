@@ -66,7 +66,30 @@ public class TopController {
         sheetVersionSelector.setValue("Select Sheet Version");
         sheetVersionSelector.setOnAction(event -> handleSheetVersionSelected());
 
+        // Call the method to add listeners to the checkboxes
+        setupBonusCheckboxListeners();
     }
+
+    private void setupBonusCheckboxListeners() {
+        // Bonus 1: Controls the enabling/disabling of the styleSelector
+        bonus1CheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            styleSelector.setDisable(!newValue);  // Disable if unchecked, enable if checked
+            if (!newValue) {
+                styleSelector.setValue("Light Theme");  // Reset to default (Light Theme)
+                applyStyle("Light Theme");  // Apply the default style immediately
+            }
+        });
+
+        // Bonus 2: Controls enabling/disabling of animations
+        bonus2CheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            sharedModel.getAnimationController().setAnimationsEnabled(newValue);  // Enable or disable animations
+        });
+
+        // Set initial state based on the checkboxes
+        styleSelector.setDisable(!bonus1CheckBox.isSelected());
+        sharedModel.getAnimationController().setAnimationsEnabled(bonus2CheckBox.isSelected());
+    }
+
 
     // Method to inject the shared model into this controller
     public void setSharedModel(SharedModel sharedModel) {
@@ -120,6 +143,8 @@ public class TopController {
 
     @FXML
     private void handleLoadFileButtonAction() {
+        sharedModel.getAnimationController().fade(loadFileButton);
+        sharedModel.getAnimationController().scale(loadFileButton);
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select XML file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("xml files", "*.xml"));
@@ -192,6 +217,9 @@ public class TopController {
     @FXML
     private void handleUpdateValueButtonAction() {
         try {
+            sharedModel.getAnimationController().fade(updateValueButton);
+            sharedModel.getAnimationController().scale(updateValueButton);
+            sharedModel.getAnimationController().rotate(updateValueButton);
             String cellID = selectedCellIDLabel.getText();
             int row = Integer.parseInt(cellID.substring(1));
             int col = cellID.charAt(0) - 'A' + 1;

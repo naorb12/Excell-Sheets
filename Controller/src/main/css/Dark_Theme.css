@@ -74,7 +74,7 @@
 }
 
 /* ScrollPane and GridPane styling for the main grid area */
-.scroll-pane {
+.scroll-pane > .viewport{
     -fx-background-color: #3a3a3a;
     -fx-border-color: #666666;
     -fx-padding: 10px;
@@ -103,7 +103,7 @@
 /* Apply hover effect for the cells in the grid */
 .scroll-pane .cell:hover ,
 .selected-cell{
-    -fx-background-color: rgb(168, 163, 163);  /* Light blue background on hover */
+    -fx-background-color: rgb(168, 163, 163);  /* Light background on hover */
     -fx-border-color: #000000;  /* Border color for hovered cell */
     -fx-border-width: 1px;
     -fx-cursor: pointer;  /* Change cursor to hand on hover */
@@ -141,4 +141,12 @@
     -fx-text-fill: black;
 }
 
+.combo-box .list-cell:hover{
+    -fx-text-fill: black;
+}
 
+#scrollPaneGridpane #spreadsheetGridPane{
+    -fx-padding: 10;
+    -fx-border-insets: 5;
+    -fx-background-color: rgba(205, 205, 205, 0.83);
+}

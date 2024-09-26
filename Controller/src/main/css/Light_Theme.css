@@ -111,6 +111,7 @@
     -fx-cursor: pointer;  /* Change cursor to hand on hover */
 }
 
+
 /* For dependsOn cells */
 .depends-on-cell {
     -fx-background-color: rgba(204, 255, 255, 0.7);  /* Light blue background for dependsOn cells */
@@ -134,3 +135,7 @@
     -fx-font-weight: bold;
 }
 
+.combo-box .list-cell:hover{
+    -fx-background-color: rgba(204, 255, 207, 0.7);
+    -fx-text-fill: black;
+}

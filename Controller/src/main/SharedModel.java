@@ -13,6 +13,8 @@ public class SharedModel {
 
     private Stage primaryStage;
 
+    private AnimationController animationController = new AnimationController();
+
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
     }
@@ -39,5 +41,9 @@ public class SharedModel {
 
     public void setLatestVersionSelected(boolean selected) {
         latestVersionSelected.setValue(selected);
+    }
+
+    public AnimationController getAnimationController() {
+        return animationController;
     }
 }

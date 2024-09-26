@@ -58,6 +58,7 @@ public class LeftController {
     @FXML
     private void handleCommandsButtonAction() {
         try {
+            sharedModel.getAnimationController().fade(commandsButton);
             commandsPopUp = new Stage();
             // Load the commands pop-up FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/commands/commandsPopup.fxml"));
@@ -92,6 +93,7 @@ public class LeftController {
     @FXML
     private void handleRangesButtonAction() {
         try {
+            sharedModel.getAnimationController().fade(rangesButton);
             rangesPopUp = new Stage();
             // Load the commands pop-up FXML
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/ranges/rangesPopup.fxml"));

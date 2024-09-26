@@ -74,11 +74,13 @@
 }
 
 /* ScrollPane and GridPane styling for the main grid area */
-.scroll-pane {
+.scroll-pane > .viewport{
     -fx-background-color: #b3e5fc;
     -fx-border-color: #81d4fa;
     -fx-padding: 10px;
 }
+
+
 
 .grid-pane {
     -fx-background-color: #b3e5fc;
@@ -133,3 +135,12 @@
     -fx-font-weight: bold;
 }
 
+.combo-box .list-cell:hover{
+    -fx-text-fill: black;
+}
+
+#scrollPaneGridpane #spreadsheetGridPane{
+    -fx-padding: 10;
+    -fx-border-insets: 5;
+    -fx-background-color: #e0f7fa;
+}
