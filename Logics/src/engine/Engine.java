@@ -33,7 +33,6 @@ public class Engine implements Serializable {
     }
 
     public Engine(){
-
     }
     public Engine(SheetImpl sheet) {
         this.sheet = sheet;
@@ -66,13 +65,17 @@ public class Engine implements Serializable {
         try {
             // Step 1: Validate sheet dimensions
             validateSheetDimensions(generatedSheet);
-
             // Step 2: Initialize the custom SheetImpl object with the validated size
-            sheet = new SheetImpl(generatedSheet.getSTLLayout().getRows(),
+            SheetImpl mappedSheet;
+            mappedSheet = new SheetImpl(generatedSheet.getSTLLayout().getRows(),
                     generatedSheet.getSTLLayout().getColumns(),
                     generatedSheet.getSTLLayout().getSTLSize().getRowsHeightUnits(),
                     generatedSheet.getSTLLayout().getSTLSize().getColumnWidthUnits());
-            sheet.setName(generatedSheet.getName());
+            mappedSheet.setName(generatedSheet.getName());
+            if(sheet == null)
+            {
+                sheet = mappedSheet;
+            }
 
             // Step 3: Translate cells and add them to the sheet
             Map<Coordinate, Cell> cells = new HashMap<>();
@@ -91,8 +94,9 @@ public class Engine implements Serializable {
             // Step 4: Handle Ranges - Validate and add ranges
             validateAndAddRanges(generatedSheet);
 
-            sheet.setCells(cells);
+            mappedSheet.setCells(cells);
 
+            sheet = mappedSheet;
             versionHistory = new HashMap<>();
 
             // Step 5: Save the current version of the sheet (snapshot)
@@ -373,5 +377,9 @@ public class Engine implements Serializable {
         return sheet.getWordsFromColumnAndRange(column, range);
     }
 
+
+    public List<Double> getRangeNumericValues(List<Coordinate> range) {
+        return sheet.getRangeNumericValues(range);
+    }
 
 }

@@ -38,6 +38,8 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         ranges = new HashMap<String, List<Coordinate>>();
     }
 
+    public SheetImpl() {}
+
     @Override
     public Map<Coordinate, Cell> copyActiveCells(){
         Map<Coordinate, Cell> copiedActiveCells = new HashMap<Coordinate,Cell>();
@@ -618,6 +620,21 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
         return words;
     }
+
+    @Override
+    public List<Double> getRangeNumericValues(List<Coordinate> range) {
+        List<Double> values = new ArrayList<>();
+        for (Coordinate coord : range) {
+            Cell cell = activeCells.get(coord);
+            if (cell != null && cell.getEffectiveValue().getCellType() == CellType.NUMERIC) {
+                values.add(cell.getEffectiveValue().extractValueWithExpectation(Double.class));
+            }
+        }
+        return values;
+
+    }
+
+
 
 
 }

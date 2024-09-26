@@ -33,4 +33,7 @@ public interface SheetDTO {
     boolean isCoordinateInRange(Coordinate coord);
 
     Set<String> getWordsFromColumnAndRange(String column, List<Coordinate> range);
+
+    List<Double> getRangeNumericValues(List<Coordinate> range);
+
 }

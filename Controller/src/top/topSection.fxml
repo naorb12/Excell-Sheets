@@ -21,7 +21,6 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-                <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefHeight="17.0" prefWidth="561.0" text="Shticell - Spreadsheet Application" textAlignment="CENTER" GridPane.columnIndex="1" />
             <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                <children>
                   <ComboBox fx:id="styleSelector" prefHeight="25.0" prefWidth="132.0" />
@@ -48,6 +47,11 @@
                            </font></Label>
                         <CheckBox fx:id="bonus2CheckBox" mnemonicParsing="false" />
                      </children></VBox>
+               </children>
+            </HBox>
+            <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+               <children>
+                      <Label fx:id="titleLabel" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" prefHeight="17.0" prefWidth="561.0" text="Shticell - Spreadsheet Application" textAlignment="CENTER" />
                </children>
             </HBox>
          </children>
