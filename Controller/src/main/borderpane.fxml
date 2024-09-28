@@ -8,15 +8,15 @@
         <BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="698.0" prefWidth="1152.0">
 
             <top>
-                <fx:include source="/Controller/src/top/topSection.fxml" />
+                <fx:include source="/top/topSection.fxml" />
             </top>
 
             <left>
-                <fx:include source="/Controller/src/left/leftSection.fxml" />
+                <fx:include source="/left/leftSection.fxml" />
             </left>
 
             <center>
-                <fx:include source="/Controller/src/center/centerSection.fxml" />
+                <fx:include source="/center/centerSection.fxml" />
             </center>
 
         </BorderPane>

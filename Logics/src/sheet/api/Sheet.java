@@ -67,4 +67,5 @@ public interface Sheet {
 
     void undoColor(int row, int col);
 
+    SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue);
 }

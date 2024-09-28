@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/UI</output-path>
     <root id="archive" name="UI.jar">
       <element id="module-output" name="UI" />
+      <element id="library" level="project" name="javafx-swt" />
     </root>
   </artifact>
 </component>

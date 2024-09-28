@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Main-Class: console.Program
-Class-Path: DTO.jar Logics.jar XML.jar JAXB.jar angus-activation.jar jakarta.activation-api.jar jakarta.xml.bind-api.jar jaxb-core.jar jaxb-impl.jar jaxb-jxc.jar jaxb-xjc.jar
+Main-Class: gui.JavaFXShticellApplication
+Class-Path: DTO.jar Logics.jar XML.jar JAXB.jar Controller.jar angus-activation.jar jakarta.activation-api.jar jakarta.xml.bind-api.jar jaxb-core.jar jaxb-impl.jar jaxb-jxc.jar jaxb-xjc.jar

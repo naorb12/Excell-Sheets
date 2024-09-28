@@ -6,6 +6,7 @@ import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import javafx.scene.paint.Color;
+import sheet.api.Sheet;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
 import sheet.cell.impl.EffectiveValueImpl;
@@ -92,7 +93,7 @@ public class Engine implements Serializable {
                 cells.put(coord, cell);
             }
             // Step 4: Handle Ranges - Validate and add ranges
-            validateAndAddRanges(generatedSheet);
+            validateAndAddRanges(generatedSheet, mappedSheet);
 
             mappedSheet.setCells(cells);
 
@@ -132,7 +133,7 @@ public class Engine implements Serializable {
         return cell;
     }
 
-    private void validateAndAddRanges(STLSheet generatedSheet) throws InvalidXMLFormatException {
+    private void validateAndAddRanges(STLSheet generatedSheet, Sheet sheet) throws InvalidXMLFormatException {
         if (generatedSheet.getSTLRanges() == null || generatedSheet.getSTLRanges().getSTLRange().isEmpty()) {
             return;
         }
@@ -360,6 +361,12 @@ public class Engine implements Serializable {
         return filteredSheet;
     }
 
+    public SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
+        SheetDTO sheetDTO = sheet.applyDynamicAnalysis(coordinate, newValue);
+
+        return sheetDTO;
+    }
+
     public void setBackgroundColor(int row, int col, Color color) {
         sheet.setBackgroundColor(row, col, color);
     }
@@ -381,5 +388,6 @@ public class Engine implements Serializable {
     public List<Double> getRangeNumericValues(List<Coordinate> range) {
         return sheet.getRangeNumericValues(range);
     }
+
 
 }

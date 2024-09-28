@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/DTO</output-path>
     <root id="archive" name="DTO.jar">
       <element id="module-output" name="DTO" />
+      <element id="library" level="project" name="javafx-swt" />
     </root>
   </artifact>
 </component>

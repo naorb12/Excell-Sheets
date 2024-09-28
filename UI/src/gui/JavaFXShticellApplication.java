@@ -11,7 +11,7 @@ import java.net.URL;
 
 public class JavaFXShticellApplication extends Application {
 
-    private static final String SPREAD_SHEET_FXML_PATH = "/Controller/src/main/borderpane.fxml";
+    private static final String SPREAD_SHEET_FXML_PATH = "/main/borderpane.fxml";
 
 
     @Override
@@ -32,7 +32,7 @@ public class JavaFXShticellApplication extends Application {
 
         primaryStage.setTitle("Shticell");
         primaryStage.setScene(scene);
-        primaryStage.getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Light_Theme.css").toExternalForm());
+        primaryStage.getScene().getStylesheets().add(getClass().getResource("/main/css/Light_Theme.css").toExternalForm());
         primaryStage.show();
     }
 

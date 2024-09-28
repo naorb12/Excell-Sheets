@@ -33,13 +33,13 @@ public class MainController {
             sharedModel = new SharedModel();
 
             // Load and set the center section first (initialize centerController first)
-            FXMLLoader centerLoader = new FXMLLoader(getClass().getResource("/Controller/src/center/centerSection.fxml"));
+            FXMLLoader centerLoader = new FXMLLoader(getClass().getResource("/center/centerSection.fxml"));
             ScrollPane centerPane = centerLoader.load();
             centerController = centerLoader.getController();  // Assign centerController here
             mainBorderPane.setCenter(centerPane);
 
             // Load and set the top section
-            FXMLLoader topLoader = new FXMLLoader(getClass().getResource("/Controller/src/top/topSection.fxml"));
+            FXMLLoader topLoader = new FXMLLoader(getClass().getResource("/top/topSection.fxml"));
             VBox topPane = topLoader.load();
             topController = topLoader.getController();
             topController.setCenterController(centerController);  // Now set the centerController in top
@@ -49,7 +49,7 @@ public class MainController {
             mainBorderPane.setTop(topPane);
 
             // Load and set the left section
-            FXMLLoader leftLoader = new FXMLLoader(getClass().getResource("/Controller/src/left/leftSection.fxml"));
+            FXMLLoader leftLoader = new FXMLLoader(getClass().getResource("/left/leftSection.fxml"));
             VBox leftPane = leftLoader.load();
             leftController = leftLoader.getController();
             leftController.setCenterController(centerController);  // Set centerController here

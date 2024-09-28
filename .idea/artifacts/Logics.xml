@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/out/artifacts/Logics</output-path>
     <root id="archive" name="Logics.jar">
       <element id="module-output" name="Logics" />
+      <element id="library" level="project" name="javafx-swt" />
     </root>
   </artifact>
 </component>

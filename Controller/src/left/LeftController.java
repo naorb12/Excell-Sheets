@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 import left.design.DesignPopUpController;
+import left.dynamic.DynamicAnalysisController;
 import left.graph.GraphPopUpController;
 import left.sort.and.filter.SortingAndFilteringController;
 import main.SharedModel;
@@ -32,6 +33,8 @@ public class LeftController {
     private Button sortingFilteringButton;
     @FXML
     private Button graphsButton;
+    @FXML
+    private Button dynamicAnalysisButton;
 
     // Range
     @FXML
@@ -57,6 +60,7 @@ public class LeftController {
     private Stage designPopUp = new Stage();
     private Stage sortingFilteringPopUp = new Stage();
     private Stage graphsPopUp = new Stage();
+    private Stage dynamicAnalysisPopUp = new Stage();
 
     private SharedModel sharedModel;
 
@@ -69,6 +73,7 @@ public class LeftController {
         designButton.setOnAction(event -> handleDesignButtonAction());
         sortingFilteringButton.setOnAction(event -> handleSortingFilteringButtonAction());
         graphsButton.setOnAction(event -> handleGraphsButtonAction());
+        dynamicAnalysisButton.setOnAction(event -> handleDynamicAnalysisButtonAction());
 
         // Set up the ComboBox with the list of range names
         // Assuming sharedModel has a boolean property `isFileLoadedProperty`
@@ -86,6 +91,7 @@ public class LeftController {
 
     }
 
+
     public void setupBindings() {
         // Bind buttons to the sheetLoaded property from sharedModel
         deleteRangeButton.disableProperty().bind(Bindings.isNull(rangeComboBox.valueProperty()));
@@ -97,6 +103,9 @@ public class LeftController {
                 sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
         );
         graphsButton.disableProperty().bind(
+                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+        );
+        dynamicAnalysisButton.disableProperty().bind(
                 sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
         );
 
@@ -132,7 +141,7 @@ public class LeftController {
             sharedModel.getAnimationController().fade(designButton);
             designPopUp = new Stage();
             // Load the design pop-up FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/design/designPopup.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/left/design/designPopUp.fxml"));
             Parent root = loader.load();
 
             // Get the CommandsPopupController from the FXML
@@ -158,7 +167,7 @@ public class LeftController {
             sharedModel.getAnimationController().fade(sortingFilteringButton);
             sortingFilteringPopUp = new Stage();
             // Load the sorting and filtering pop-up FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/sort/and/filter/sortAndFilterPopUp.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/left/sort/and/filter/sortAndFilterPopUp.fxml"));
             Parent root = loader.load();
 
             // Get the CommandsPopupController from the FXML
@@ -185,7 +194,7 @@ public class LeftController {
             sharedModel.getAnimationController().fade(graphsButton);
             graphsPopUp = new Stage();
             // Load the design pop-up FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Controller/src/left/graph/graphsPopUp.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/left/graph/graphsPopUp.fxml"));
             Parent root = loader.load();
 
             // Get the CommandsPopupController from the FXML
@@ -205,6 +214,33 @@ public class LeftController {
         }
     }
 
+    @FXML
+    private void handleDynamicAnalysisButtonAction() {
+        try {
+            sharedModel.getAnimationController().fade(dynamicAnalysisButton);
+            dynamicAnalysisPopUp = new Stage();
+            // Load the sorting and filtering pop-up FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/left/dynamic/dynamicPopUp.fxml"));
+            Parent root = loader.load();
+
+            // Get the CommandsPopupController from the FXML
+            DynamicAnalysisController dynamicAnalysisController = loader.getController();
+            dynamicAnalysisController.setCenterController(centerController);
+
+            // Set up the pop-up window
+            dynamicAnalysisPopUp.setTitle("Dynamic Analysis");
+            dynamicAnalysisPopUp.setScene(new Scene(root));
+            dynamicAnalysisPopUp.initOwner(dynamicAnalysisButton.getScene().getWindow());
+            dynamicAnalysisPopUp.initModality(Modality.WINDOW_MODAL);
+            dynamicAnalysisPopUp.setResizable(true);
+            dynamicAnalysisPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
+            dynamicAnalysisPopUp.setOnCloseRequest(event -> dynamicAnalysisController.handleRemoveDynamicAnalysis());
+            dynamicAnalysisPopUp.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
     // Method to set the reference to CenterController
@@ -300,7 +336,8 @@ public class LeftController {
     }
 
     // Populate the ComboBox with ranges from the sheet
-    private void populateSelectors() {
+    @FXML
+    public void populateSelectors() {
         if (centerController != null) {
             SheetDTO sheet = centerController.getEngine().getSheet();
 
@@ -313,8 +350,10 @@ public class LeftController {
     // Helper method to format a list of coordinates as a string for display
     private String formatCoordinates(List<Coordinate> coordinates) {
         StringBuilder formatted = new StringBuilder();
-        for (Coordinate coord : coordinates) {
-            formatted.append(coord.toString()).append(", ");
+        if(coordinates != null) {
+            for (Coordinate coord : coordinates) {
+                formatted.append(coord.toString()).append(", ");
+            }
         }
         return formatted.length() > 0 ? formatted.substring(0, formatted.length() - 2) : "";  // Remove the last comma
     }

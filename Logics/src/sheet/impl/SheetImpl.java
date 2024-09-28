@@ -579,6 +579,29 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         return (SheetDTO) filteredSheet;
     }
 
+    @Override
+    public SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
+        SheetImpl dynamicSheet = new SheetImpl(rowsCount, columnsCount, rowsHeight, columnsWidth);
+        dynamicSheet.setRanges(getDeepCopiedRanges());
+        Map<Coordinate, Cell> mutableMap = copyActiveCells();
+        dynamicSheet.setCellsForDynamicAnalysis(mutableMap);
+        dynamicSheet.setCell(coordinate.getRow(), coordinate.getColumn(), newValue.toString());
+
+
+        return dynamicSheet;
+    }
+
+    private void setCellsForDynamicAnalysis(Map<Coordinate, Cell> mutableMap) {
+        // Step 1: Initialize activeCells with a copy of the provided cells map
+        this.activeCells = new HashMap<>(mutableMap);
+
+        // Step 2: Loop through each cell to update dependencies and check for loops
+        for (Map.Entry<Coordinate, Cell> entry : this.activeCells.entrySet()) {
+            Coordinate coordinate = entry.getKey();
+            Cell cell = entry.getValue();
+        }
+
+    }
 
 
     private void setCellsForSortAndFilter(Map<Coordinate, Cell> cells) {
@@ -594,12 +617,23 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
     @Override
     public void setBackgroundColor(int row, int col, Color color) {
+        if( activeCells.get(new Coordinate(row,col)) == null) {
+            CellImpl cell = new CellImpl(row, col, "");
+            activeCells.put(new Coordinate(row,col), cell);
+
+        }
         activeCells.get(new Coordinate(row,col)).setBackgroundColor(color);
     }
 
     @Override
     public void setTextColor(int row, int col, Color color) {
-        activeCells.get(new Coordinate(row,col)).setForegroundColor(color);
+        if( activeCells.get(new Coordinate(row,col)) == null) {
+            CellImpl cell = new CellImpl(row, col, "");
+            activeCells.put(new Coordinate(row,col), cell);
+
+        }
+        activeCells.get(new Coordinate(row, col)).setForegroundColor(color);
+
     }
 
     @Override
@@ -634,7 +668,14 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
     }
 
-
-
+    public Map<String, List<Coordinate>> getDeepCopiedRanges() {
+        Map<String, List<Coordinate>> deepCopiedRanges = new HashMap<>();
+        for (Map.Entry<String, List<Coordinate>> entry : this.getAllRanges().entrySet()) {
+            // Deep copy of the list of coordinates for each range
+            List<Coordinate> copiedCoordinates = new ArrayList<>(entry.getValue()); // Shallow copy of the list (the coordinates are immutable or we assume they won't change)
+            deepCopiedRanges.put(entry.getKey(), copiedCoordinates);
+        }
+        return deepCopiedRanges;
+    }
 
 }

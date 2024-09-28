@@ -1,6 +1,6 @@
 /* General app background */
 .root {
-    -fx-background-color: #e0f7fa;  /* Light blue background */
+    -fx-background-color: #d4f0f5;  /* Softer light blue for a more gentle background */
 }
 
 /* Title Label */
@@ -10,6 +10,7 @@
     -fx-text-fill: #01579b;  /* Dark blue text */
     -fx-padding: 10px;
     -fx-alignment: center;
+    -fx-font-family: "Berlin Sans FB";  /* Original Font */
 }
 
 /* Buttons Styling */
@@ -20,6 +21,7 @@
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
     -fx-padding: 10 20 10 20;
+    -fx-font-family: "Berlin Sans FB";  /* Original Font */
 }
 
 .button:hover {
@@ -34,6 +36,7 @@
     -fx-padding: 10px 15px;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
+    -fx-font-family: "Berlin Sans FB";  /* Original Font */
 }
 
 #loadFileButton:hover, #updateValueButton:hover, #commandsbutton:hover, #rangesButton:hover {
@@ -74,13 +77,11 @@
 }
 
 /* ScrollPane and GridPane styling for the main grid area */
-.scroll-pane > .viewport{
-    -fx-background-color: #b3e5fc;
+.scroll-pane > .viewport {
+    -fx-background-color: #bde4f6;
     -fx-border-color: #81d4fa;
     -fx-padding: 10px;
 }
-
-
 
 .grid-pane {
     -fx-background-color: #b3e5fc;
@@ -103,8 +104,8 @@
 }
 
 /* Apply hover effect for the cells in the grid */
-.scroll-pane .cell:hover ,
-.selected-cell{
+.scroll-pane .cell:hover,
+.selected-cell {
     -fx-background-color: rgba(204, 216, 255, 0.73);  /* Light blue background on hover */
     -fx-border-color: #000000;  /* Border color for hovered cell */
     -fx-border-width: 1px;
@@ -133,14 +134,21 @@
     -fx-pref-height: 100%;
     -fx-font-size: 1em;  /* Adjust this value as needed */
     -fx-font-weight: bold;
+    -fx-font-family: "Berlin Sans FB";  /* Original Font */
 }
 
-.combo-box .list-cell:hover{
+.combo-box .list-cell:hover {
     -fx-text-fill: black;
 }
 
-#scrollPaneGridpane #spreadsheetGridPane{
+#scrollPaneGridpane #spreadsheetGridPane {
     -fx-padding: 10;
     -fx-border-insets: 5;
     -fx-background-color: #e0f7fa;
+}
+
+.cell, .header {
+    -fx-border-width: 0.5px;
+    -fx-border-style: solid;
+    -fx-padding: 0px;  /* Consistent padding for both cells and headers */
 }

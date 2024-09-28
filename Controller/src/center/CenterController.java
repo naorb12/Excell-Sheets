@@ -346,6 +346,11 @@ public class CenterController {
         isFiltered = true;
     }
 
+    public void applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
+        SheetDTO dynamicAnalysisSheet = engine.applyDynamicAnalysis(coordinate, newValue);
+        renderGrid(dynamicAnalysisSheet);
+    }
+
     // Restore original cell styles (e.g., colors)
     private void restoreOriginalStyles() {
         // Clear any existing styles
@@ -433,4 +438,9 @@ public class CenterController {
         spreadsheetGridPane.setMouseTransparent(false);
     }
 
+    public void updateValueBySlider(Coordinate coordinate, double value) {
+        engine.setCell(coordinate.getRow(), coordinate.getColumn(), String.valueOf(value));
+        renderGridPane();
+        topController.populateVersionSelector();
+    }
 }

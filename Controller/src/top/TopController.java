@@ -2,6 +2,7 @@ package top;
 
 import center.CenterController;
 import immutable.objects.SheetDTO;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -130,13 +131,13 @@ public class TopController {
         // Apply the selected stylesheet
         switch (selectedStyle) {
             case "Dark Theme":
-                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Dark_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/main/css/Dark_Theme.css").toExternalForm());
                 break;
             case "Blue Theme":
-                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Blue_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/main/css/Blue_Theme.css").toExternalForm());
                 break;
             default:
-                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/Controller/src/main/css/Light_Theme.css").toExternalForm());
+                sharedModel.getPrimaryStage().getScene().getStylesheets().add(getClass().getResource("/main/css/Light_Theme.css").toExternalForm());
                 break;
         }
     }
@@ -191,13 +192,21 @@ public class TopController {
 
         // When the task is complete, hide the progress bar and update UI
         loadTask.setOnSucceeded(event -> {
-            populateVersionSelector();
-            System.out.println("XML file loaded and validated successfully.");
-            sharedModel.setSheetLoaded(true);
-            centerController.renderGridPane();  // Trigger rendering of the grid
+            Platform.runLater(() -> {
+                // Update the version selector in the TopController
+                populateVersionSelector();
 
-            // Hide the progress bar
-            progressBar.setVisible(false);
+                // Update the range combo box in the LeftController
+                if (leftController != null) {
+                    leftController.populateSelectors();
+                }
+
+                sharedModel.setSheetLoaded(true);
+                centerController.renderGridPane();  // Trigger rendering of the grid
+
+                // Hide the progress bar
+                progressBar.setVisible(false);
+            });
         });
 
         loadTask.setOnFailed(event -> {
