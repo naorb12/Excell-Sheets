@@ -1,16 +1,13 @@
 package expression.impl.numeric.ranges;
 
-import engine.Engine;
 import expression.api.Expression;
 import expression.api.RangeBasedExpression;
-import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellType;
 import sheet.cell.impl.EffectiveValueImpl;
 import sheet.coordinate.Coordinate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AverageExpression implements Expression, RangeBasedExpression {

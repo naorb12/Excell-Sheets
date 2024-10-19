@@ -1,6 +1,6 @@
 package center;
 
-import engine.Engine;
+import sheet.manager.SheetManager;
 import exception.InvalidXMLFormatException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
@@ -38,7 +38,7 @@ public class CenterController {
 
     private TopController topController;
 
-    private Engine engine;
+    private SheetManager sheetManager;
 
     // Track original states of the grid for undoing sort
     private Map<Coordinate, CellDTO> originalCells;
@@ -52,13 +52,13 @@ public class CenterController {
     private SimpleBooleanProperty isFileSelected = new SimpleBooleanProperty(false);
 
     public void initialize() {
-        engine = new Engine();
+        sheetManager = new SheetManager();
     }
 
     @FXML
     public void renderGridPane() {
-        // Render the grid from the engine's sheet data
-        renderGrid(engine.getSheet());
+        // Render the grid from the sheetManager's sheet data
+        renderGrid(sheetManager.getSheet());
     }
 
     public void renderGrid(SheetDTO sheet) {
@@ -72,10 +72,10 @@ public class CenterController {
             return;
         }
 
-        int rows = engine.getSheet().getRowCount();
-        int cols = engine.getSheet().getColumnCount();
-        int rowHeight = engine.getSheet().getRowHeightUnits();  // Assuming you have these methods in the engine
-        int colWidth = engine.getSheet().getColumnsWidthUnits();
+        int rows = sheetManager.getSheet().getRowCount();
+        int cols = sheetManager.getSheet().getColumnCount();
+        int rowHeight = sheetManager.getSheet().getRowHeightUnits();  // Assuming you have these methods in the sheetManager
+        int colWidth = sheetManager.getSheet().getColumnsWidthUnits();
 
         // Set up row and column constraints
         for (int i = 0; i <= cols; i++) {
@@ -261,7 +261,7 @@ public class CenterController {
             label.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, new Insets(0))));
         }
 
-        engine.setBackgroundColor(row, col, color);
+        sheetManager.setBackgroundColor(row, col, color);
     }
 
     public void updateCellTextColor(String cell, Color color) {
@@ -273,7 +273,7 @@ public class CenterController {
             label.setTextFill(color);
         }
 
-        engine.setTextColor(row, col, color);
+        sheetManager.setTextColor(row, col, color);
     }
 
     public void undoCellColor(String cell) {
@@ -286,13 +286,13 @@ public class CenterController {
             label.setTextFill(null);
             label.setStyle("");
             label.getStyleClass().add("label");    // Reset the text color, allowing the theme to apply
-            engine.undoColor(row,col);
+            sheetManager.undoColor(row,col);
         }
     }
 
     public void applySorting(String fromCell, String toCell, List<Integer> columnsToSortBy) throws InvalidXMLFormatException {
         try {
-            SheetDTO sortedSheet = engine.sortSheet(fromCell, toCell, columnsToSortBy);
+            SheetDTO sortedSheet = sheetManager.sortSheet(fromCell, toCell, columnsToSortBy);
             // render gridpane by sortedSheet.
             renderGrid(sortedSheet);
 
@@ -309,7 +309,7 @@ public class CenterController {
     // Save original state of the grid (before sorting)
     private void saveOriginalState() {
         // Save the original cell data and their styles
-        originalCells = engine.getSheet().getMapOfCellsDTO(); // Assuming the engine provides this method
+        originalCells = sheetManager.getSheet().getMapOfCellsDTO(); // Assuming the sheetManager provides this method
 
         // Save styled labels (e.g., with colors)
         originalStyledLabels = new HashSet<>();
@@ -324,7 +324,7 @@ public class CenterController {
     public void removeSorting() {
         if (isSorted) {
             // Re-render the original grid
-            renderGrid(engine.getSheet());
+            renderGrid(sheetManager.getSheet());
 
             isSorted = false; // Mark that sorting has been removed
         }
@@ -332,14 +332,14 @@ public class CenterController {
 
     public void removeFiltering() {
         if (isFiltered) {
-            renderGrid(engine.getSheet());
+            renderGrid(sheetManager.getSheet());
             isFiltered = false;
         }
     }
 
 
     public void applyFiltering(String fromCell, String toCell, Set<String> selectedWordsSet ) throws InvalidXMLFormatException {
-        SheetDTO filteredSheet = engine.filterSheet(fromCell, toCell, selectedWordsSet );
+        SheetDTO filteredSheet = sheetManager.filterSheet(fromCell, toCell, selectedWordsSet );
         // render gridpane by sortedSheet.
         renderGrid(filteredSheet);
 
@@ -347,7 +347,7 @@ public class CenterController {
     }
 
     public void applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
-        SheetDTO dynamicAnalysisSheet = engine.applyDynamicAnalysis(coordinate, newValue);
+        SheetDTO dynamicAnalysisSheet = sheetManager.applyDynamicAnalysis(coordinate, newValue);
         renderGrid(dynamicAnalysisSheet);
     }
 
@@ -384,8 +384,8 @@ public class CenterController {
         return null;  // Return null if no node is found at the specified position
     }
 
-    public Engine getEngine() {
-        return engine;
+    public SheetManager getEngine() {
+        return sheetManager;
     }
 
     @FXML
@@ -439,7 +439,7 @@ public class CenterController {
     }
 
     public void updateValueBySlider(Coordinate coordinate, double value) {
-        engine.setCell(coordinate.getRow(), coordinate.getColumn(), String.valueOf(value));
+        sheetManager.setCell(coordinate.getRow(), coordinate.getColumn(), String.valueOf(value));
         renderGridPane();
         topController.populateVersionSelector();
     }

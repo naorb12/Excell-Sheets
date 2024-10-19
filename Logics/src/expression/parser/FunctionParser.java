@@ -1,6 +1,6 @@
 package expression.parser;
 
-import engine.Engine;
+import sheet.manager.SheetManager;
 import expression.api.Expression;
 import expression.impl.bool.*;
 import expression.impl.numeric.*;
@@ -11,8 +11,6 @@ import expression.impl.string.SubExpression;
 import expression.impl.string.UpperCaseExpression;
 import expression.impl.system.IdentityExpression;
 import expression.impl.system.RefExpression;
-import immutable.objects.CellDTO;
-import sheet.api.Sheet;
 import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
 
@@ -249,7 +247,7 @@ public enum FunctionParser {
 
             String refCell = arguments.get(0).trim().toUpperCase();
             Coordinate target = new Coordinate(refCell.charAt(1) - '0', refCell.charAt(0) - 'A' + 1);
-            if(!Engine.isWithinBounds(target.getRow(), target.getColumn()))
+            if(!SheetManager.isWithinBounds(target.getRow(), target.getColumn()))
             {
                 throw new RuntimeException();
             }
@@ -556,7 +554,7 @@ public enum FunctionParser {
         try {
             int row = Integer.parseInt(cellReference.substring(1));  // Assuming row is after the first character
             int column = cellReference.charAt(0) - 'A' + 1;
-            Engine.isWithinBounds(row, column);
+            SheetManager.isWithinBounds(row, column);
             // Convert column letter to number
             return new Coordinate(row, column);
         }catch (Exception e) {

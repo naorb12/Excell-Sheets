@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.dashboard.DashboardController" spacing="10" alignment="CENTER">
+    <!-- Title -->
+    <Label text="Dashboard of Sheets" style="-fx-font-size: 24px;"/>
+
+    <!-- TableView to Display Sheets -->
+    <TableView fx:id="sheetTableView" prefHeight="400.0" prefWidth="600.0">
+        <columns>
+            <TableColumn fx:id="sheetNameColumn" text="Sheet Name"/>
+            <TableColumn fx:id="ownerColumn" text="Owner"/>
+            <TableColumn fx:id="sheetSizeColumn" text="Size"/>
+            <TableColumn fx:id="permissionColumn" text="Permission"/>
+        </columns>
+    </TableView>
+
+    <!-- Buttons for Adding and Viewing Sheets -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="addSheetButton" text="Add New Sheet" onAction="#onAddSheet"/>
+        <Button fx:id="viewSheetButton" text="View Selected Sheet" onAction="#onViewSheet" disable="true"/>
+        <Button fx:id="logoutButton" text="Logout" onAction="#logout"/>
+    </HBox>
+</VBox>

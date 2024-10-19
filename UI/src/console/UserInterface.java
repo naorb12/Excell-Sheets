@@ -1,6 +1,6 @@
 package console;
 
-import engine.Engine;
+import sheet.manager.SheetManager;
 import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
@@ -14,12 +14,12 @@ import java.util.Optional;
 import java.util.Scanner;
 
 public class UserInterface {
-    private Engine engine;
+    private SheetManager sheetManager;
     private Scanner scanner;
 
 
-    public UserInterface(Engine engine) {
-        this.engine = engine;
+    public UserInterface(SheetManager sheetManager) {
+        this.sheetManager = sheetManager;
         this.scanner = new Scanner(System.in);
     }
 
@@ -82,16 +82,16 @@ public class UserInterface {
     }
 
     private void displayPreviousVersions() {
-        if(engine.getSheet() != null) {
+        if(sheetManager.getSheet() != null) {
             try {
-                System.out.println("Enter the version number you want to peek at range of 1-" + engine.getSheet().getVersion() + ": ");
+                System.out.println("Enter the version number you want to peek at range of 1-" + sheetManager.getSheet().getVersion() + ": ");
                 int version = Integer.parseInt(scanner.nextLine());
 
-                // Ask the engine to get the specified version of the sheet
-                SheetDTO sheetVersion = engine.peekVersion(version);
+                // Ask the sheetManager to get the specified version of the sheet
+                SheetDTO sheetVersion = sheetManager.peekVersion(version);
 
                 if (sheetVersion != null) {
-                    int cellsChanged = engine.countAmountOfCellsChangedFromPreviousVersions(sheetVersion);
+                    int cellsChanged = sheetManager.countAmountOfCellsChangedFromPreviousVersions(sheetVersion);
                     System.out.println("Displaying sheet version (" + version + ") With (" + cellsChanged + ") cells updated in that version:");
                     presentSpecificSheet(sheetVersion);  // Display the retrieved version
                 } else {
@@ -174,7 +174,7 @@ public class UserInterface {
 
         try {
             STLSheet sheet = loader.loadXML(filePath);
-            engine.mapSTLSheet(sheet);
+            sheetManager.mapSTLSheet(sheet);
             System.out.println("XML file loaded and validated successfully.");
         } catch (Exception e) {
             System.out.println("Failed to load and validate XML: " + e.getMessage());
@@ -182,7 +182,7 @@ public class UserInterface {
     }
 
     public void presentCurrentSheet() {
-        SheetDTO sheet = engine.getSheet();
+        SheetDTO sheet = sheetManager.getSheet();
         if(sheet != null) {
             presentSpecificSheet(sheet);
         }
@@ -192,13 +192,13 @@ public class UserInterface {
     }
 
     public void displayCell() {
-        SheetDTO sheet = engine.getSheet();
+        SheetDTO sheet = sheetManager.getSheet();
         try {
         if(sheet != null) {
             Coordinate coord = inputCell();
 
-            // Retrieve the cell from the engine
-            CellDTO cell = engine.getCell(coord.getRow(), coord.getColumn()); // Adjusting row index (1-based to 0-based)
+            // Retrieve the cell from the sheetManager
+            CellDTO cell = sheetManager.getCell(coord.getRow(), coord.getColumn()); // Adjusting row index (1-based to 0-based)
 
             // Display the details of the cell
             printCell(cell);
@@ -249,13 +249,13 @@ public class UserInterface {
     }
 
     public void setCell() {
-        SheetDTO sheet = engine.getSheet();
+        SheetDTO sheet = sheetManager.getSheet();
         if(sheet != null) {
         try {
             Coordinate coord = inputCell();
             System.out.println("Enter your input: ");
             String input = scanner.nextLine();
-            engine.setCell(coord.getRow(), coord.getColumn(), input);
+            sheetManager.setCell(coord.getRow(), coord.getColumn(), input);
             System.out.println("Cell: " + (char) (coord.getColumn() + 'A' - 1) + coord.getRow() + " has been updated in the sheet.");
             System.out.println();
             presentCurrentSheet();
@@ -281,7 +281,7 @@ public class UserInterface {
                 int row = Integer.parseInt(input.substring(1)) ;
                 int col = input.charAt(0) - 'A' + 1; // Convert column letter to index
 
-                if (engine.isWithinBounds(row, col)) {
+                if (sheetManager.isWithinBounds(row, col)) {
                     return new Coordinate(row, col);
                 } else {
                     return null;
@@ -305,7 +305,7 @@ public class UserInterface {
         try {
             System.out.println("Enter the file path to save the state:");
             String filePath = scanner.nextLine();
-            engine.saveStateToFile(filePath);
+            sheetManager.saveStateToFile(filePath);
             System.out.println("State saved successfully.");
         }
         catch (Exception e) {
@@ -318,9 +318,9 @@ public class UserInterface {
         try{
             System.out.println("Enter the file path to load the state:");
             String filePath = scanner.nextLine();
-            Engine newEngine = new Engine();
-            newEngine = Engine.loadStateFromFile(filePath);
-            engine = Engine.loadStateFromFile(filePath);
+            SheetManager newSheetManager = new SheetManager();
+            newSheetManager = SheetManager.loadStateFromFile(filePath);
+            sheetManager = SheetManager.loadStateFromFile(filePath);
             System.out.println("State loaded successfully.");
         }
         catch (Exception e) {

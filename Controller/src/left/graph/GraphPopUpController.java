@@ -94,7 +94,7 @@ public class GraphPopUpController {
             String fromY = fromCellFieldY.getText();
             String toY = toCellFieldY.getText();
 
-            // Call the method to get data from the Engine
+            // Call the method to get data from the SheetManager
             List<Double> xData = getDataFromRange(fromX, toX);
             List<Double> yData = getDataFromRange(fromY, toY);
 
@@ -113,7 +113,7 @@ public class GraphPopUpController {
             String fromY = fromCellFieldY.getText();
             String toY = toCellFieldY.getText();
 
-            // Call the method to get data from the Engine
+            // Call the method to get data from the SheetManager
             List<Double> xData = getDataFromRange(fromX, toX);
             List<Double> yData = getDataFromRange(fromY, toY);
 

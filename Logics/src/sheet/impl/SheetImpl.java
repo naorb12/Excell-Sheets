@@ -1,6 +1,6 @@
 package sheet.impl;
 
-import engine.Engine;
+import sheet.manager.SheetManager;
 import expression.api.Expression;
 import expression.api.RangeBasedExpression;
 import expression.parser.FunctionParser;
@@ -178,7 +178,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
             oldCell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), input);
         }
 
-        SheetImpl oldSheet = (SheetImpl) Engine.createSnapshot();
+        SheetImpl oldSheet = (SheetImpl) SheetManager.createSnapshot();
 
         try {
             Set<Coordinate> oldDependsOnSet = cell != null ? cell.getDependsOn() : null;

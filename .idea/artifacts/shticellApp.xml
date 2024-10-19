@@ -1,0 +1,27 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="shticellApp">
+    <output-path>$PROJECT_DIR$/out/artifacts/shticellApp</output-path>
+    <root id="archive" name="shticellApp.war">
+      <element id="javaee-facet-resources" facet="ShticellServer/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="ShticellServer" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="gson-2.11.0-sources" />
+          <element id="library" level="project" name="javafx-swt" />
+          <element id="library" level="project" name="okhttp" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-jxc.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-xjc.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-core.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-impl.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/angus-activation.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jakarta.xml.bind-api.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jakarta.activation-api.jar" />
+          <element id="dir-copy" path="$PROJECT_DIR$" />
+          <element id="artifact" artifact-name="Logics" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

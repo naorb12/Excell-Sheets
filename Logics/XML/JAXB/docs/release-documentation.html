@@ -825,7 +825,7 @@ PersonEx p = (PersonEx)u.unmarshal(<span class="ReservedWord">new</span> StringR
       <span class="Identifier">printMethod</span>=<span class="String">"org.acme.foo.DateAdapter.printDate"</span><span class="ReservedWord">
     /&gt;</span>
   <span class="ReservedWord">&lt;/globalBindings&gt;</span>
-<span class="ReservedWord">&lt;/bindings&gt;</span></pre></div></div><br class="example-break"></div></div><div lang="en" class="section" id="annotating-your-classes"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.&nbsp;Annotating Your Classes</h2></div></div></div><div lang="en" class="section" id="annotating-your-classes-mapping-your-favorite-class"><div class="titlepage"><div><div><h3 class="title">3.1.&nbsp;Mapping your favorite class</h3></div></div></div><div class="section" id="ResultSet"><div class="titlepage"><div><div><h4 class="title">3.1.1.&nbsp;ResultSet</h4></div></div></div><p>Jakarta XML Binding (or any other databinding engine, for that matter) is for
+<span class="ReservedWord">&lt;/bindings&gt;</span></pre></div></div><br class="example-break"></div></div><div lang="en" class="section" id="annotating-your-classes"><div class="titlepage"><div><div><h2 class="title" style="clear: both">3.&nbsp;Annotating Your Classes</h2></div></div></div><div lang="en" class="section" id="annotating-your-classes-mapping-your-favorite-class"><div class="titlepage"><div><div><h3 class="title">3.1.&nbsp;Mapping your favorite class</h3></div></div></div><div class="section" id="ResultSet"><div class="titlepage"><div><div><h4 class="title">3.1.1.&nbsp;ResultSet</h4></div></div></div><p>Jakarta XML Binding (or any other databinding sheetManager, for that matter) is for
         binding strongly-typed POJO-like objects to XML, such as
         <code class="literal">AddressBook</code> class, <code class="literal">PurchaseOrder</code> class, and
         so on, where you have fields and methods that shape a class.</p><p>There are other kinds of classes that are more close to
@@ -1583,7 +1583,7 @@ o = dr.getDocument();</pre></div></div><br class="example-break"><p>Similar mech
         is much more efficient than first marshalling to
         <code class="literal">ByteArrayOutputStream</code> and then read it back into these
         DOMs. The same mechanism can be used to marshal to FastInfoset or send the
-        marshaled document to an XSLT engine (<code class="literal">TransformerHandler</code>.)</p><p>The other interesting connector is <code class="literal">JAXBSource</code>,
+        marshaled document to an XSLT sheetManager (<code class="literal">TransformerHandler</code>.)</p><p>The other interesting connector is <code class="literal">JAXBSource</code>,
         which wraps a marshaller and allows a Jakarta XML Binding object to be used as a
         "source" of XML. Many XML APIs take <code class="literal">Source</code> as an input,
         and now Jakarta XML Binding object can be passed to them directly.</p><p>For example, you can marshal a Jakarta XML Binding object and unmarshal it into
