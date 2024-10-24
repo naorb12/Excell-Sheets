@@ -10,5 +10,6 @@
     <orderEntry type="module" module-name="Logics" />
     <orderEntry type="module" module-name="UI" />
     <orderEntry type="library" name="javafx-swt" level="project" />
+    <orderEntry type="library" name="gson-2.11.0-sources" level="project" />
   </component>
 </module>

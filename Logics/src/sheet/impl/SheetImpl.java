@@ -1,6 +1,6 @@
 package sheet.impl;
 
-import sheet.manager.SheetManager;
+import engine.manager.SheetManager;
 import expression.api.Expression;
 import expression.api.RangeBasedExpression;
 import expression.parser.FunctionParser;
@@ -39,6 +39,17 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     }
 
     public SheetImpl() {}
+
+    public SheetImpl(String name, int version, int columnCount, int rowCount, int columnsWidthUnits, int rowHeightUnits, Map<Coordinate, Cell> mapOfCells, Map<String, List<Coordinate>> ranges) {
+        this.name = name;
+        this.version = version;
+        this.columnsCount = columnCount;
+        this.rowsCount = rowCount;
+        this.columnsWidth = columnsWidthUnits;
+        this.rowsHeight = rowHeightUnits;
+        this.ranges = ranges;
+        this.activeCells = mapOfCells;
+    }
 
     @Override
     public Map<Coordinate, Cell> copyActiveCells(){
@@ -190,7 +201,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
                 cell.setOriginalValue(input);
             }
 
-            Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+            Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input, this);
             cell.setDependsOn(newDependsOnSet);
 
             updateDependencies(coordinate, cell, oldDependsOnSet, input);
@@ -222,7 +233,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         removeOldDependencies(coordinate, oldDependsOnSet);
 
         // Step 2: Parse and add new dependencies
-        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input);
+        Set<Coordinate> newDependsOnSet = FunctionParser.parseDependsOn(input, this);
 
         if (isRangeFunction(input)) {
             addRangeDependencies(coordinate, input, newDependsOnSet);  // Handle ranges
@@ -357,7 +368,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
                 // Check if the range name is directly referenced in the original value
                 if (originalValue.contains(rangeName)) {
                     // Parse the expression to ensure it's a valid reference
-                    Expression expression = FunctionParser.parseExpression(originalValue);
+                    Expression expression = FunctionParser.parseExpression(originalValue, this);
 
                     // If the expression involves the range, return true
                     if (expressionUsesRange(expression, rangeName)) {

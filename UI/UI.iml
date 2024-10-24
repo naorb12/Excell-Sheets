@@ -11,7 +11,7 @@
     <orderEntry type="module" module-name="DTO" />
     <orderEntry type="module" module-name="XML" />
     <orderEntry type="module-library">
-      <library>
+      <library name="jaxb">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/angus-activation.jar!/" />
           <root url="jar://$MODULE_DIR$/../Logics/XML/JAXB/mod/jakarta.activation-api.jar!/" />

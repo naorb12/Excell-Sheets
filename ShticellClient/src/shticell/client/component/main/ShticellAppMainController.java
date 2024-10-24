@@ -46,7 +46,7 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
 
         // prepare components
         loadLoginPage();
-        loadChatRoomPage();
+        loadDashboard();
     }
 
     public void updateUserName(String userName) {
@@ -81,7 +81,7 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
         }
     }
 
-    private void loadChatRoomPage() {
+    private void loadDashboard() {
         URL loginPageUrl = getClass().getResource(DASHBOARD_FXML_RESOURCE_LOCATION);
         try {
             FXMLLoader fxmlLoader = new FXMLLoader();

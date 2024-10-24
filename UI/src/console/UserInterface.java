@@ -1,6 +1,6 @@
 package console;
 
-import sheet.manager.SheetManager;
+import engine.manager.SheetManager;
 import exception.OutOfBoundsException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;

@@ -1,4 +1,4 @@
-package sheet.manager;
+package engine.manager;
 
 import exception.CalculationException;
 import exception.InvalidXMLFormatException;
@@ -24,6 +24,10 @@ public class SheetManager implements Serializable {
 
     private static final int MAX_ROWS = 50;
     private static final int MAX_COLS = 20;
+
+
+
+
     private static SheetImpl sheet;
     // Version history
     private Map<Integer, SheetDTO> versionHistory = new HashMap<>();
@@ -43,6 +47,9 @@ public class SheetManager implements Serializable {
         return sheet;
     }
 
+    public static void setSheet(SheetImpl sheet) {
+        SheetManager.sheet = sheet;
+    }
 
     public CellDTO getCell(int row, int col) {
         return (CellDTO) sheet.getCellDTO(row, col);

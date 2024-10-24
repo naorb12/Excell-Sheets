@@ -22,5 +22,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Tomcat 10.1.26" level="application_server_libraries" />
     <orderEntry type="module" module-name="Logics" />
     <orderEntry type="library" name="gson-2.11.0-sources" level="project" />
+    <orderEntry type="module" module-name="XML" />
+    <orderEntry type="module" module-name="DTO" />
   </component>
 </module>

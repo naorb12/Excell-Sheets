@@ -159,3 +159,11 @@
     -fx-border-style: solid;
     -fx-padding: 0px;  /* Consistent padding for both cells and headers */
 }
+
+.table-view{
+    -fx-text-fill: black;
+}
+
+.table-row-cell {
+    -fx-text-fill: black;
+}

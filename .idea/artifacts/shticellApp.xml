@@ -6,20 +6,20 @@
       <element id="directory" name="WEB-INF">
         <element id="directory" name="classes">
           <element id="module-output" name="ShticellServer" />
+          <element id="module-output" name="DTO" />
+          <element id="module-output" name="UI" />
+          <element id="module-output" name="XML" />
+          <element id="module-output" name="Controller" />
+          <element id="module-output" name="ShticellClient" />
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="gson-2.11.0-sources" />
           <element id="library" level="project" name="javafx-swt" />
           <element id="library" level="project" name="okhttp" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-jxc.jar" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-xjc.jar" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-core.jar" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jaxb-impl.jar" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/angus-activation.jar" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jakarta.xml.bind-api.jar" />
-          <element id="file-copy" path="$PROJECT_DIR$/Logics/XML/JAXB/mod/jakarta.activation-api.jar" />
           <element id="dir-copy" path="$PROJECT_DIR$" />
           <element id="artifact" artifact-name="Logics" />
+          <element id="library" level="project" name="jaxb" />
+          <element id="library" level="module" name="jaxb" module-name="UI" />
         </element>
       </element>
     </root>

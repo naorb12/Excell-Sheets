@@ -104,7 +104,7 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
                 return;
             }
             // Parse and evaluate the expression for this cell
-            Expression expression = FunctionParser.parseExpression(this.originalValue);
+            Expression expression = FunctionParser.parseExpression(this.originalValue, sheet);
             effectiveValue = expression.eval(sheet);
 
             // Now that this cell's value is calculated, update all cells that depend on it

@@ -72,8 +72,7 @@ public class LoginController {
                 if (response.code() != 200) {
                     String responseBody = response.body().string();
                     Platform.runLater(() ->
-                            //errorMessageProperty.set("Something went wrong: " + responseBody)
-                            System.out.println("Something went wrong: " + responseBody)
+                            errorMessageProperty.set("Something went wrong: " + responseBody)
                     );
                 } else {
                     Platform.runLater(() -> {
