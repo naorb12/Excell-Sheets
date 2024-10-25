@@ -43,9 +43,6 @@ public class DashboardController implements Cloneable, ShticellCommands {
     private ShticellAppMainController shticellAppMainController;
 
     @FXML
-    private Label debugInfoLabel;
-
-    @FXML
     private TableView<SheetDTO> sheetTableView;
 
     @FXML
@@ -74,13 +71,6 @@ public class DashboardController implements Cloneable, ShticellCommands {
     @FXML
     public void initialize() {
 
-        SheetDTO testSheet = new SheetImpl("Test Sheet", 1, 10, 5, 100, 100, new HashMap<>(), new HashMap<>());
-        sheetData.add(testSheet);
-
-        // Check if the data is added to the list
-        System.out.println("SheetData size: " + sheetData.size());
-        System.out.println("First sheet name: " + sheetData.get(0).getName());
-
         // Bind columns to the data
         sheetNameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getName()));
         ownerColumn.setCellValueFactory(cellData -> new SimpleStringProperty("Owner"));
@@ -104,10 +94,9 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Listener to enable/disable buttons based on table selection
         sheetTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             viewSheetButton.setDisable(newSelection == null);
-            if (newSelection != null) {
-                debugInfoLabel.setText("Selected sheet: " + newSelection.getName());
-            }
         });
+
+
     }
 
 
