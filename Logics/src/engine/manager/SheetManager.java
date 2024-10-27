@@ -427,4 +427,8 @@ public class SheetManager implements Serializable {
     public void resetUserPermissions() {
         this.userPermissionsMap = new HashMap<>();
     }
+
+    public void handlePermissions(String userName, PermissionStatus status) {
+        userPermissionsMap.get(userName).setUserPermissionStatus(status);
+    }
 }

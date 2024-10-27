@@ -382,7 +382,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Get the name of the selected sheet
         String sheetName = selectedSheet.getName();
         // Prepare the URL for the permission request
-        String url = Constants.REQUEST_READER_PERMISSION + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
+        String url = Constants.REQUEST_PERMISSION + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                 + "&userName=" + URLEncoder.encode(shticellAppMainController.getCurrentUserName(), StandardCharsets.UTF_8) + "&permissionType=" + URLEncoder.encode(PermissionType.READER.toString(), StandardCharsets.UTF_8);
 
         RequestBody emptyBody = RequestBody.create("", MediaType.parse("application/json")); // Use an empty request body
@@ -418,7 +418,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Get the name of the selected sheet
         String sheetName = selectedSheet.getName();
         // Prepare the URL for the permission request
-        String url = Constants.REQUEST_READER_PERMISSION + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
+        String url = Constants.REQUEST_PERMISSION + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                 + "&userName=" + URLEncoder.encode(shticellAppMainController.getCurrentUserName(), StandardCharsets.UTF_8) + "&permissionType=" + URLEncoder.encode(PermissionType.WRITER.toString(), StandardCharsets.UTF_8);
 
         RequestBody emptyBody = RequestBody.create("", MediaType.parse("application/json")); // Use an empty request body
@@ -443,15 +443,71 @@ public class DashboardController implements Cloneable, ShticellCommands {
     // Action when the "Approve Permission Request" button is clicked
     @FXML
     private void onApprovePermissionRequest() {
-        // Logic for approving a permission request
-        System.out.println("Approve Permission Request clicked");
+        // Check if a sheet is selected
+        SheetDTO selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
+        if (selectedSheet == null) {
+            errorMessageProperty.set("No sheet selected. Please select a sheet to request permission.");
+            return;
+        }
+
+        // Get the name of the selected sheet
+        String sheetName = selectedSheet.getName();
+        // Prepare the URL for the permission request
+        String url = Constants.HANDLE_PERMISSION + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
+                + "&userName=" + URLEncoder.encode(userPermissionsTableView.getSelectionModel().getSelectedItem().getUserName(), StandardCharsets.UTF_8) + "&permissionStatus=" + URLEncoder.encode(PermissionStatus.APPROVED.toString(), StandardCharsets.UTF_8);
+
+        RequestBody emptyBody = RequestBody.create("", MediaType.parse("application/json")); // Use an empty request body
+        // Make an async HTTP request to request reader permission
+        HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, emptyBody, (responseBody) -> {
+            Platform.runLater(() -> {
+                if (responseBody == null) {
+                    errorMessageProperty.set("Failed to approve request: Empty response from server.");
+                    return;
+                }
+
+                // Handle success or failure based on server response (assuming server sends a success/failure message)
+                if (responseBody.contains("success")) {
+                    errorMessageProperty.set("Permission approved successfully.");
+                } else {
+                    errorMessageProperty.set("Failed to approve permission: " + responseBody);
+                }
+            });
+        });
     }
 
     // Action when the "Deny Permission Request" button is clicked
     @FXML
     private void onDenyPermissionRequest() {
-        // Logic for denying a permission request
-        System.out.println("Deny Permission Request clicked");
+        // Check if a sheet is selected
+        SheetDTO selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
+        if (selectedSheet == null) {
+            errorMessageProperty.set("No sheet selected. Please select a sheet to request permission.");
+            return;
+        }
+
+        // Get the name of the selected sheet
+        String sheetName = selectedSheet.getName();
+        // Prepare the URL for the permission request
+        String url = Constants.HANDLE_PERMISSION + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
+                + "&userName=" + URLEncoder.encode(userPermissionsTableView.getSelectionModel().getSelectedItem().getUserName(), StandardCharsets.UTF_8) + "&permissionStatus=" + URLEncoder.encode(PermissionStatus.REJECTED.toString(), StandardCharsets.UTF_8);
+
+        RequestBody emptyBody = RequestBody.create("", MediaType.parse("application/json")); // Use an empty request body
+        // Make an async HTTP request to request reader permission
+        HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, emptyBody, (responseBody) -> {
+            Platform.runLater(() -> {
+                if (responseBody == null) {
+                    errorMessageProperty.set("Failed to reject request: Empty response from server.");
+                    return;
+                }
+
+                // Handle success or failure based on server response (assuming server sends a success/failure message)
+                if (responseBody.contains("success")) {
+                    errorMessageProperty.set("Permission rejected successfully.");
+                } else {
+                    errorMessageProperty.set("Failed to reject permission: " + responseBody);
+                }
+            });
+        });
     }
 
 }

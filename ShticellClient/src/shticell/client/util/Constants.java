@@ -32,7 +32,8 @@ public class Constants {
     public final static String ADD_SHEET = FULL_SERVER_PATH + "/addsheet";
     public final static String REQUEST_SHEETS = FULL_SERVER_PATH + "/getsheets";
     public final static String GET_SHEET_USER_PERMISSIONS = FULL_SERVER_PATH + "/getsheetuserpermissions";
-    public final static String REQUEST_READER_PERMISSION = FULL_SERVER_PATH + "/requestpermission";
+    public final static String REQUEST_PERMISSION = FULL_SERVER_PATH + "/requestpermission";
+    public final static String HANDLE_PERMISSION = FULL_SERVER_PATH + "/handlepermission";
 
     // GSON instance
     public final static Gson GSON_INSTANCE = new Gson();
