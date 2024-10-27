@@ -1,4 +1,4 @@
-package shticell.servlets;
+package shticell.servlets.login;
 
 import engine.users.UserManager;
 import jakarta.servlet.annotation.WebServlet;

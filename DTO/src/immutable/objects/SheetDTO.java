@@ -19,6 +19,8 @@ public interface SheetDTO {
 
     String getName();
 
+    String getOwner();
+
     int getVersion();
     
     int getColumnsWidthUnits();

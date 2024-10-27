@@ -1,9 +1,9 @@
 package engine;
 
 import engine.manager.SheetManager;
+import engine.manager.dto.SheetManagerDTO;
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
-import immutable.objects.SheetDTO;
 import sheet.api.Sheet;
 import sheet.cell.api.Cell;
 import sheet.cell.impl.CellImpl;
@@ -42,7 +42,7 @@ public class ShticellEngine {
     }
 
 
-    public void mapSTLSheet(String sheetName, STLSheet generatedSheet) throws InvalidXMLFormatException {
+    public void mapSTLSheet(String sheetName, STLSheet generatedSheet, String owner) throws InvalidXMLFormatException {
         try {
             // Step 1: Validate sheet dimensions
             validateSheetDimensions(generatedSheet);
@@ -73,10 +73,13 @@ public class ShticellEngine {
 
             mappedSheet.setCells(cells);
 
+            if (sheetManagerMap.containsKey(sheetName)) {
+                sheetManagerMap.get(sheetName).resetUserPermissions();
+            }
             // Step 5: Store the sheet in the appropriate SheetManager
             SheetManager sheetManager = sheetManagerMap.computeIfAbsent(sheetName, k -> new SheetManager());
             sheetManager.setSheet(mappedSheet);
-
+            sheetManager.setOwner(owner);
             // Step 6: Save the current version of the sheet in the SheetManager's version history
             sheetManager.saveCurrentVersion(sheetManager.createSnapshot());
 
@@ -192,5 +195,10 @@ public class ShticellEngine {
         } catch (Exception e) {
             throw new InvalidXMLFormatException("Invalid coordinate format: " + coordStr);
         }
+    }
+
+    public SheetManagerDTO getSheetManagerDTO(String sheetName) {
+        SheetManagerDTO sheetManagerDTO = new SheetManagerDTO(this.getSheetManagerMap().get(sheetName));
+        return sheetManagerDTO;
     }
 }

@@ -1,5 +1,6 @@
 package sheet.api;
 
+import engine.manager.SheetManager;
 import immutable.objects.SheetDTO;
 import javafx.scene.paint.Color;
 import sheet.cell.api.Cell;
@@ -11,6 +12,8 @@ import java.util.Set;
 
 public interface Sheet {
 
+
+    void setOwner(String owner);
 
     Map<Coordinate, Cell> copyActiveCells();
 
@@ -34,7 +37,7 @@ public interface Sheet {
 
     void setCells(Map<Coordinate, Cell> cells);
 
-    void setCell(int row, int col, String input);
+    void setCell(int row, int col, String input, SheetManager sheetManager);
 
     void incrementVersion();
 
@@ -67,5 +70,5 @@ public interface Sheet {
 
     void undoColor(int row, int col);
 
-    SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue);
+    SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue, SheetManager sheetManager);
 }

@@ -1,5 +1,9 @@
 package engine.manager;
 
+import engine.permission.UserPermissions;
+import engine.permission.dto.UserPermissionsDTO;
+import engine.permission.property.PermissionStatus;
+import engine.permission.property.PermissionType;
 import exception.CalculationException;
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
@@ -26,11 +30,11 @@ public class SheetManager implements Serializable {
     private static final int MAX_COLS = 20;
 
 
-
-
-    private static SheetImpl sheet;
+    private SheetImpl sheet;
     // Version history
     private Map<Integer, SheetDTO> versionHistory = new HashMap<>();
+    // UserPermissions list
+    private Map<String, UserPermissions> userPermissionsMap = new HashMap<>();
 
 
     public SheetManager(int rowsCount, int colsCount, int rowsHeight, int colsWidth) {
@@ -47,19 +51,27 @@ public class SheetManager implements Serializable {
         return sheet;
     }
 
-    public static void setSheet(SheetImpl sheet) {
-        SheetManager.sheet = sheet;
+    public Map<String, UserPermissionsDTO> getUserPermissionsMap() {
+        Map<String, UserPermissionsDTO> userPermissionsList = new HashMap<>();
+        for (UserPermissions userPermissions : userPermissionsMap.values()) {
+            userPermissionsList.put(userPermissions.getUserName(), new UserPermissionsDTO(userPermissions));
+        }
+        return userPermissionsList;
+    }
+
+    public void setSheet(SheetImpl sheet) {
+        this.sheet = sheet;
     }
 
     public CellDTO getCell(int row, int col) {
         return (CellDTO) sheet.getCellDTO(row, col);
     }
 
-    public static CellDTO getCellDTO(int row, int col) {
+    public CellDTO getCellDTO(int row, int col) {
         return (CellDTO) sheet.getCellDTO(row, col);
     }
 
-    public static boolean isWithinBounds(int row, int column) throws OutOfBoundsException {
+    public boolean isWithinBounds(int row, int column) throws OutOfBoundsException {
         int maxRow = sheet.getRowCount(); // Assuming method to get total rows
         int maxColumn = sheet.getColumnCount(); // Assuming method to get total columns
 
@@ -227,7 +239,7 @@ public class SheetManager implements Serializable {
 
     public void setCell(int row, int col, String input) {
         try {
-            sheet.setCell(row, col, input);
+            sheet.setCell(row, col, input, this);
             saveCurrentVersion(createSnapshot());
         }
         catch (CalculationException e)
@@ -248,7 +260,7 @@ public class SheetManager implements Serializable {
     }
 
     // Method to create a snapshot of the current sheet state
-    public static SheetDTO createSnapshot() {
+    public SheetDTO createSnapshot() {
         // Create a deep copy of the current sheet
         SheetImpl snapshot = new SheetImpl(sheet.getRowCount(), sheet.getColumnCount(), sheet.getRowHeightUnits(), sheet.getColumnsWidthUnits());
         snapshot.setName(sheet.getName());
@@ -312,24 +324,25 @@ public class SheetManager implements Serializable {
         return count;
     }
 
-    public void saveStateToFile(String filePath) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
-            oos.writeObject(this);
-            oos.writeObject(sheet); // Serialize the static sheet separately
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save state to file: " + e.getMessage());
-        }
-    }
-
-    public static SheetManager loadStateFromFile(String filePath) {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
-            SheetManager sheetManager = (SheetManager) ois.readObject();
-            sheet = (SheetImpl) ois.readObject(); // Deserialize the static sheet separately
-            return sheetManager;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Failed to load engine state from file: " + e.getMessage(), e);
-        }
-    }
+    // EX 1 BONUS
+//    public void saveStateToFile(String filePath) {
+//        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filePath))) {
+//            oos.writeObject(this);
+//            oos.writeObject(sheet); // Serialize the static sheet separately
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to save state to file: " + e.getMessage());
+//        }
+//    }
+//
+//    public static SheetManager loadStateFromFile(String filePath) {
+//        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filePath))) {
+//            SheetManager sheetManager = (SheetManager) ois.readObject();
+//            sheet = (SheetImpl) ois.readObject(); // Deserialize the static sheet separately
+//            return sheetManager;
+//        } catch (IOException | ClassNotFoundException e) {
+//            throw new RuntimeException("Failed to load engine state from file: " + e.getMessage(), e);
+//        }
+//    }
 
     public Map<Integer, SheetDTO> getVersionHistory() {
         return versionHistory;
@@ -369,7 +382,7 @@ public class SheetManager implements Serializable {
     }
 
     public SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
-        SheetDTO sheetDTO = sheet.applyDynamicAnalysis(coordinate, newValue);
+        SheetDTO sheetDTO = sheet.applyDynamicAnalysis(coordinate, newValue, this);
 
         return sheetDTO;
     }
@@ -397,4 +410,21 @@ public class SheetManager implements Serializable {
     }
 
 
+    public String getOwner(){
+        return sheet.getOwner();
+    }
+
+    public void setOwner(String owner) {
+        sheet.setOwner(owner);
+        UserPermissions ownerPermission = new UserPermissions(owner, PermissionType.OWNER, PermissionStatus.APPROVED);
+        userPermissionsMap.put(owner, ownerPermission);
+    }
+
+    public void addUserPermissions(UserPermissions userPermissions) {
+        userPermissionsMap.put(userPermissions.getUserName(), userPermissions);
+    }
+
+    public void resetUserPermissions() {
+        this.userPermissionsMap = new HashMap<>();
+    }
 }

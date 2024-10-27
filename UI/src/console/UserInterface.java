@@ -65,10 +65,10 @@ public class UserInterface {
                     displayPreviousVersions();
                     break;
                 case "6":
-                    saveState();
+//                    saveState();
                     break;
                 case "7":
-                    loadState();
+//                    loadState();
                     break;
                 case "8":
                     System.out.println("Exiting the program.");
@@ -301,30 +301,31 @@ public class UserInterface {
     }
 
 
-    private void saveState() {
-        try {
-            System.out.println("Enter the file path to save the state:");
-            String filePath = scanner.nextLine();
-            sheetManager.saveStateToFile(filePath);
-            System.out.println("State saved successfully.");
-        }
-        catch (Exception e) {
-            System.out.println("An error occurred while saving the state: " + e.getMessage());
-        }
-
-    }
-
-    private void loadState() {
-        try{
-            System.out.println("Enter the file path to load the state:");
-            String filePath = scanner.nextLine();
-            SheetManager newSheetManager = new SheetManager();
-            newSheetManager = SheetManager.loadStateFromFile(filePath);
-            sheetManager = SheetManager.loadStateFromFile(filePath);
-            System.out.println("State loaded successfully.");
-        }
-        catch (Exception e) {
-            System.out.println("An error occurred while loading the state: " + e.getMessage());
-        }
-    }
+    // EX 1 Bonus
+//    private void saveState() {
+//        try {
+//            System.out.println("Enter the file path to save the state:");
+//            String filePath = scanner.nextLine();
+//            sheetManager.saveStateToFile(filePath);
+//            System.out.println("State saved successfully.");
+//        }
+//        catch (Exception e) {
+//            System.out.println("An error occurred while saving the state: " + e.getMessage());
+//        }
+//
+//    }
+//
+//    private void loadState() {
+//        try{
+//            System.out.println("Enter the file path to load the state:");
+//            String filePath = scanner.nextLine();
+//            SheetManager newSheetManager = new SheetManager();
+//            newSheetManager = SheetManager.loadStateFromFile(filePath);
+//            sheetManager = SheetManager.loadStateFromFile(filePath);
+//            System.out.println("State loaded successfully.");
+//        }
+//        catch (Exception e) {
+//            System.out.println("An error occurred while loading the state: " + e.getMessage());
+//        }
+//    }
 }

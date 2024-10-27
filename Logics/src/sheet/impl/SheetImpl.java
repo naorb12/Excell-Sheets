@@ -27,6 +27,8 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     private int columnsWidth;
     private int rowsHeight;
 
+    private String owner;
+
     private Map<String, List<Coordinate>> ranges;
 
     public SheetImpl(int rows, int columns, int rowsHeight, int columnsWidth) {
@@ -40,7 +42,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
 
     public SheetImpl() {}
 
-    public SheetImpl(String name, int version, int columnCount, int rowCount, int columnsWidthUnits, int rowHeightUnits, Map<Coordinate, Cell> mapOfCells, Map<String, List<Coordinate>> ranges) {
+    public SheetImpl(String name, int version, int columnCount, int rowCount, int columnsWidthUnits, int rowHeightUnits, Map<Coordinate, Cell> mapOfCells, Map<String, List<Coordinate>> ranges, String owner) {
         this.name = name;
         this.version = version;
         this.columnsCount = columnCount;
@@ -49,6 +51,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
         this.rowsHeight = rowHeightUnits;
         this.ranges = ranges;
         this.activeCells = mapOfCells;
+        this.owner = owner;
     }
 
     @Override
@@ -111,6 +114,16 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     public String getName() {return name;}
 
     @Override
+    public String getOwner() {
+        return owner;
+    }
+
+    @Override
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
+
+    @Override
     public int getVersion() {return version;}
 
     @Override
@@ -170,7 +183,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     }
 
     @Override
-    public void setCell(int row, int col, String input) {
+    public void setCell(int row, int col, String input, SheetManager sheetManager) {
         Coordinate coordinate = new Coordinate(row, col);
         Cell cell = activeCells.get(coordinate);
         Cell oldCell;
@@ -189,7 +202,7 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
             oldCell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), input);
         }
 
-        SheetImpl oldSheet = (SheetImpl) SheetManager.createSnapshot();
+        SheetImpl oldSheet = (SheetImpl) sheetManager.createSnapshot();
 
         try {
             Set<Coordinate> oldDependsOnSet = cell != null ? cell.getDependsOn() : null;
@@ -591,12 +604,12 @@ public class SheetImpl implements sheet.api.Sheet, SheetDTO, Serializable {
     }
 
     @Override
-    public SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
+    public SheetDTO applyDynamicAnalysis(Coordinate coordinate, Number newValue, SheetManager sheetManager) {
         SheetImpl dynamicSheet = new SheetImpl(rowsCount, columnsCount, rowsHeight, columnsWidth);
         dynamicSheet.setRanges(getDeepCopiedRanges());
         Map<Coordinate, Cell> mutableMap = copyActiveCells();
         dynamicSheet.setCellsForDynamicAnalysis(mutableMap);
-        dynamicSheet.setCell(coordinate.getRow(), coordinate.getColumn(), newValue.toString());
+        dynamicSheet.setCell(coordinate.getRow(), coordinate.getColumn(), newValue.toString(), sheetManager);
 
 
         return dynamicSheet;

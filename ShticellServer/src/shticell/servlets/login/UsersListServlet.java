@@ -1,4 +1,4 @@
-package shticell.servlets;
+package shticell.servlets.login;
 
 import com.google.gson.Gson;
 import engine.users.UserManager;

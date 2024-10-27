@@ -21,7 +21,8 @@ public class SheetDTODeserializer implements JsonDeserializer<SheetDTO> {
         JsonObject jsonObject = json.getAsJsonObject();
 
         String name = jsonObject.get("name").getAsString();
-        int version = jsonObject.get("version").getAsInt();
+        String owner = jsonObject.has("owner") && !jsonObject.get("owner").isJsonNull() ?
+                jsonObject.get("owner").getAsString() : null;        int version = jsonObject.get("version").getAsInt();
         int columnCount = jsonObject.get("columnsCount").getAsInt();
         int rowCount = jsonObject.get("rowsCount").getAsInt();
         int columnsWidthUnits = jsonObject.get("columnsWidth").getAsInt();
@@ -55,7 +56,7 @@ public class SheetDTODeserializer implements JsonDeserializer<SheetDTO> {
         }
 
         // Create and return the SheetImpl instance
-        return new SheetImpl(name, version, columnCount, rowCount, columnsWidthUnits, rowHeightUnits, mapOfCells, ranges);
+        return new SheetImpl(name, version, columnCount, rowCount, columnsWidthUnits, rowHeightUnits, mapOfCells, ranges, owner);
     }
 
     private Coordinate parseCoordinate(String coordinateStr) {

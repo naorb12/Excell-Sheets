@@ -1,6 +1,11 @@
 package shticell.client.util;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import deserializer.CellImplDeserializer;
+import deserializer.SheetDTODeserializer;
+import immutable.objects.SheetDTO;
+import sheet.cell.impl.CellImpl;
 
 public class Constants {
 
@@ -25,7 +30,14 @@ public class Constants {
     public final static String USERS_LIST = FULL_SERVER_PATH + "/userslist";
     public final static String LOGOUT = FULL_SERVER_PATH + "/shticell/logout";
     public final static String ADD_SHEET = FULL_SERVER_PATH + "/addsheet";
+    public final static String REQUEST_SHEETS = FULL_SERVER_PATH + "/getsheets";
+    public final static String GET_SHEET_USER_PERMISSIONS = FULL_SERVER_PATH + "/getsheetuserpermissions";
+    public final static String REQUEST_READER_PERMISSION = FULL_SERVER_PATH + "/requestpermission";
 
     // GSON instance
     public final static Gson GSON_INSTANCE = new Gson();
+    public final static Gson GSON_INSTANCE_WITH_DESERIALIZERS = new GsonBuilder().registerTypeAdapter(SheetDTO.class, new SheetDTODeserializer())  // Handle SheetDTO deserialization
+            .registerTypeAdapter(CellImpl.class, new CellImplDeserializer())  // Handle CellImpl deserialization
+            .setPrettyPrinting()
+            .create();
 }

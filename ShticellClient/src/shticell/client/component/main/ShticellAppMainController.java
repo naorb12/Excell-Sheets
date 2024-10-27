@@ -35,6 +35,7 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
     @FXML private Label userGreetingLabel;
     @FXML private AnchorPane mainPanel;
 
+
     private final StringProperty currentUserName;
     public ShticellAppMainController() {
         currentUserName = new SimpleStringProperty(JHON_DOE);
@@ -51,6 +52,10 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
 
     public void updateUserName(String userName) {
         currentUserName.set(userName);
+    }
+
+    public String getCurrentUserName() {
+        return currentUserName.get();
     }
 
     private void setMainPanelTo(Parent pane) {
