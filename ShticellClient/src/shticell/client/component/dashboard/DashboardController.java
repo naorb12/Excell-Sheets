@@ -16,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import okhttp3.*;
 import shticell.client.component.api.ShticellCommands;
@@ -110,11 +111,18 @@ public class DashboardController implements Cloneable, ShticellCommands {
             Map<String, UserPermissionsDTO> permissionsMap = currentUserPermissionsMap.get(sheet.getName());
             if (permissionsMap != null && permissionsMap.containsKey(currentUser)) {
                 UserPermissionsDTO userPermission = permissionsMap.get(currentUser);
-                return new SimpleStringProperty(userPermission.getPermissionType().toString());
+
+                if (userPermission.getPermissionStatus() == PermissionStatus.APPROVED) {
+                    return new SimpleStringProperty(userPermission.getPermissionType().toString());
+                } else {
+                    return new SimpleStringProperty("Pending Approval");
+                }
             } else {
                 return new SimpleStringProperty("N/A");
             }
         });
+
+
 
         // Set the TableView's items to the ObservableList
         sheetTableView.setItems(sheetData);
@@ -330,7 +338,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
     }
 
     public void startDashboardRefresher() {
-        refresherTask = new DashboardRefresher(sheetData, sheetTableView);  // Pass sheetData and sheetTableView
+        refresherTask = new DashboardRefresher(sheetData, sheetTableView, currentUserPermissionsMap, shticellAppMainController.getCurrentUserName());  // Pass sheetData and sheetTableView
         timer = new Timer();
         timer.schedule(refresherTask, 0, Constants.REFRESH_RATE);  // Refresh every REFRESH_RATE milliseconds (e.g., 5 seconds)
     }
