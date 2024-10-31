@@ -3,7 +3,7 @@ package shticell.servlets.sheet.permission;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import engine.ShticellEngine;
-import engine.permission.dto.UserPermissionsDTO;
+import immutable.objects.UserPermissionsDTO;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;

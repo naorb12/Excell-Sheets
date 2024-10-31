@@ -3,12 +3,11 @@ package shticell.servlets.sheet;
 import com.google.gson.Gson;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
-import engine.manager.dto.SheetManagerDTO;
+import immutable.objects.SheetManagerDTO;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import shticell.constants.Constants;
 import shticell.utils.ServletUtils;
 
 import java.io.IOException;

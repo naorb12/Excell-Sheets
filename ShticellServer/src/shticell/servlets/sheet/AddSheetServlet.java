@@ -3,7 +3,7 @@ package shticell.servlets.sheet;
 
 import com.google.gson.Gson;
 import engine.ShticellEngine;
-import engine.manager.dto.SheetManagerDTO;
+import immutable.objects.SheetManagerDTO;
 import exception.InvalidXMLFormatException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;

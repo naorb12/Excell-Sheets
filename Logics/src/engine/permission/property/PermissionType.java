@@ -26,4 +26,15 @@ public enum PermissionType {
     public String toString() {
         return name().substring(0, 1).toUpperCase() + name().substring(1).toLowerCase();
     }
+
+    // Case-insensitive lookup
+    public static PermissionType fromString(String type) {
+        for (PermissionType permission : PermissionType.values()) {
+            if (permission.name().equalsIgnoreCase(type)) {
+                return permission;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant for " + type);
+    }
+
 }

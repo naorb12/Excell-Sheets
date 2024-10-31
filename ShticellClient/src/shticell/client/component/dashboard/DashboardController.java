@@ -1,8 +1,8 @@
 package shticell.client.component.dashboard;
 
 import com.google.gson.reflect.TypeToken;
-import engine.manager.dto.SheetManagerDTO;
-import engine.permission.dto.UserPermissionsDTO;
+import immutable.objects.SheetManagerDTO;
+import immutable.objects.UserPermissionsDTO;
 import engine.permission.property.PermissionStatus;
 import engine.permission.property.PermissionType;
 import immutable.objects.SheetDTO;
@@ -16,7 +16,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import okhttp3.*;
 import shticell.client.component.api.ShticellCommands;
@@ -61,7 +60,10 @@ public class DashboardController implements Cloneable, ShticellCommands {
     @FXML
     private Button addSheetButton;
 
-    private ObservableList<SheetDTO> sheetData = FXCollections.observableArrayList(); // Observable list for table data
+    // Observable list for table data
+    private ObservableList<SheetDTO> sheetData = FXCollections.observableArrayList();
+
+    // Map<Sheet.getName(), Map<userName, UserPermissionsDTO>
     private Map<String, Map<String, UserPermissionsDTO>> currentUserPermissionsMap = new HashMap<>();
 
     // Permissions
@@ -144,7 +146,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Add listener to handle sheet selection
         sheetTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             onSheetSelected();  // Call method to update permissions when a sheet is selected
-            viewSheetButton.setDisable(newSelection == null);
+            setViewSheetButtonAccordingToPermissions(newSelection);
             requestReaderButton.setDisable(newSelection == null);
             requestWriterButton.setDisable(newSelection == null);
         });
@@ -152,6 +154,22 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Add Listener to handle giving out permissions
         userPermissionsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             onPermissionSelected(newSelection);});
+    }
+
+    private void setViewSheetButtonAccordingToPermissions(SheetDTO newSelection) {
+        UserPermissionsDTO permissionsDTO = currentUserPermissionsMap.get(sheetTableView.getSelectionModel().getSelectedItem().getName()).get(shticellAppMainController.getCurrentUserName());
+        if (permissionsDTO != null) {
+            if (permissionsDTO.getPermissionStatus() == PermissionStatus.APPROVED || permissionsDTO.getLastApprovedPermissionType() != null) {
+                viewSheetButton.setDisable(false);
+            }
+            else {
+                viewSheetButton.setDisable(true);
+            }
+        }
+        else {
+            viewSheetButton.setDisable(true);
+        }
+
     }
 
 
@@ -308,10 +326,10 @@ public class DashboardController implements Cloneable, ShticellCommands {
     @FXML
     public void onViewSheet() {
         // Implement logic to view the selected sheet
-        // Sheet selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
-        // if (selectedSheet != null) {
-        //     shticellAppMainController.switchToSheetView(selectedSheet);
-        // }
+         String selectedSheetName = sheetTableView.getSelectionModel().getSelectedItem().getName();
+         if (selectedSheetName != null) {
+             shticellAppMainController.switchToSheetMain(selectedSheetName);
+         }
     }
 
     @FXML

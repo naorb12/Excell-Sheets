@@ -1,8 +1,6 @@
-package engine.manager.dto;
+package immutable.objects;
 
 import engine.manager.SheetManager;
-import engine.permission.dto.UserPermissionsDTO;
-import immutable.objects.SheetDTO;
 
 import java.util.Map;
 

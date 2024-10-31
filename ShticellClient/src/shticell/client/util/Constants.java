@@ -15,10 +15,12 @@ public class Constants {
     public final static int REFRESH_RATE = 2000;
     public final static String CHAT_LINE_FORMATTING = "%tH:%tM:%tS | %.10s: %s%n";
 
-    // TODO change: fxml locations
+    // fxml locations
     public final static String MAIN_PAGE_FXML_RESOURCE_LOCATION = "/shticell/client/component/main/shticell-main.fxml";
     public final static String LOGIN_PAGE_FXML_RESOURCE_LOCATION = "/shticell/client/component/login/login.fxml";
     public final static String DASHBOARD_FXML_RESOURCE_LOCATION = "/shticell/client/component/dashboard/dashboard.fxml";
+    public final static String SHEET_MAIN_FXML_RESOURCE_LOCATION = "/shticell/client/component/sheet/main/sheet-main-controller.fxml";
+
 
     // Server resources locations
     public final static String BASE_DOMAIN = "localhost";
@@ -34,9 +36,9 @@ public class Constants {
     public final static String GET_SHEET_USER_PERMISSIONS = FULL_SERVER_PATH + "/getsheetuserpermissions";
     public final static String REQUEST_PERMISSION = FULL_SERVER_PATH + "/requestpermission";
     public final static String HANDLE_PERMISSION = FULL_SERVER_PATH + "/handlepermission";
+    public final static String GET_SHEET_BY_NAME = FULL_SERVER_PATH + "/getsheetbyname";
 
     // GSON instance
-    public final static Gson GSON_INSTANCE = new Gson();
     public final static Gson GSON_INSTANCE_WITH_DESERIALIZERS = new GsonBuilder().registerTypeAdapter(SheetDTO.class, new SheetDTODeserializer())  // Handle SheetDTO deserialization
             .registerTypeAdapter(CellImpl.class, new CellImplDeserializer())  // Handle CellImpl deserialization
             .setPrettyPrinting()

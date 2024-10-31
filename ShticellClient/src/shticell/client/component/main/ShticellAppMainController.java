@@ -13,6 +13,7 @@ import javafx.scene.layout.GridPane;
 import shticell.client.component.api.HttpStatusUpdate;
 import shticell.client.component.dashboard.DashboardController;
 import shticell.client.component.login.LoginController;
+import shticell.client.component.sheet.main.SheetMainController;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,6 +33,9 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
     private Parent shticellDashboardComponent;
     private DashboardController dashboardComponentController;
 
+    private Parent shticellSheetComponent;
+    private SheetMainController sheetComponentController;
+
     @FXML private Label userGreetingLabel;
     @FXML private AnchorPane mainPanel;
 
@@ -48,6 +52,7 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
         // prepare components
         loadLoginPage();
         loadDashboard();
+        loadSheetMain();
     }
 
     public void updateUserName(String userName) {
@@ -99,6 +104,20 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
         }
     }
 
+    public void loadSheetMain() {
+        URL sheetPageUrl = getClass().getResource(SHEET_MAIN_FXML_RESOURCE_LOCATION);
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader();
+            fxmlLoader.setLocation(sheetPageUrl);
+            shticellSheetComponent = fxmlLoader.load();
+            sheetComponentController = fxmlLoader.getController();
+            sheetComponentController.setShticellAppMainController(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @Override
     public void updateHttpLine(String line) {
        // httpStatusComponentController.addHttpStatusLine(line);
@@ -107,6 +126,11 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
     public void switchToDashboard() {
         setMainPanelTo(shticellDashboardComponent);
         dashboardComponentController.setActive();
+    }
+
+    public void switchToSheetMain(String sheetName){
+        setMainPanelTo(shticellSheetComponent);
+        sheetComponentController.setActive(sheetName);
     }
 
     public void switchToLogin() {

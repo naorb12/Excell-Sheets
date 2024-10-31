@@ -1,4 +1,4 @@
-package engine.permission.dto;
+package immutable.objects;
 
 import engine.permission.UserPermissions;
 import engine.permission.property.PermissionStatus;
@@ -9,10 +9,13 @@ public class UserPermissionsDTO {
     private PermissionType permissionType;
     private PermissionStatus permissionStatus;
 
+    private PermissionType lastApprovedPermissionType;
+
     public UserPermissionsDTO(UserPermissions userPermissions) {
         userName = userPermissions.getUserName();
         permissionType = userPermissions.getUserPermissionType();
         permissionStatus = userPermissions.getUserPermissionStatus();
+        lastApprovedPermissionType = userPermissions.getLastApprovedPermissionType();
     }
 
     public String getUserName() {
@@ -20,6 +23,9 @@ public class UserPermissionsDTO {
     }
     public PermissionType getPermissionType() {
         return permissionType;
+    }
+    public PermissionType getLastApprovedPermissionType() {
+        return lastApprovedPermissionType;
     }
     public PermissionStatus getPermissionStatus() {
         return permissionStatus;

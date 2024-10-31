@@ -1,7 +1,7 @@
 package engine;
 
 import engine.manager.SheetManager;
-import engine.manager.dto.SheetManagerDTO;
+import immutable.objects.SheetManagerDTO;
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
 import sheet.api.Sheet;

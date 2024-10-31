@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="753.0" prefWidth="1190.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.sheet.main.SheetMainController">
+    <content>
+        <BorderPane fx:id="mainBorderPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="698.0" prefWidth="1152.0">
+
+            <top>
+                <fx:include source="/shticell/client/component/sheet/top/topSection.fxml" />
+            </top>
+
+            <left>
+                <fx:include source="/shticell/client/component/sheet/left/leftSection.fxml" />
+            </left>
+
+            <center>
+                <fx:include source="/shticell/client/component/sheet/center/centerSection.fxml" />
+            </center>
+
+        </BorderPane>
+    </content>
+</ScrollPane>
+
+

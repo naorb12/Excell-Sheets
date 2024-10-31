@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.sheet.top.TopController">
+    <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0" spacing="10">
+        <children>
+            <Label fx:id="selectedCellIDLabel" text="Selected Cell ID" />
+            <TextArea fx:id="cellOriginalValueTextArea" prefHeight="38.0" prefWidth="121.0" text="Original Value">
+                <cursor>
+                    <Cursor fx:constant="TEXT" />
+                </cursor></TextArea>
+            <Button fx:id="updateValueButton" text="Update Value" />
+            <Label fx:id="lastUpdateCellVersionLabel" text="Last Update Cell Version" />
+            <ComboBox fx:id="sheetVersionSelector" prefWidth="170.0" />
+        </children>
+    </HBox>
+</AnchorPane>

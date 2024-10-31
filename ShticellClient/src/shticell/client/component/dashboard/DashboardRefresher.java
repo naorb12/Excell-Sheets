@@ -1,26 +1,16 @@
 package shticell.client.component.dashboard;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import deserializer.CellImplDeserializer;
-import deserializer.SheetDTODeserializer;
-import engine.permission.dto.UserPermissionsDTO;
+import immutable.objects.UserPermissionsDTO;
 import immutable.objects.SheetDTO;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableView;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
-import okhttp3.Response;
 import shticell.client.util.Constants;
 import shticell.client.util.http.HttpClientUtil;
-import sheet.cell.impl.CellImpl;
-import engine.manager.dto.SheetManagerDTO;
+import immutable.objects.SheetManagerDTO;
 import shticell.client.util.http.HttpMethod;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -70,7 +60,7 @@ public class DashboardRefresher extends TimerTask {
                 // Check if the number of sheets has changed
                 boolean sheetCountChanged = updatedSheetData.size() != sheetCount;
                 if (sheetCountChanged) {
-                    System.out.println("Sheet count changed. used to be " + sheetCount + " sheets, now its " + updatedSheetData.size() + " sheets.");
+                    //System.out.println("Sheet count changed. used to be " + sheetCount + " sheets, now its " + updatedSheetData.size() + " sheets.");
                     sheetCount = updatedSheetData.size();
                 }
                 // Check if permissions have changed for any sheet

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
 import engine.permission.UserPermissions;
-import engine.permission.dto.UserPermissionsDTO;
+import immutable.objects.UserPermissionsDTO;
 import engine.permission.property.PermissionStatus;
 import engine.permission.property.PermissionType;
 import jakarta.servlet.annotation.WebServlet;

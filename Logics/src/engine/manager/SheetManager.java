@@ -1,7 +1,7 @@
 package engine.manager;
 
 import engine.permission.UserPermissions;
-import engine.permission.dto.UserPermissionsDTO;
+import immutable.objects.UserPermissionsDTO;
 import engine.permission.property.PermissionStatus;
 import engine.permission.property.PermissionType;
 import exception.CalculationException;
@@ -421,7 +421,12 @@ public class SheetManager implements Serializable {
     }
 
     public void addUserPermissions(UserPermissions userPermissions) {
-        userPermissionsMap.put(userPermissions.getUserName(), userPermissions);
+        if(userPermissionsMap.containsKey(userPermissions.getUserName())){
+            userPermissionsMap.get(userPermissions.getUserName()).setUserPermissionType(userPermissions.getUserPermissionType());
+        }
+        else {
+            userPermissionsMap.put(userPermissions.getUserName(), userPermissions);
+        }
     }
 
     public void resetUserPermissions() {

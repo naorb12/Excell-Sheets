@@ -8,6 +8,8 @@ public class UserPermissions {
     private PermissionType permissionType;
     private PermissionStatus permissionStatus;
 
+    private PermissionType lastApprovedPermissionType = null;
+
     public UserPermissions(String userName, PermissionType permissionType, PermissionStatus permissionStatus) {
         this.userName = userName;
         this.permissionType = permissionType;
@@ -32,8 +34,18 @@ public class UserPermissions {
         return permissionType;
     }
 
+    public PermissionType getLastApprovedPermissionType() {
+        return lastApprovedPermissionType;
+    }
+
     public void setUserPermissionType(PermissionType permissionType) {
+        if (this.permissionType != null && permissionStatus == PermissionStatus.APPROVED) {
+            this.lastApprovedPermissionType = this.permissionType;
+            System.out.println("Changed permission  to " + this.permissionStatus);
+        }
+
         this.permissionType = permissionType;
+        this.permissionStatus = PermissionStatus.PENDING;
     }
 
     public PermissionStatus getUserPermissionStatus() {
