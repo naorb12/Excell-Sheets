@@ -30,7 +30,7 @@ public class ShticellClient extends Application {
             Parent root = fxmlLoader.load();
             shticellAppMainController = fxmlLoader.getController();
 
-            Scene scene = new Scene(root, 700, 600);
+            Scene scene = new Scene(root, 1200, 760);
             primaryStage.setScene(scene);
             primaryStage.getScene().getStylesheets().add(getClass().getResource("/shticell/client/main/Light_Theme.css").toExternalForm());
             primaryStage.show();

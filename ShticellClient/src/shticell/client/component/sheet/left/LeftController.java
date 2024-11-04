@@ -23,6 +23,7 @@ import shticell.client.component.sheet.main.SharedModel;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class LeftController {
 
@@ -96,35 +97,36 @@ public class LeftController {
         deleteRangeButton.disableProperty().bind(Bindings.isNull(rangeComboBox.valueProperty()));
 
         designButton.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())
         );
         sortingFilteringButton.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                (sharedModel.latestVersionSelectedProperty().not())
         );
         graphsButton.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+               (sharedModel.latestVersionSelectedProperty().not())
         );
         dynamicAnalysisButton.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())
         );
 
         rangeComboBox.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())
         );
         rangeNameField.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())
         );
         fromCellField.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())
         );
         toCellField.disableProperty().bind(
-                sharedModel.sheetLoadedProperty().not().or(sharedModel.latestVersionSelectedProperty().not())
+                sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())
         );
         rangeDetailsArea.disableProperty().bind(Bindings.isNull(rangeComboBox.valueProperty()));
 
         sharedModel.latestVersionSelectedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                populateSelectors();
+                System.out.println("populating selectors");
+                //populateSelectors(sheetDTO);
             } else {
                 rangeComboBox.getItems().clear();
                 rangeComboBox.setValue("Select Range"); // Optionally clear the selected value
@@ -144,6 +146,7 @@ public class LeftController {
 
             // Get the CommandsPopupController from the FXML
             DesignPopUpController designPopupController = loader.getController();
+            designPopupController.setSharedModel(sharedModel);
             designPopupController.setCenterController(centerController);
 
             // Set up the pop-up window
@@ -152,10 +155,15 @@ public class LeftController {
             designPopUp.initOwner(designButton.getScene().getWindow());
             designPopUp.initModality(Modality.WINDOW_MODAL);
             designPopUp.setResizable(true);
-            designPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
+           // designPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
             designPopUp.show();
         } catch (IOException e) {
+            System.err.println("Unexpected exception: " + e);
             e.printStackTrace();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -170,6 +178,7 @@ public class LeftController {
             // Get the CommandsPopupController from the FXML
             SortingAndFilteringController sortingFilteringPopupController = loader.getController();
             sortingFilteringPopupController.setCenterController(centerController);
+            sortingFilteringPopupController.setSharedModel(sharedModel);
 
             // Set up the pop-up window
             sortingFilteringPopUp.setTitle("Sorting and Filtering");
@@ -177,8 +186,16 @@ public class LeftController {
             sortingFilteringPopUp.initOwner(sortingFilteringButton.getScene().getWindow());
             sortingFilteringPopUp.initModality(Modality.WINDOW_MODAL);
             sortingFilteringPopUp.setResizable(true);
-            sortingFilteringPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
-            sortingFilteringPopUp.setOnCloseRequest(event -> sortingFilteringPopupController.handleRemoveSortAndFilter());
+            //sortingFilteringPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
+            sortingFilteringPopUp.setOnCloseRequest(event -> {
+                try {
+                    sortingFilteringPopupController.handleRemoveSortAndFilter();
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            });
             sortingFilteringPopUp.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -190,12 +207,13 @@ public class LeftController {
         try {
             graphsPopUp = new Stage();
             // Load the design pop-up FXML
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/shticell/client/component/sheet/left/sort/and/filter/sortAndFilterPopUp.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/shticell/client/component/sheet/left/graph/graphsPopUp.fxml"));
             Parent root = loader.load();
 
             // Get the CommandsPopupController from the FXML
             GraphPopUpController graphPopUpController = loader.getController();
             graphPopUpController.setCenterController(centerController);
+            graphPopUpController.setSharedModel(sharedModel);
 
             // Set up the pop-up window
             graphsPopUp.setTitle("Graphs");
@@ -203,7 +221,7 @@ public class LeftController {
             graphsPopUp.initOwner(graphsButton.getScene().getWindow());
             graphsPopUp.initModality(Modality.WINDOW_MODAL);
             graphsPopUp.setResizable(true);
-            graphsPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
+            //graphsPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
             graphsPopUp.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -220,6 +238,7 @@ public class LeftController {
 
             // Get the CommandsPopupController from the FXML
             DynamicAnalysisController dynamicAnalysisController = loader.getController();
+            dynamicAnalysisController.setSharedModel(sharedModel);
             dynamicAnalysisController.setCenterController(centerController);
 
             // Set up the pop-up window
@@ -228,11 +247,15 @@ public class LeftController {
             dynamicAnalysisPopUp.initOwner(dynamicAnalysisButton.getScene().getWindow());
             dynamicAnalysisPopUp.initModality(Modality.WINDOW_MODAL);
             dynamicAnalysisPopUp.setResizable(true);
-            dynamicAnalysisPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
+            //dynamicAnalysisPopUp.getScene().getStylesheets().addAll(sharedModel.getPrimaryStage().getScene().getStylesheets());
             dynamicAnalysisPopUp.setOnCloseRequest(event -> dynamicAnalysisController.handleRemoveDynamicAnalysis());
             dynamicAnalysisPopUp.show();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
     }
@@ -275,7 +298,7 @@ public class LeftController {
 
         try {
             // Generate list of cells in the range
-            List<Coordinate> cellsInRange = centerController.getEngine().createNewRange(rangeName, fromCell, toCell);
+            List<Coordinate> cellsInRange = centerController.getServerEngineService().createNewRange(sharedModel.getSheetName(), rangeName, fromCell, toCell).get();
 
             // Add the range to the map and update the ComboBox
             rangeNames.add(rangeName);
@@ -300,10 +323,10 @@ public class LeftController {
 
     // Handle selecting a range from the ComboBox
     @FXML
-    private void handleSelectRange() {
+    private void handleSelectRange() throws ExecutionException, InterruptedException {
         String selectedRange = rangeComboBox.getValue();
         if (selectedRange != null) {
-            List<Coordinate> cellsInRange = centerController.getEngine().getSheet().getRange(selectedRange);
+            List<Coordinate> cellsInRange = centerController.getServerEngineService().getSheet(sharedModel.getSheetName()).get().getRange(selectedRange);
             rangeDetailsArea.setText(formatCoordinates(cellsInRange));  // Display formatted coordinates
         }
     }
@@ -314,7 +337,7 @@ public class LeftController {
         String selectedRange = rangeComboBox.getValue();
         try {
             if (selectedRange != null) {
-                centerController.getEngine().removeRange(selectedRange);
+                centerController.getServerEngineService().removeRange(sharedModel.getSheetName(), selectedRange);
                 rangeNames.remove(selectedRange);
                 rangeDetailsArea.clear();
 
@@ -332,13 +355,12 @@ public class LeftController {
 
     // Populate the ComboBox with ranges from the sheet
     @FXML
-    public void populateSelectors() {
+    public void populateSelectors(SheetDTO sheetDTO) {
         if (centerController != null) {
-            SheetDTO sheet = centerController.getEngine().getSheet();
 
             // Clear and populate the ComboBox with range names
             rangeNames.clear();
-            rangeNames.addAll(centerController.getEngine().getSheet().getAllRanges().keySet());
+            rangeNames.addAll(sheetDTO.getAllRanges().keySet());
         }
     }
 

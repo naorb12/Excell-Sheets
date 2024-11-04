@@ -11,8 +11,10 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import sheet.coordinate.Coordinate;
 import shticell.client.component.sheet.center.CenterController;
+import shticell.client.component.sheet.main.SharedModel;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class GraphPopUpController {
 
@@ -36,6 +38,12 @@ public class GraphPopUpController {
 
     // Reference to the CenterController
     private CenterController centerController;
+
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
+    }
+
+    private SharedModel sharedModel;
 
     // Inject the CenterController (call this method from outside to pass the reference)
     public void setCenterController(CenterController centerController) {
@@ -124,10 +132,10 @@ public class GraphPopUpController {
         }
     }
 
-    private List<Double> getDataFromRange(String fromCell, String toCell) throws InvalidXMLFormatException {
+    private List<Double> getDataFromRange(String fromCell, String toCell) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
         // Use the CenterController's engine to get the data for the range
-        List<Coordinate> range = centerController.getEngine().validateRange(fromCell, toCell);
-        return centerController.getEngine().getRangeNumericValues(range);
+        List<Coordinate> range = centerController.getServerEngineService().validateRange(sharedModel.getSheetName(), fromCell, toCell).get();
+        return centerController.getServerEngineService().getRangeNumericValues(sharedModel.getSheetName(), range).get();
     }
 
     private void generateBarChart(List<Double> xData, List<Double> yData) {

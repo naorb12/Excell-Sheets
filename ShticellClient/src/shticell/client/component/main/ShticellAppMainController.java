@@ -124,13 +124,18 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
     }
 
     public void switchToDashboard() {
-        setMainPanelTo(shticellDashboardComponent);
-        dashboardComponentController.setActive();
+        Platform.runLater(()->{
+            setMainPanelTo(shticellDashboardComponent);
+            dashboardComponentController.setActive();
+        });
     }
 
     public void switchToSheetMain(String sheetName){
-        setMainPanelTo(shticellSheetComponent);
+        Platform.runLater(() ->{
+                setMainPanelTo(shticellSheetComponent);
+        dashboardComponentController.setInActive();
         sheetComponentController.setActive(sheetName);
+        });
     }
 
     public void switchToLogin() {

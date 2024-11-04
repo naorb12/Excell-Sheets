@@ -24,5 +24,6 @@
     <orderEntry type="library" name="gson-2.11.0-sources" level="project" />
     <orderEntry type="module" module-name="XML" />
     <orderEntry type="module" module-name="DTO" />
+    <orderEntry type="library" name="javafx-swt" level="project" />
   </component>
 </module>

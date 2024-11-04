@@ -1,21 +1,15 @@
 package shticell.client.component.sheet.top;
 
 import immutable.objects.SheetDTO;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.stage.FileChooser;
 import shticell.client.component.sheet.center.CenterController;
 import shticell.client.component.sheet.left.LeftController;
 import shticell.client.component.sheet.main.SharedModel;
-import xml.generated.STLSheet;
-import xml.handler.XMLSheetLoader;
-import xml.handler.XMLSheetLoaderImpl;
 
-import java.io.File;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class TopController {
 
@@ -47,7 +41,15 @@ public class TopController {
         updateValueButton.setOnAction(event -> handleUpdateValueButtonAction());
 
         sheetVersionSelector.setValue("Select Sheet Version");
-        sheetVersionSelector.setOnAction(event -> handleSheetVersionSelected());
+        sheetVersionSelector.setOnAction(event -> {
+            try {
+                handleSheetVersionSelected();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
     }
 
@@ -63,15 +65,13 @@ public class TopController {
 
     public void setupBindings() {
         // Bind buttons to the sheetLoaded property from sharedModel
-        updateValueButton.disableProperty().bind(sharedModel.isSheetLoaded().not());
-        sheetVersionSelector.disableProperty().bind(sharedModel.isSheetLoaded().not());
         // Bind the update button to file selection
-        updateValueButton.disableProperty().bind(Bindings.createBooleanBinding(
-                () -> !sharedModel.isSheetLoaded().get() || selectedCellIDLabel.getText().equals("Selected Cell ID"),
-                sharedModel.isSheetLoaded(), selectedCellIDLabel.textProperty()
-        ));
-        sheetVersionSelector.disableProperty().bind(sharedModel.isSheetLoaded().not());
-
+        updateValueButton.disableProperty().bind(
+                Bindings.createBooleanBinding(
+                        () -> sharedModel.readOnlyProperty().get() || selectedCellIDLabel.getText().equals("Selected Cell ID"),
+                        sharedModel.readOnlyProperty(), selectedCellIDLabel.textProperty()
+                )
+        );
 
     }
 
@@ -81,7 +81,7 @@ public class TopController {
             String cellID = selectedCellIDLabel.getText();
             int row = Integer.parseInt(cellID.substring(1));
             int col = cellID.charAt(0) - 'A' + 1;
-            centerController.getEngine().setCell(row, col, cellOriginalValueTextArea.getText());
+            centerController.getServerEngineService().setCell(sharedModel.getSheetName(), row, col, cellOriginalValueTextArea.getText());
             populateVersionSelector();
             centerController.renderGridPane();
         }
@@ -92,7 +92,7 @@ public class TopController {
     }
 
     @FXML
-    private void handleSheetVersionSelected() {
+    private void handleSheetVersionSelected() throws ExecutionException, InterruptedException {
         if (sheetVersionSelector != null && sheetVersionSelector.getValue() != null) {
             String selectedValue = sheetVersionSelector.getValue();
 
@@ -104,7 +104,7 @@ public class TopController {
                 } else {
                     String versionNumber = selectedValue.replaceAll("\\D+", ""); // Removes all non-digit characters
                     int version = Integer.parseInt(versionNumber);
-                    centerController.renderGrid(centerController.getEngine().peekVersion(version));
+                    centerController.renderGrid(centerController.getServerEngineService().peekVersion(sharedModel.getSheetName(), version).get());
                     resetLabelsAndText();
                     sharedModel.setLatestVersionSelected(false);
                     centerController.setDisabled();
@@ -134,13 +134,11 @@ public class TopController {
     }
 
     @FXML
-    public void populateVersionSelector() {
+    public void populateVersionSelector() throws ExecutionException, InterruptedException {
         // Clear previous items
         sheetVersionSelector.getItems().clear();
-
         // Get version history from the engine's version history map
-        Map<Integer, SheetDTO> versionHistory = centerController.getEngine().getVersionHistory();
-
+        Map<Integer, SheetDTO> versionHistory = centerController.getServerEngineService().getVersionHistory(sharedModel.getSheetName()).get();
         // Add version numbers (keys) as strings to the ComboBox
         for (Integer version : versionHistory.keySet()) {
             sheetVersionSelector.getItems().add("Version " + version);

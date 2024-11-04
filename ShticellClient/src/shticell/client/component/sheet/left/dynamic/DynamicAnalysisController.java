@@ -11,11 +11,13 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import sheet.coordinate.Coordinate;
 import shticell.client.component.sheet.center.CenterController;
+import shticell.client.component.sheet.main.SharedModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class DynamicAnalysisController {
 
@@ -39,6 +41,12 @@ public class DynamicAnalysisController {
 
 
     private CenterController centerController;
+
+    private SharedModel sharedModel;
+
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
+    }
 
     @FXML
     private void initialize() {
@@ -77,7 +85,13 @@ public class DynamicAnalysisController {
             updateSliderMinValue();
             adjustSliderValueWithinBounds();
             if (cellSelector.getValue() != null && !cellSelector.getValue().isEmpty()) {
-                setSliderValueFromCell(cellSelector.getValue());
+                try {
+                    setSliderValueFromCell(cellSelector.getValue());
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -85,7 +99,13 @@ public class DynamicAnalysisController {
             updateSliderMaxValue();
             adjustSliderValueWithinBounds();
             if (cellSelector.getValue() != null && !cellSelector.getValue().isEmpty()) {
-                setSliderValueFromCell(cellSelector.getValue());
+                try {
+                    setSliderValueFromCell(cellSelector.getValue());
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -94,7 +114,13 @@ public class DynamicAnalysisController {
         // Add a listener to update the slider value based on the selected cell's value
         cellSelector.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !newValue.isEmpty()) {
-                setSliderValueFromCell(newValue);
+                try {
+                    setSliderValueFromCell(newValue);
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
 
@@ -102,12 +128,20 @@ public class DynamicAnalysisController {
         valuesSlider.valueProperty().addListener((observable, oldValue, newValue) -> handleSliderValueChange(newValue));
 
         // Update slider value on button click
-        updateValueButton.setOnAction(event -> handleUpdateValueButton());
+        updateValueButton.setOnAction(event -> {
+            try {
+                handleUpdateValueButton();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
-    private void setSliderValueFromCell(String cellName) {
+    private void setSliderValueFromCell(String cellName) throws ExecutionException, InterruptedException {
         Coordinate coord = parseCellNameToCoordinate(cellName);
-        CellDTO cell = centerController.getEngine().getCell(coord.getRow(), coord.getColumn());
+        CellDTO cell = centerController.getServerEngineService().getCell(sharedModel.getSheetName(), coord.getRow(), coord.getColumn()).get();
         if (cell != null && isDouble(cell.getOriginalValue())) {
             double cellValue = Double.parseDouble(cell.getOriginalValue());
 
@@ -199,14 +233,14 @@ public class DynamicAnalysisController {
         }
     }
 
-    public void setCenterController(CenterController centerController) {
+    public void setCenterController(CenterController centerController) throws ExecutionException, InterruptedException {
         this.centerController = centerController;
         populateSelectors();
     }
 
-    private void populateSelectors() {
+    private void populateSelectors() throws ExecutionException, InterruptedException {
         if (centerController != null) {
-            SheetDTO sheet = centerController.getEngine().getSheet();
+            SheetDTO sheet = centerController.getServerEngineService().getSheet(sharedModel.getSheetName()).get();
             int columnCount = sheet.getColumnCount();
             int rowCount = sheet.getRowCount();
 
@@ -218,7 +252,7 @@ public class DynamicAnalysisController {
 
                     // Parse the cell name to get the coordinate (row, column)
                     Coordinate coord = parseCellNameToCoordinate(cellName);
-                    CellDTO cell = centerController.getEngine().getCell(coord.getRow(), coord.getColumn());
+                    CellDTO cell = centerController.getServerEngineService().getCell(sharedModel.getSheetName(),coord.getRow(), coord.getColumn()).get();
                     if (cell != null && isDouble(cell.getOriginalValue())) {
                         cellNames.add(cellName);  // Add the cell name if valid
                     }
@@ -306,7 +340,7 @@ public class DynamicAnalysisController {
     }
 
     @FXML
-    private void handleUpdateValueButton() {
+    private void handleUpdateValueButton() throws ExecutionException, InterruptedException {
         Coordinate coordinate = parseCellNameToCoordinate(cellSelector.getValue());
         centerController.updateValueBySlider(coordinate, valuesSlider.getValue());
     }

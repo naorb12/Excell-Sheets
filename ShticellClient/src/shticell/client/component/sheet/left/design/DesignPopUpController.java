@@ -6,11 +6,13 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import shticell.client.component.sheet.center.CenterController;
+import shticell.client.component.sheet.main.SharedModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class DesignPopUpController {
 
@@ -37,6 +39,8 @@ public class DesignPopUpController {
     private ColorPicker colorPickerTextColor;
     @FXML
     private Button colorUndoButton;
+
+    private SharedModel sharedModel;
 
 
     public void initialize() {
@@ -71,14 +75,18 @@ public class DesignPopUpController {
     }
 
     // Set the reference to CenterController and populate selectors after it's set
-    public void setCenterController(CenterController centerController) {
+    public void setCenterController(CenterController centerController) throws ExecutionException, InterruptedException {
         this.centerController = centerController;
         populateSelectors();  // Populate the selectors after setting centerController
     }
 
-    private void populateSelectors() {
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
+    }
+
+    private void populateSelectors() throws ExecutionException, InterruptedException {
         if (centerController != null) {
-            SheetDTO sheet = centerController.getEngine().getSheet();
+            SheetDTO sheet = centerController.getServerEngineService().getSheet(sharedModel.getSheetName()).get();
             int columnCount = sheet.getColumnCount();
             int rowCount = sheet.getRowCount();
 

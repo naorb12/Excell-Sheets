@@ -63,19 +63,18 @@ public class DashboardRefresher extends TimerTask {
                     //System.out.println("Sheet count changed. used to be " + sheetCount + " sheets, now its " + updatedSheetData.size() + " sheets.");
                     sheetCount = updatedSheetData.size();
                 }
+
                 // Check if permissions have changed for any sheet
                 boolean permissionsChanged = false;
                 for (String sheetName : updatedPermissionsMap.keySet()) {
                     if(updatedPermissionsMap.get(sheetName).containsKey(userName)) {
                         if(!currentUserPermissionsMap.get(sheetName).containsKey(userName)) {
-                            //System.out.println("user " + userName + " has no permissions in front for " + sheetName);
                             currentUserPermissionsMap.put(sheetName, updatedPermissionsMap.get(sheetName));
                             permissionsChanged = true;
                             break;
                         }
                         if (!updatedPermissionsMap.get(sheetName).get(userName).getPermissionStatus().equals(currentUserPermissionsMap.get(sheetName).get(userName).getPermissionStatus())) {
                             permissionsChanged = true;
-                            //System.out.println("Updating permissions for " + sheetName);
                             break;
                         }
                     }

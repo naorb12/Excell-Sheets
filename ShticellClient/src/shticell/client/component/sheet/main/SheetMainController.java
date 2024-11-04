@@ -6,6 +6,7 @@ import immutable.objects.SheetManagerDTO;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -38,6 +39,9 @@ public class SheetMainController implements ShticellCommands {
     @FXML
     private CenterController centerController;
 
+    @FXML
+    private Button backToDashboardButton;
+
     private SharedModel sharedModel;
 
 
@@ -47,6 +51,7 @@ public class SheetMainController implements ShticellCommands {
         try {
             // Initialize the shared model
             sharedModel = new SharedModel();
+            sharedModel.setLatestVersionSelected(true);
 
             // Load and set the center section
             FXMLLoader centerLoader = new FXMLLoader(getClass().getResource("/shticell/client/component/sheet/center/centerSection.fxml"));
@@ -54,6 +59,8 @@ public class SheetMainController implements ShticellCommands {
             centerController = centerLoader.getController();
             //System.out.println("CenterController loaded: " + centerController);
             mainBorderPane.setCenter(centerPane);
+            centerController.setSharedModel(sharedModel);
+
 
             // Load and set the top section
             FXMLLoader topLoader = new FXMLLoader(getClass().getResource("/shticell/client/component/sheet/top/topSection.fxml"));
@@ -62,6 +69,7 @@ public class SheetMainController implements ShticellCommands {
             topController.setCenterController(centerController);
             topController.setSharedModel(sharedModel);
             topController.setupBindings();
+            centerController.setTopController(topController);
             //System.out.println("TopController loaded: " + topController);
             mainBorderPane.setTop(topPane);
 
@@ -74,6 +82,7 @@ public class SheetMainController implements ShticellCommands {
             leftController.setupBindings();
             //System.out.println("LeftController loaded: " + leftController);
             mainBorderPane.setLeft(leftPane);
+            topController.setLeftController(leftController);
 
             // Set click event for background pane
             mainBorderPane.setOnMouseClicked(event -> {
@@ -122,20 +131,33 @@ public class SheetMainController implements ShticellCommands {
 
                 if (sheetDTO != null) {
                     centerController.renderGrid(sheetDTO);
+                    leftController.populateSelectors(sheetDTO);
+                    sharedModel.setSheetName(sheetName);
+                    // refresher.run();
                 } else {
                     System.out.println("Failed to load sheetDTO: Deserialization error.");
                 }
 
                 if (permissionType == PermissionType.READER) {
-                    setReadOnly();
+                    sharedModel.setReadOnly(true);
                 }
             });
         });
     }
 
 
+    public void setInactive(){
+
+    }
+
 
     private void setReadOnly() {
         System.out.println("READONLY");
+    }
+
+    @FXML
+    private void onBackToDashboardButton(){
+        setInactive();
+        shticellAppMainController.switchToDashboard();
     }
 }

@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
@@ -21,9 +19,21 @@
             <center>
                 <fx:include source="/shticell/client/component/sheet/center/centerSection.fxml" />
             </center>
+            <bottom>
+                    <HBox alignment="CENTER_RIGHT">
+                        <Button fx:id="backToDashboardButton" onAction="#onBackToDashboardButton" prefHeight="25.0" prefWidth="191.0" text="Back To Dashboard">
+                  <HBox.margin>
+                     <Insets />
+                  </HBox.margin></Button>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <BorderPane.margin>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="15.0" />
+               </BorderPane.margin>
+                    </HBox>
+            </bottom>
 
         </BorderPane>
     </content>
 </ScrollPane>
-
-

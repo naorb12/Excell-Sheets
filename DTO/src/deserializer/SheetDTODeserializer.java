@@ -20,39 +20,55 @@ public class SheetDTODeserializer implements JsonDeserializer<SheetDTO> {
     public SheetDTO deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonObject = json.getAsJsonObject();
 
-        String name = jsonObject.get("name").getAsString();
+        // Name field (required)
+        String name = jsonObject.has("name") && !jsonObject.get("name").isJsonNull() ?
+                jsonObject.get("name").getAsString() : "Unnamed Sheet";
+        // Owner field (optional)
         String owner = jsonObject.has("owner") && !jsonObject.get("owner").isJsonNull() ?
-                jsonObject.get("owner").getAsString() : null;        int version = jsonObject.get("version").getAsInt();
-        int columnCount = jsonObject.get("columnsCount").getAsInt();
-        int rowCount = jsonObject.get("rowsCount").getAsInt();
-        int columnsWidthUnits = jsonObject.get("columnsWidth").getAsInt();
-        int rowHeightUnits = jsonObject.get("rowsHeight").getAsInt();
+                jsonObject.get("owner").getAsString() : null;
+        // Version (optional, default 0 if missing)
+        int version = jsonObject.has("version") && !jsonObject.get("version").isJsonNull() ?
+                jsonObject.get("version").getAsInt() : 0;
+        // Column and Row counts (default 0 if missing)
+        int columnCount = jsonObject.has("columnsCount") && !jsonObject.get("columnsCount").isJsonNull() ?
+                jsonObject.get("columnsCount").getAsInt() : 0;
+        int rowCount = jsonObject.has("rowsCount") && !jsonObject.get("rowsCount").isJsonNull() ?
+                jsonObject.get("rowsCount").getAsInt() : 0;
+        // Column width and row height units (default 0 if missing)
+        int columnsWidthUnits = jsonObject.has("columnsWidth") && !jsonObject.get("columnsWidth").isJsonNull() ?
+                jsonObject.get("columnsWidth").getAsInt() : 0;
+        int rowHeightUnits = jsonObject.has("rowsHeight") && !jsonObject.get("rowsHeight").isJsonNull() ?
+                jsonObject.get("rowsHeight").getAsInt() : 0;
 
-        // Deserialize mapOfCells (which will be a Map of CellImpl)
-        JsonObject mapOfCellsJson = jsonObject.getAsJsonObject("activeCells");
+        // Deserialize mapOfCells (which is a Map of CellImpl)
         Map<Coordinate, Cell> mapOfCells = new HashMap<>();
+        if (jsonObject.has("activeCells") && !jsonObject.get("activeCells").isJsonNull()) {
+            JsonObject mapOfCellsJson = jsonObject.getAsJsonObject("activeCells");
 
-        // Iterate over the entries in the JSON object to manually deserialize each Coordinate-Cell pair
-        for (Map.Entry<String, JsonElement> entry : mapOfCellsJson.entrySet()) {
-            // Parse the coordinate string (assuming it's a string) and convert it to a Coordinate object
-            String coordinateString = entry.getKey();
-            Coordinate coordinate = parseCoordinate(coordinateString);  // Custom method to parse coordinate
+            // Iterate over entries in JSON object for each Coordinate-Cell pair
+            for (Map.Entry<String, JsonElement> entry : mapOfCellsJson.entrySet()) {
+                String coordinateString = entry.getKey();
+                Coordinate coordinate = parseCoordinate(coordinateString);  // Custom method to parse coordinates
 
-            // Deserialize the cell as CellDTOImpl
-            Cell cell = context.deserialize(entry.getValue(), CellImpl.class);  // Assuming CellImpl is the implementation
-            mapOfCells.put(cell.getCoordinate(), cell);
+                // Deserialize the cell as CellImpl
+                Cell cell = context.deserialize(entry.getValue(), CellImpl.class);
+                mapOfCells.put(coordinate, cell);
+            }
         }
 
-        // Deserialize ranges (as usual)
-        JsonObject rangesJson = jsonObject.getAsJsonObject("ranges");
+        // Deserialize ranges (which is a Map of String -> List of Coordinates)
         Map<String, List<Coordinate>> ranges = new HashMap<>();
-        for (Map.Entry<String, JsonElement> entry : rangesJson.entrySet()) {
-            List<Coordinate> coordinates = new ArrayList<>();
-            for (JsonElement coordElement : entry.getValue().getAsJsonArray()) {
-                Coordinate coord = context.deserialize(coordElement, Coordinate.class);
-                coordinates.add(coord);
+        if (jsonObject.has("ranges") && !jsonObject.get("ranges").isJsonNull()) {
+            JsonObject rangesJson = jsonObject.getAsJsonObject("ranges");
+
+            for (Map.Entry<String, JsonElement> entry : rangesJson.entrySet()) {
+                List<Coordinate> coordinates = new ArrayList<>();
+                for (JsonElement coordElement : entry.getValue().getAsJsonArray()) {
+                    Coordinate coord = context.deserialize(coordElement, Coordinate.class);
+                    coordinates.add(coord);
+                }
+                ranges.put(entry.getKey(), coordinates);
             }
-            ranges.put(entry.getKey(), coordinates);
         }
 
         // Create and return the SheetImpl instance

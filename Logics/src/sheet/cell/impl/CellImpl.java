@@ -34,8 +34,8 @@ public class CellImpl<T> implements Cell, CellDTO, Serializable {
         this.originalValue = originalValue;
         this.effectiveValue = effectiveValue;
         this.versionNumber = version;
-        this.dependsOn = dependsOn;
-        this.influencingOn = influencingOn;
+        this.dependsOn = new HashSet<>(dependsOn);
+        this.influencingOn = new HashSet<>(influencingOn);
     }
 
     public CellImpl(int row, int column, String originalValue){

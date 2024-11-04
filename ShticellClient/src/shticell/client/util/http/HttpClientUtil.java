@@ -37,11 +37,6 @@ public class HttpClientUtil {
         call.enqueue(callback);
     }
 
-    public static void runAsyncRequest(Request request, Callback callback) {
-        Call call = HttpClientUtil.HTTP_CLIENT.newCall(request);
-        call.enqueue(callback);  // Asynchronously send the request
-    }
-
     public static void runReqAsyncWithJson(
             String finalUrl,
             HttpMethod methodType,
@@ -90,6 +85,7 @@ public class HttpClientUtil {
                         responseConsumer.accept(null);
                     } else {
                         String json = response.body().string();
+                        System.out.println("Raw response: " + json);  // Log the raw response here
                         if (response.isSuccessful() && json != null) {
                             responseConsumer.accept(json);
                         } else {

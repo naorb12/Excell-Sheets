@@ -1,9 +1,9 @@
 package shticell.client.component.sheet.center;
 
-import engine.manager.SheetManager;
 import exception.InvalidXMLFormatException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -13,12 +13,14 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import sheet.cell.impl.CellType;
 import sheet.coordinate.Coordinate;
+import shticell.client.component.sheet.main.SharedModel;
 import shticell.client.component.sheet.top.TopController;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class CenterController {
 
@@ -37,8 +39,9 @@ public class CenterController {
 
     private TopController topController;
 
-    private SheetManager sheetManager;
+    private ServerEngineService serverEngineService;
 
+    private  SharedModel sharedModel;
     // Track original states of the grid for undoing sort
     private Map<Coordinate, CellDTO> originalCells;
     private Set<Label> originalStyledLabels;
@@ -51,13 +54,22 @@ public class CenterController {
     private SimpleBooleanProperty isFileSelected = new SimpleBooleanProperty(false);
 
     public void initialize() {
-        sheetManager = new SheetManager();
+        serverEngineService = new ServerEngineService();
     }
 
     @FXML
     public void renderGridPane() {
-        // Render the grid from the sheetManager's sheet data
-        renderGrid(sheetManager.getSheet());
+        // Fetch the sheet data asynchronously
+        serverEngineService.getSheet(sharedModel.getSheetName()).thenAccept(sheetDTO -> {
+            // Ensure UI updates are on the JavaFX Application Thread
+            Platform.runLater(() -> {
+                renderGrid(sheetDTO);  // Safely update the UI with sheet data
+            });
+        }).exceptionally(ex -> {
+            // Handle any errors that occur
+            System.out.println("Error occurred: " + ex.getMessage());
+            return null;
+        });
     }
 
     public void renderGrid(SheetDTO sheet) {
@@ -73,7 +85,7 @@ public class CenterController {
 
         int rows = sheet.getRowCount();
         int cols = sheet.getColumnCount();
-        int rowHeight =sheet.getRowHeightUnits();  // Assuming you have these methods in the sheetManager
+        int rowHeight =sheet.getRowHeightUnits();  // Assuming you have these methods in the serverEngineService
         int colWidth = sheet.getColumnsWidthUnits();
 
         // Set up row and column constraints
@@ -121,7 +133,7 @@ public class CenterController {
                     }
                     if(cell.getBackgroundColor() != null){
                         cellLabel.setBackground(new Background(new BackgroundFill(cell.getBackgroundColor(), CornerRadii.EMPTY, new Insets(0))));
-                        System.out.println("Rendering " + cell.getCoordinate() + " background color: " + cell.getBackgroundColor());
+                        //System.out.println("Rendering " + cell.getCoordinate() + " background color: " + cell.getBackgroundColor());
                     }
                     if (cell.getForegroundColor() != null) {
                         String color = String.format("#%02x%02x%02x",
@@ -260,7 +272,7 @@ public class CenterController {
             label.setBackground(new Background(new BackgroundFill(color, CornerRadii.EMPTY, new Insets(0))));
         }
 
-        sheetManager.setBackgroundColor(row, col, color);
+        serverEngineService.setBackgroundColor(sharedModel.getSheetName(), row, col, color);
     }
 
     public void updateCellTextColor(String cell, Color color) {
@@ -272,7 +284,7 @@ public class CenterController {
             label.setTextFill(color);
         }
 
-        sheetManager.setTextColor(row, col, color);
+        serverEngineService.setTextColor(sharedModel.getSheetName(),row, col, color);
     }
 
     public void undoCellColor(String cell) {
@@ -285,60 +297,60 @@ public class CenterController {
             label.setTextFill(null);
             label.setStyle("");
             label.getStyleClass().add("label");    // Reset the text color, allowing the theme to apply
-            sheetManager.undoColor(row,col);
+            serverEngineService.undoColor(sharedModel.getSheetName(), row,col);
         }
     }
 
     public void applySorting(String fromCell, String toCell, List<Integer> columnsToSortBy) throws InvalidXMLFormatException {
         try {
-            SheetDTO sortedSheet = sheetManager.sortSheet(fromCell, toCell, columnsToSortBy);
+            SheetDTO sortedSheet = serverEngineService.sortSheet(sharedModel.getSheetName(), fromCell, toCell, columnsToSortBy).get();
             // render gridpane by sortedSheet.
             renderGrid(sortedSheet);
 
             isSorted = true; // Mark that sorting has been applied
-        }
-        catch (InvalidXMLFormatException e) {
-            throw new InvalidXMLFormatException(e.getMessage());
-        }
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException(e.getMessage());
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    // Save original state of the grid (before sorting)
-    private void saveOriginalState() {
-        // Save the original cell data and their styles
-        originalCells = sheetManager.getSheet().getMapOfCellsDTO(); // Assuming the sheetManager provides this method
-
-        // Save styled labels (e.g., with colors)
-        originalStyledLabels = new HashSet<>();
-        for (Node node : spreadsheetGridPane.getChildren()) {
-            if (node instanceof Label && !((Label) node).getStyleClass().isEmpty()) {
-                originalStyledLabels.add((Label) node); // Save labels with custom styles
-            }
-        }
-    }
+//    // Save original state of the grid (before sorting)
+//    private void saveOriginalState() {
+//        // Save the original cell data and their styles
+//        originalCells = serverEngineService.getSheet(sharedModel.getSheetName()).getMapOfCellsDTO(); // Assuming the serverEngineService provides this method
+//
+//        // Save styled labels (e.g., with colors)
+//        originalStyledLabels = new HashSet<>();
+//        for (Node node : spreadsheetGridPane.getChildren()) {
+//            if (node instanceof Label && !((Label) node).getStyleClass().isEmpty()) {
+//                originalStyledLabels.add((Label) node); // Save labels with custom styles
+//            }
+//        }
+//    }
 
     // Method to remove sorting and restore the original grid state
-    public void removeSorting() {
+    public void removeSorting() throws ExecutionException, InterruptedException {
         if (isSorted) {
             // Re-render the original grid
-            renderGrid(sheetManager.getSheet());
+            renderGrid(serverEngineService.getSheet(sharedModel.getSheetName()).get());
 
             isSorted = false; // Mark that sorting has been removed
         }
     }
 
-    public void removeFiltering() {
+    public void removeFiltering() throws ExecutionException, InterruptedException {
         if (isFiltered) {
-            renderGrid(sheetManager.getSheet());
+            renderGrid(serverEngineService.getSheet(sharedModel.getSheetName()).get());
             isFiltered = false;
         }
     }
 
 
     public void applyFiltering(String fromCell, String toCell, Set<String> selectedWordsSet ) throws InvalidXMLFormatException {
-        SheetDTO filteredSheet = sheetManager.filterSheet(fromCell, toCell, selectedWordsSet );
+        SheetDTO filteredSheet = (SheetDTO) serverEngineService.filterSheet(sharedModel.getSheetName(), fromCell, toCell, selectedWordsSet );
         // render gridpane by sortedSheet.
         renderGrid(filteredSheet);
 
@@ -346,7 +358,7 @@ public class CenterController {
     }
 
     public void applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
-        SheetDTO dynamicAnalysisSheet = sheetManager.applyDynamicAnalysis(coordinate, newValue);
+        SheetDTO dynamicAnalysisSheet = (SheetDTO) serverEngineService.applyDynamicAnalysis(sharedModel.getSheetName(), coordinate, newValue);
         renderGrid(dynamicAnalysisSheet);
     }
 
@@ -383,8 +395,8 @@ public class CenterController {
         return null;  // Return null if no node is found at the specified position
     }
 
-    public SheetManager getEngine() {
-        return sheetManager;
+    public ServerEngineService getServerEngineService() {
+        return serverEngineService;
     }
 
     @FXML
@@ -437,10 +449,13 @@ public class CenterController {
         spreadsheetGridPane.setMouseTransparent(false);
     }
 
-    public void updateValueBySlider(Coordinate coordinate, double value) {
-        sheetManager.setCell(coordinate.getRow(), coordinate.getColumn(), String.valueOf(value));
+    public void updateValueBySlider(Coordinate coordinate, double value) throws ExecutionException, InterruptedException {
+        serverEngineService.setCell(sharedModel.getSheetName(), coordinate.getRow(), coordinate.getColumn(), String.valueOf(value));
         renderGridPane();
         topController.populateVersionSelector();
     }
 
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
+    }
 }

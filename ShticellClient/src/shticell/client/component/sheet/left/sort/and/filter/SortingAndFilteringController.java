@@ -6,15 +6,20 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import sheet.coordinate.Coordinate;
 import shticell.client.component.sheet.center.CenterController;
+import shticell.client.component.sheet.main.SharedModel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class SortingAndFilteringController {
 
     private CenterController centerController;
+
+    private SharedModel sharedModel;
 
     // Sorting and Filtering
     @FXML
@@ -49,6 +54,10 @@ public class SortingAndFilteringController {
         initializeFilter();
     }
 
+    public void setSharedModel(SharedModel sharedModel) {
+        this.sharedModel = sharedModel;
+    }
+
     private void initializeSort() {
         // Initially disable the applySortButton
         applySortButton.setDisable(true);
@@ -72,6 +81,10 @@ public class SortingAndFilteringController {
                     }, columnsToSortBy);
                 } catch (InvalidXMLFormatException e) {
                     //showErrorPopup("Invalid Range", e.getMessage());
+                } catch (ExecutionException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         };
@@ -86,7 +99,15 @@ public class SortingAndFilteringController {
             }
         });
 
-        revertSortButton.setOnAction(event -> handleRemoveSort());
+        revertSortButton.setOnAction(event -> {
+            try {
+                handleRemoveSort();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     private void initializeFilter() {
@@ -106,7 +127,15 @@ public class SortingAndFilteringController {
             }
         });
 
-        revertFilterButton.setOnAction(event -> handleRemoveFilter());
+        revertFilterButton.setOnAction(event -> {
+            try {
+                handleRemoveFilter();
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         // Add listener to checkboxes in the columns list to reset the words when columns change
         checkboxListViewFilterColumns.getItems().forEach(checkbox -> {
@@ -124,15 +153,23 @@ public class SortingAndFilteringController {
                 populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, () -> {
                     if (checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected)) {
                         try {
+                            if (!isValidCellFormat(fromCellFieldFilter.getText()) || !isValidCellFormat(toCellFieldFilter.getText())) {
+                                // Skip the request if the format is invalid
+                                return;
+                            }
                             populateCheckboxListViewFilterWords(fromCell, toCell);
                         } catch (InvalidXMLFormatException e) {
+                            throw new RuntimeException(e);
+                        } catch (ExecutionException e) {
+                            //throw new RuntimeException(e);
+                        } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
                     } else {
                         checkboxListViewFilterWords.getItems().clear();  // Clear words if no columns are selected
                     }
                 }, columnsToFilterBy);
-            } catch (InvalidXMLFormatException e) {
+            } catch (InvalidXMLFormatException | ExecutionException | InterruptedException e) {
                 checkboxListViewFilterColumns.getItems().clear();
                 checkboxListViewFilterWords.getItems().clear();  // Clear both lists if range is invalid
             }
@@ -153,6 +190,12 @@ public class SortingAndFilteringController {
                 populateCheckboxListViewFilterWords(fromCell, toCell);
             } catch (InvalidXMLFormatException e) {
                 checkboxListViewFilterWords.getItems().clear();
+            } catch (ExecutionException e) {
+                checkboxListViewFilterWords.getItems().clear();
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                checkboxListViewFilterWords.getItems().clear();
+                throw new RuntimeException(e);
             }
         } else {
             checkboxListViewFilterWords.getItems().clear();
@@ -182,7 +225,8 @@ public class SortingAndFilteringController {
         applyFilterButton.setDisable(!(areTextFieldsFilled && isAnyColumnCheckboxSelected && isAnyWordCheckboxSelected));
     }
 
-    private void populateCheckboxListViewFilterWords(String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
+    private void populateCheckboxListViewFilterWords(String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
+
         checkboxListViewFilterWords.getItems().clear();  // Clear existing items
 
         boolean anyColumnSelected = checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected);
@@ -197,7 +241,7 @@ public class SortingAndFilteringController {
                 String column = columnCheckbox.getText();  // Get the column name
 
                 // Retrieve the words for the selected column and add them as checkboxes
-                Set<String> words = getWordsForColumn(column, fromCellFieldFilter, toCellFieldFilter);
+                Set<String> words = getWordsForColumn(sharedModel.getSheetName(), column, fromCellFieldFilter, toCellFieldFilter);
                 for (String word : words) {
                     CheckBox wordCheckbox = new CheckBox(word);
 
@@ -220,14 +264,14 @@ public class SortingAndFilteringController {
     }
 
 
-    private Set<String> getWordsForColumn(String column, String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException {
+    private Set<String> getWordsForColumn(String column, String fromCellFieldFilter, String toCellFieldFilter, String cellFieldFilter) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
         Set<String> words = new HashSet<>();
-        words = centerController.getEngine().getWordsFromColumnAndRange(column, fromCellFieldFilter, toCellFieldFilter);
+        words = centerController.getServerEngineService().getWordsFromColumnAndRange(sharedModel.getSheetName(), column, fromCellFieldFilter, toCellFieldFilter).get();
 
         return words;
     }
 
-    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView, Runnable runnable, List<Integer> columnsToXBy) throws InvalidXMLFormatException {
+    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView, Runnable runnable, List<Integer> columnsToXBy) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
         // Clear previous items
         listView.getItems().clear();
 
@@ -238,7 +282,7 @@ public class SortingAndFilteringController {
             columnsToXBy.clear();  // Clear the columnsToSortBy list
         }
 
-        List<Coordinate> range = centerController.getEngine().validateRange(fromCell, toCell);
+        List<Coordinate> range = centerController.getServerEngineService().validateRange(sharedModel.getSheetName(), fromCell, toCell).get();
         Set<Integer> columnsSet = parseRangeToColumns(range);
 
         for (Integer columnIndex : columnsSet) {
@@ -264,7 +308,9 @@ public class SortingAndFilteringController {
         }
     }
 
-
+    private boolean isValidCellFormat(String cell) {
+        return cell != null && cell.matches("^[A-Za-z]+\\d+$"); // e.g., "B2" or "C5"
+    }
 
     private Set<Integer> parseRangeToColumns(List<Coordinate> range) {
         Set<Integer> columnsToSortBy = new HashSet<>();
@@ -290,14 +336,14 @@ public class SortingAndFilteringController {
     }
 
     @FXML
-    private void handleRemoveSort() {
+    private void handleRemoveSort() throws ExecutionException, InterruptedException {
         centerController.removeSorting();
         columnsToSortBy.clear();
         checkboxListView.getItems().forEach(checkBox -> checkBox.setSelected(false));
     }
 
     @FXML
-    public void handleRemoveSortAndFilter() {
+    public void handleRemoveSortAndFilter() throws ExecutionException, InterruptedException {
         centerController.removeSorting();
         centerController.removeFiltering();
         columnsToSortBy.clear();
@@ -319,7 +365,7 @@ public class SortingAndFilteringController {
     }
 
     @FXML
-    private void handleRemoveFilter() {
+    private void handleRemoveFilter() throws ExecutionException, InterruptedException {
         centerController.removeFiltering();
         selectedWordsSet.clear();
         checkboxListViewFilterColumns.getItems().forEach(checkBox -> checkBox.setSelected(false));

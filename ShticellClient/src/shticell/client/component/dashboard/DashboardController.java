@@ -116,7 +116,15 @@ public class DashboardController implements Cloneable, ShticellCommands {
 
                 if (userPermission.getPermissionStatus() == PermissionStatus.APPROVED) {
                     return new SimpleStringProperty(userPermission.getPermissionType().toString());
-                } else {
+                } else if(userPermission.getPermissionStatus() == PermissionStatus.REJECTED){
+                    if(userPermission.getLastApprovedPermissionType() != null){
+                        return new SimpleStringProperty(userPermission.getLastApprovedPermissionType().toString());
+                    }
+                    else{
+                        return new SimpleStringProperty("N/A");
+                    }
+                }
+                else {
                     return new SimpleStringProperty("Pending Approval");
                 }
             } else {
@@ -157,17 +165,17 @@ public class DashboardController implements Cloneable, ShticellCommands {
     }
 
     private void setViewSheetButtonAccordingToPermissions(SheetDTO newSelection) {
-        UserPermissionsDTO permissionsDTO = currentUserPermissionsMap.get(sheetTableView.getSelectionModel().getSelectedItem().getName()).get(shticellAppMainController.getCurrentUserName());
-        if (permissionsDTO != null) {
-            if (permissionsDTO.getPermissionStatus() == PermissionStatus.APPROVED || permissionsDTO.getLastApprovedPermissionType() != null) {
-                viewSheetButton.setDisable(false);
-            }
-            else {
+        if(newSelection != null) {
+            UserPermissionsDTO permissionsDTO = currentUserPermissionsMap.get(newSelection.getName()).get(shticellAppMainController.getCurrentUserName());
+            if (permissionsDTO != null) {
+                if (permissionsDTO.getPermissionStatus() == PermissionStatus.APPROVED || permissionsDTO.getLastApprovedPermissionType() != null) {
+                    viewSheetButton.setDisable(false);
+                } else {
+                    viewSheetButton.setDisable(true);
+                }
+            } else {
                 viewSheetButton.setDisable(true);
             }
-        }
-        else {
-            viewSheetButton.setDisable(true);
         }
 
     }
@@ -326,10 +334,12 @@ public class DashboardController implements Cloneable, ShticellCommands {
     @FXML
     public void onViewSheet() {
         // Implement logic to view the selected sheet
-         String selectedSheetName = sheetTableView.getSelectionModel().getSelectedItem().getName();
-         if (selectedSheetName != null) {
-             shticellAppMainController.switchToSheetMain(selectedSheetName);
-         }
+        if(sheetTableView.getSelectionModel().getSelectedItem() != null) {
+            String selectedSheetName = sheetTableView.getSelectionModel().getSelectedItem().getName();
+            if (selectedSheetName != null) {
+                shticellAppMainController.switchToSheetMain(selectedSheetName);
+            }
+        }
     }
 
     @FXML
