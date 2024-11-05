@@ -30,7 +30,7 @@ public class ValidateRangeServlet extends HttpServlet {
 
         if (sheetManager == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write(new Gson().toJson("Sheet not found."));
+            response.getWriter().write("{\"error\": \"Sheet not found.\"}");
             return;
         }
 
@@ -41,7 +41,7 @@ public class ValidateRangeServlet extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(new Gson().toJson("Error validating range."));
+            response.getWriter().write("{\"error\": \"Error validating range: " + e.getMessage() + "\"}");
         }
     }
 }

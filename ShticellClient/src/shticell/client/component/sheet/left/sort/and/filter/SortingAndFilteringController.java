@@ -1,6 +1,7 @@
 package shticell.client.component.sheet.left.sort.and.filter;
 
 import exception.InvalidXMLFormatException;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -8,12 +9,10 @@ import sheet.coordinate.Coordinate;
 import shticell.client.component.sheet.center.CenterController;
 import shticell.client.component.sheet.main.SharedModel;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
 
 public class SortingAndFilteringController {
 
@@ -71,21 +70,13 @@ public class SortingAndFilteringController {
             if (!fromCellFieldSortField.getText().trim().isEmpty() && !toCellFieldSortField.getText().trim().isEmpty()) {
                 String fromCell = fromCellFieldSortField.getText().trim();
                 String toCell = toCellFieldSortField.getText().trim();
-                try {
-                    populateCheckboxListView(fromCell, toCell, checkboxListView, ()->{
-                        try {
-                            updateApplySortButtonState();
-                        } catch (RuntimeException e) {
-                            //
-                        }
-                    }, columnsToSortBy);
-                } catch (InvalidXMLFormatException e) {
-                    //showErrorPopup("Invalid Range", e.getMessage());
-                } catch (ExecutionException e) {
-                    throw new RuntimeException(e);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                populateCheckboxListView(fromCell, toCell, checkboxListView, ()->{
+                    try {
+                        updateApplySortButtonState();
+                    } catch (RuntimeException e) {
+                        //
+                    }
+                }, columnsToSortBy);
             }
         };
         fromCellFieldSortField.textProperty().addListener(listener);
@@ -148,31 +139,18 @@ public class SortingAndFilteringController {
         if (!fromCellFieldFilter.getText().trim().isEmpty() && !toCellFieldFilter.getText().trim().isEmpty()) {
             String fromCell = fromCellFieldFilter.getText().trim();
             String toCell = toCellFieldFilter.getText().trim();
-            try {
-                // Populate column selector
-                populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, () -> {
-                    if (checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected)) {
-                        try {
-                            if (!isValidCellFormat(fromCellFieldFilter.getText()) || !isValidCellFormat(toCellFieldFilter.getText())) {
-                                // Skip the request if the format is invalid
-                                return;
-                            }
-                            populateCheckboxListViewFilterWords(fromCell, toCell);
-                        } catch (InvalidXMLFormatException e) {
-                            throw new RuntimeException(e);
-                        } catch (ExecutionException e) {
-                            //throw new RuntimeException(e);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    } else {
-                        checkboxListViewFilterWords.getItems().clear();  // Clear words if no columns are selected
+            // Populate column selector
+            populateCheckboxListView(fromCell, toCell, checkboxListViewFilterColumns, () -> {
+                if (checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected)) {
+                    if (!isValidCellFormat(fromCellFieldFilter.getText()) || !isValidCellFormat(toCellFieldFilter.getText())) {
+                        // Skip the request if the format is invalid
+                        return;
                     }
-                }, columnsToFilterBy);
-            } catch (InvalidXMLFormatException | ExecutionException | InterruptedException e) {
-                checkboxListViewFilterColumns.getItems().clear();
-                checkboxListViewFilterWords.getItems().clear();  // Clear both lists if range is invalid
-            }
+                    populateCheckboxListViewFilterWords(fromCell, toCell);
+                } else {
+                    checkboxListViewFilterWords.getItems().clear();  // Clear words if no columns are selected
+                }
+            }, columnsToFilterBy);
         } else {
             // Clear both columns and words if the range fields are empty
             checkboxListViewFilterColumns.getItems().clear();
@@ -182,29 +160,22 @@ public class SortingAndFilteringController {
         updateApplyFilterButtonState();
     }
 
+    // Helper method to check if a cell reference is valid, e.g., "C3" or "D10"
+    private boolean isValidCell(String cell) {
+        return cell != null && cell.matches("^[A-Za-z]+\\d+$");
+    }
+
     private void handleColumnSelectionChange() {
         if (checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected)) {
             String fromCell = fromCellFieldFilter.getText().trim();
             String toCell = toCellFieldFilter.getText().trim();
-            try {
-                populateCheckboxListViewFilterWords(fromCell, toCell);
-            } catch (InvalidXMLFormatException e) {
-                checkboxListViewFilterWords.getItems().clear();
-            } catch (ExecutionException e) {
-                checkboxListViewFilterWords.getItems().clear();
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
-                checkboxListViewFilterWords.getItems().clear();
-                throw new RuntimeException(e);
-            }
+            populateCheckboxListViewFilterWords(fromCell, toCell);
         } else {
             checkboxListViewFilterWords.getItems().clear();
         }
 
         updateApplyFilterButtonState();
     }
-
-
 
 
     // Method to update the apply button's state based on text fields and checkbox selections
@@ -225,53 +196,63 @@ public class SortingAndFilteringController {
         applyFilterButton.setDisable(!(areTextFieldsFilled && isAnyColumnCheckboxSelected && isAnyWordCheckboxSelected));
     }
 
-    private void populateCheckboxListViewFilterWords(String fromCellFieldFilter, String toCellFieldFilter) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
-
+    private void populateCheckboxListViewFilterWords(String fromCellFieldFilter, String toCellFieldFilter) {
         checkboxListViewFilterWords.getItems().clear();  // Clear existing items
 
         boolean anyColumnSelected = checkboxListViewFilterColumns.getItems().stream().anyMatch(CheckBox::isSelected);
-
         if (!anyColumnSelected) {
-            return;  // If no columns are selected, exit early and leave the word list empty
+            return;  // If no columns are selected, exit early
         }
 
-        // Loop through each checkbox in checkboxListViewFilterColumns
         for (CheckBox columnCheckbox : checkboxListViewFilterColumns.getItems()) {
             if (columnCheckbox.isSelected()) {
                 String column = columnCheckbox.getText();  // Get the column name
 
-                // Retrieve the words for the selected column and add them as checkboxes
-                Set<String> words = getWordsForColumn(sharedModel.getSheetName(), column, fromCellFieldFilter, toCellFieldFilter);
-                for (String word : words) {
-                    CheckBox wordCheckbox = new CheckBox(word);
+                // Use the updated asynchronous method
+                getWordsForColumn(column, fromCellFieldFilter, toCellFieldFilter, words -> {
+                    for (String word : words) {
+                        CheckBox wordCheckbox = new CheckBox(word);
 
-                    // Add a listener to update the set when the checkbox is selected/unselected
-                    wordCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                        if (newValue) {
-                            selectedWordsSet.add(word);
-                        } else {
-                            selectedWordsSet.remove(word);
-                        }
-                        updateApplyFilterButtonState();
-                    });
+                        // Add a listener to update the set when the checkbox is selected/unselected
+                        wordCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                            if (newValue) {
+                                selectedWordsSet.add(word);
+                            } else {
+                                selectedWordsSet.remove(word);
+                            }
+                            updateApplyFilterButtonState();
+                        });
 
-                    checkboxListViewFilterWords.getItems().add(wordCheckbox);
-                }
+                        checkboxListViewFilterWords.getItems().add(wordCheckbox);
+                    }
+                    updateApplyFilterButtonState();
+                });
             }
         }
-
-        updateApplyFilterButtonState();
     }
 
 
-    private Set<String> getWordsForColumn(String column, String fromCellFieldFilter, String toCellFieldFilter, String cellFieldFilter) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
-        Set<String> words = new HashSet<>();
-        words = centerController.getServerEngineService().getWordsFromColumnAndRange(sharedModel.getSheetName(), column, fromCellFieldFilter, toCellFieldFilter).get();
 
-        return words;
+    private void getWordsForColumn(String column, String fromCellFieldFilter, String toCellFieldFilter, Consumer<Set<String>> callback) {
+        // Fetch words asynchronously
+        centerController.getServerEngineService()
+                .getWordsFromColumnAndRange(sharedModel.getSheetName(), column, fromCellFieldFilter, toCellFieldFilter)
+                .thenAccept(words -> Platform.runLater(() -> callback.accept(words)))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        System.out.println("Error retrieving words for column: " + ex.getMessage());
+                        callback.accept(Collections.emptySet()); // Return empty set on error
+                    });
+                    return null;
+                });
     }
 
-    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView, Runnable runnable, List<Integer> columnsToXBy) throws InvalidXMLFormatException, ExecutionException, InterruptedException {
+
+    private void populateCheckboxListView(String fromCell, String toCell, ListView<CheckBox> listView, Runnable runnable, List<Integer> columnsToXBy) {
+        if (!isValidCell(fromCell) || !isValidCell(toCell)) {
+            return;
+        }
+
         // Clear previous items
         listView.getItems().clear();
 
@@ -282,31 +263,42 @@ public class SortingAndFilteringController {
             columnsToXBy.clear();  // Clear the columnsToSortBy list
         }
 
-        List<Coordinate> range = centerController.getServerEngineService().validateRange(sharedModel.getSheetName(), fromCell, toCell).get();
-        Set<Integer> columnsSet = parseRangeToColumns(range);
+        // Fetch the range asynchronously
+        List<Integer> finalColumnsToXBy1 = columnsToXBy;
+        centerController.getServerEngineService().validateRange(sharedModel.getSheetName(), fromCell, toCell)
+                .thenAccept(range -> Platform.runLater(() -> {
+                    // Run this block on the JavaFX Application Thread to update the UI
+                    Set<Integer> columnsSet = parseRangeToColumns(range);
 
-        for (Integer columnIndex : columnsSet) {
-            String columnName = getColumnName(columnIndex - 1);
-            CheckBox checkBox = new CheckBox(columnName);
+                    for (Integer columnIndex : columnsSet) {
+                        String columnName = getColumnName(columnIndex - 1);
+                        CheckBox checkBox = new CheckBox(columnName);
 
-            // Add listener to track the state of each checkbox and update columnsToSortBy list
-            List<Integer> finalColumnsToXBy = columnsToXBy;
-            checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue) {
-                    // Checkbox is selected: add the column (in order) to columnsToSortBy
-                    finalColumnsToXBy.add(columnIndex);
-                } else {
-                    // Checkbox is deselected: remove the column from columnsToSortBy
-                    finalColumnsToXBy.remove(Integer.valueOf(columnIndex));
-                }
+                        // Add listener to track the state of each checkbox and update columnsToSortBy list
+                        List<Integer> finalColumnsToXBy = finalColumnsToXBy1;
+                        checkBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+                            if (newValue) {
+                                // Checkbox is selected: add the column (in order) to columnsToSortBy
+                                finalColumnsToXBy.add(columnIndex);
+                            } else {
+                                // Checkbox is deselected: remove the column from columnsToSortBy
+                                finalColumnsToXBy.remove(Integer.valueOf(columnIndex));
+                            }
 
-                runnable.run();
-            });
+                            runnable.run();
+                        });
 
-            // Add the CheckBox to the ListView
-            listView.getItems().add(checkBox);
-        }
+                        // Add the CheckBox to the ListView
+                        listView.getItems().add(checkBox);
+                    }
+                }))
+                .exceptionally(ex -> {
+                    // Handle any exceptions
+                    Platform.runLater(() -> showErrorPopup("Error", "Failed to populate columns due to an error: " + ex.getMessage()));
+                    return null;
+                });
     }
+
 
     private boolean isValidCellFormat(String cell) {
         return cell != null && cell.matches("^[A-Za-z]+\\d+$"); // e.g., "B2" or "C5"

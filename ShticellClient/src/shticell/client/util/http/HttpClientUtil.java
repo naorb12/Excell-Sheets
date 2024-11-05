@@ -89,9 +89,15 @@ public class HttpClientUtil {
                         if (response.isSuccessful() && json != null) {
                             responseConsumer.accept(json);
                         } else {
-                            JsonObject errorObject = JsonParser.parseString(json).getAsJsonObject();
-                            String errorMessage = errorObject.get("error").getAsString();
-                            handleFailure(new IOException(errorMessage));
+                            try {
+                                JsonObject errorObject = JsonParser.parseString(json).getAsJsonObject();
+                                String errorMessage = errorObject.has("error")
+                                        ? errorObject.get("error").getAsString()
+                                        : "An unknown error occurred.";  // Fallback message if "error" is missing
+                                handleFailure(new IOException(errorMessage));
+                            } catch (Exception parseException) {
+                                handleFailure(new IOException("Unexpected response format. Could not parse error message."));
+                            }
                         }
                     }
                 } finally {
@@ -118,6 +124,7 @@ public class HttpClientUtil {
         Call call = HttpClientUtil.HTTP_CLIENT.newCall(request);
         call.enqueue(callback);  // Send the request asynchronously
     }
+
 
 
     public static void shutdown() {

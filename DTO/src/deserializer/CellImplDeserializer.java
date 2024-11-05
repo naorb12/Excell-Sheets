@@ -23,7 +23,7 @@ public class CellImplDeserializer implements JsonDeserializer<CellImpl> {
         Coordinate coordinate = context.deserialize(jsonObject.get("coordinate"), Coordinate.class);
 
         // Deserialize the original value
-        String originalValue = jsonObject.get("originalValue").getAsString();
+        String originalValue = jsonObject.has("originalValue") && !jsonObject.get("originalValue").isJsonNull() ? jsonObject.get("originalValue").getAsString() : null; ;
 
         // Deserialize the effective value
         EffectiveValue effectiveValue = context.deserialize(jsonObject.get("effectiveValue"), EffectiveValueImpl.class);

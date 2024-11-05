@@ -302,20 +302,19 @@ public class CenterController {
     }
 
     public void applySorting(String fromCell, String toCell, List<Integer> columnsToSortBy) throws InvalidXMLFormatException {
-        try {
-            SheetDTO sortedSheet = serverEngineService.sortSheet(sharedModel.getSheetName(), fromCell, toCell, columnsToSortBy).get();
-            // render gridpane by sortedSheet.
-            renderGrid(sortedSheet);
-
-            isSorted = true; // Mark that sorting has been applied
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e.getMessage());
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        serverEngineService.sortSheet(sharedModel.getSheetName(), fromCell, toCell, columnsToSortBy)
+                .thenAccept(sortedSheet -> Platform.runLater(() -> {
+                    // Render gridpane by sortedSheet on the JavaFX Application Thread
+                    renderGrid(sortedSheet);
+                    isSorted = true; // Mark that sorting has been applied
+                }))
+                .exceptionally(ex -> {
+                    // Handle any exceptions
+                    Platform.runLater(() -> System.out.println(("Sorting Error "  + "Failed to apply sorting: " + ex.getMessage())));
+                    return null;
+                });
     }
+
 
 //    // Save original state of the grid (before sorting)
 //    private void saveOriginalState() {
@@ -349,13 +348,22 @@ public class CenterController {
     }
 
 
-    public void applyFiltering(String fromCell, String toCell, Set<String> selectedWordsSet ) throws InvalidXMLFormatException {
-        SheetDTO filteredSheet = (SheetDTO) serverEngineService.filterSheet(sharedModel.getSheetName(), fromCell, toCell, selectedWordsSet );
-        // render gridpane by sortedSheet.
-        renderGrid(filteredSheet);
-
-        isFiltered = true;
+    public void applyFiltering(String fromCell, String toCell, Set<String> selectedWordsSet) throws InvalidXMLFormatException {
+        serverEngineService.filterSheet(sharedModel.getSheetName(), fromCell, toCell, selectedWordsSet)
+                .thenAccept(filteredSheet -> Platform.runLater(() -> {
+                    // Render gridpane by filteredSheet on the JavaFX Application Thread
+                    renderGrid(filteredSheet);
+                    isFiltered = true;  // Mark that filtering has been applied
+                }))
+                .exceptionally(ex -> {
+                    // Handle any exceptions
+                    Platform.runLater(() -> {
+                        System.out.println("Filtering Error: Failed to apply filtering: " + ex.getMessage());
+                    });
+                    return null;
+                });
     }
+
 
     public void applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
         SheetDTO dynamicAnalysisSheet = (SheetDTO) serverEngineService.applyDynamicAnalysis(sharedModel.getSheetName(), coordinate, newValue);

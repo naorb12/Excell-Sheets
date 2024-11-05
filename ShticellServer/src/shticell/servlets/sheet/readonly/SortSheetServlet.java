@@ -63,7 +63,10 @@ public class SortSheetServlet extends HttpServlet {
             }
         } catch (InvalidXMLFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson("Invalid XML format: " + e.getMessage()));
+            response.getWriter().write("{\"error\": \"Error validating range: " + e.getMessage() + "\"}");
+        } catch (RuntimeException e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("{\"error\": \"Error validating range: " + e.getMessage() + "\"}");
         }
     }
 }
