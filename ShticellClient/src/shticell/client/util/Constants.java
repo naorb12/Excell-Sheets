@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import deserializer.CellImplDeserializer;
 import deserializer.ColorTypeAdapter;
 import deserializer.SheetDTODeserializer;
+import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
 import javafx.scene.paint.Color;
 import sheet.cell.impl.CellImpl;
@@ -75,6 +76,7 @@ public class Constants {
     // GSON instance
     public final static Gson GSON_INSTANCE_WITH_DESERIALIZERS = new GsonBuilder().registerTypeAdapter(SheetDTO.class, new SheetDTODeserializer())  // Handle SheetDTO deserialization
             .registerTypeAdapter(CellImpl.class, new CellImplDeserializer())  // Handle CellImpl deserialization
+            .registerTypeAdapter(CellDTO.class, new CellImplDeserializer())
             .registerTypeAdapter(Color.class, new ColorTypeAdapter())
             .setPrettyPrinting()
             .create();

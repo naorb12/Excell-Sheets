@@ -15,7 +15,7 @@ import shticell.utils.ServletUtils;
 
 import java.io.IOException;
 
-@WebServlet("/applyDynamicAnalysis")
+@WebServlet("/applydynamicanalysis")
 public class DynamicAnalysisServlet extends HttpServlet {
 
     private static final Gson gson = new Gson();

@@ -2,6 +2,7 @@ package shticell.client.component.sheet.left.dynamic;
 
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -13,11 +14,10 @@ import sheet.coordinate.Coordinate;
 import shticell.client.component.sheet.center.CenterController;
 import shticell.client.component.sheet.main.SharedModel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class DynamicAnalysisController {
 
@@ -125,7 +125,15 @@ public class DynamicAnalysisController {
         });
 
         // Add a listener to handle slider value changes
-        valuesSlider.valueProperty().addListener((observable, oldValue, newValue) -> handleSliderValueChange(newValue));
+        valuesSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            try {
+                handleSliderValueChange(newValue);
+            } catch (ExecutionException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         // Update slider value on button click
         updateValueButton.setOnAction(event -> {
@@ -141,9 +149,9 @@ public class DynamicAnalysisController {
 
     private void setSliderValueFromCell(String cellName) throws ExecutionException, InterruptedException {
         Coordinate coord = parseCellNameToCoordinate(cellName);
-        CellDTO cell = centerController.getServerEngineService().getCell(sharedModel.getSheetName(), coord.getRow(), coord.getColumn()).get();
-        if (cell != null && isDouble(cell.getOriginalValue())) {
-            double cellValue = Double.parseDouble(cell.getOriginalValue());
+        Optional<CellDTO> cell = centerController.getServerEngineService().getCell(sharedModel.getSheetName(), coord.getRow(), coord.getColumn()).get();
+        if (cell != null && isDouble(cell.get().getOriginalValue())) {
+            double cellValue = Double.parseDouble(cell.get().getOriginalValue());
 
             // Ensure the cell value is within bounds before setting it to the slider
             double minValue = valuesSlider.getMin();
@@ -238,49 +246,72 @@ public class DynamicAnalysisController {
         populateSelectors();
     }
 
-    private void populateSelectors() throws ExecutionException, InterruptedException {
+    private void populateSelectors() {
         if (centerController != null) {
-            SheetDTO sheet = centerController.getServerEngineService().getSheet(sharedModel.getSheetName()).get();
-            int columnCount = sheet.getColumnCount();
-            int rowCount = sheet.getRowCount();
+            centerController.getServerEngineService().getSheet(sharedModel.getSheetName())
+                    .thenAccept(sheet -> {
+                        int columnCount = sheet.getColumnCount();
+                        int rowCount = sheet.getRowCount();
 
-            // Collect all valid coordinates from the cells
-            List<String> cellNames = new ArrayList<>();
-            for (int row = 1; row <= rowCount; row++) {
-                for (int col = 0; col < columnCount; col++) {
-                    String cellName = getColumnName(col) + row;  // Create cell name (e.g., A1, B2, etc.)
+                        List<CompletableFuture<Optional<String>>> cellFutures = new ArrayList<>();
 
-                    // Parse the cell name to get the coordinate (row, column)
-                    Coordinate coord = parseCellNameToCoordinate(cellName);
-                    CellDTO cell = centerController.getServerEngineService().getCell(sharedModel.getSheetName(),coord.getRow(), coord.getColumn()).get();
-                    if (cell != null && isDouble(cell.getOriginalValue())) {
-                        cellNames.add(cellName);  // Add the cell name if valid
-                    }
-                }
-            }
+                        for (int row = 1; row <= rowCount; row++) {
+                            for (int col = 0; col < columnCount; col++) {
+                                String cellName = getColumnName(col) + row;
+                                Coordinate coord = parseCellNameToCoordinate(cellName);
 
-            // Sort the cell names correctly: by column (lexicographically) and row (numerically)
-            Collections.sort(cellNames, new Comparator<String>() {
-                @Override
-                public int compare(String cell1, String cell2) {
-                    Coordinate coord1 = parseCellNameToCoordinate(cell1);
-                    Coordinate coord2 = parseCellNameToCoordinate(cell2);
+                                CompletableFuture<Optional<String>> cellFuture = centerController.getServerEngineService()
+                                        .getCell(sharedModel.getSheetName(), coord.getRow(), coord.getColumn())
+                                        .handle((optionalCell, ex) -> {
+                                            if (ex != null) {
+                                                System.err.println("Error fetching cell: " + ex.getMessage());
+                                                return Optional.empty();
+                                            }
+                                            return optionalCell.map(cell -> isDouble(cell.getOriginalValue()) ? cellName : null);
+                                        });
 
-                    // First, compare columns numerically
-                    int columnComparison = Integer.compare(coord1.getColumn(), coord2.getColumn());
-                    if (columnComparison != 0) {
-                        return columnComparison;
-                    }
+                                cellFutures.add(cellFuture);
+                            }
+                        }
 
-                    // If columns are the same, compare the rows numerically
-                    return Integer.compare(coord1.getRow(), coord2.getRow());
-                }
-            });
+                        CompletableFuture.allOf(cellFutures.toArray(new CompletableFuture[0]))
+                                .thenAccept(v -> {
+                                    List<String> cellNames = cellFutures.stream()
+                                            .map(CompletableFuture::join)
+                                            .filter(Optional::isPresent)
+                                            .map(Optional::get)
+                                            .collect(Collectors.toList());
 
-            // Populate cellSelector with the sorted cell names
-            cellSelector.getItems().addAll(cellNames);
+                                    if (!cellNames.isEmpty()) {
+                                        cellNames.sort((cellName1, cellName2) -> {
+                                            Coordinate coord1 = parseCellNameToCoordinate(cellName1);
+                                            Coordinate coord2 = parseCellNameToCoordinate(cellName2);
+
+                                            int columnComparison = Integer.compare(coord1.getColumn(), coord2.getColumn());
+                                            return columnComparison != 0 ? columnComparison : Integer.compare(coord1.getRow(), coord2.getRow());
+                                        });
+
+                                        Platform.runLater(() -> {
+                                            cellSelector.getItems().setAll(cellNames);
+                                            System.out.println("Populated cellSelector successfully!");
+                                        });
+                                    } else {
+                                        System.out.println("No valid numeric cells found.");
+                                    }
+                                })
+                                .exceptionally(ex -> {
+                                    System.err.println("Error populating selectors: " + ex.getMessage());
+                                    return null;
+                                });
+                    })
+                    .exceptionally(ex -> {
+                        System.err.println("Failed to fetch sheet: " + ex.getMessage());
+                        return null;
+                    });
         }
     }
+
+
 
     // Utility method to parse a cell name into a Coordinate (A3 -> row=3, column=1)
     private Coordinate parseCellNameToCoordinate(String cellName) {
@@ -346,7 +377,7 @@ public class DynamicAnalysisController {
     }
 
     @FXML
-    private void handleSliderValueChange(Number newValue) {
+    private void handleSliderValueChange(Number newValue) throws ExecutionException, InterruptedException {
         Coordinate coordinate = parseCellNameToCoordinate(cellSelector.getValue());
         centerController.applyDynamicAnalysis(coordinate, newValue);
     }

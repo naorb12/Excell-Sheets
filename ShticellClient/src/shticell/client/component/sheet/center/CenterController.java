@@ -366,8 +366,20 @@ public class CenterController {
 
 
     public void applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
-        SheetDTO dynamicAnalysisSheet = (SheetDTO) serverEngineService.applyDynamicAnalysis(sharedModel.getSheetName(), coordinate, newValue);
-        renderGrid(dynamicAnalysisSheet);
+        serverEngineService.applyDynamicAnalysis(sharedModel.getSheetName(), coordinate, newValue)
+                .thenAccept(dynamicAnalysisSheet -> Platform.runLater(() -> {
+                    // Update the UI with the new sheet
+                    renderGrid(dynamicAnalysisSheet);
+                }))
+                .exceptionally(ex -> {
+                    // Handle exceptions gracefully, e.g., log or show an error popup
+                    Platform.runLater(() -> {
+                        System.err.println("Error applying dynamic analysis: " + ex.getMessage());
+                        // Optionally, show an error popup
+                        // showErrorPopup("Dynamic Analysis Error", "Failed to apply dynamic analysis: " + ex.getMessage());
+                    });
+                    return null;
+                });
     }
 
     // Restore original cell styles (e.g., colors)

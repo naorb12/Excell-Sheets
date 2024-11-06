@@ -64,8 +64,14 @@ public class SetCellServlet extends HttpServlet {
             response.getWriter().write(gson.toJson("Cell updated successfully."));
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson("Error updating cell: " + e.getMessage()));
+            writeErrorResponse(response, "Failed to update cell: " + e.getMessage());
         }
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        JsonObject errorObject = new JsonObject();
+        errorObject.addProperty("error", errorMessage);
+        response.getWriter().write(gson.toJson(errorObject));
     }
 }
 

@@ -1,5 +1,7 @@
 package shticell.client.component.sheet.center;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import exception.InvalidXMLFormatException;
 import immutable.objects.CellDTO;
@@ -23,10 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class ServerEngineService {
@@ -231,76 +230,88 @@ public class ServerEngineService {
         return result;
     }
 
-    public CompletableFuture<List<Coordinate>> createNewRange(String sheetName, String rangeName, String fromCell, String toCell) throws InvalidXMLFormatException {
-        // Construct the URL with query parameters
+    public CompletableFuture<List<Coordinate>> createNewRange(String sheetName, String rangeName, String fromCell, String toCell) {
         String urlString = Constants.CREATE_NEW_RANGE_URL
                 + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                 + "&rangeName=" + URLEncoder.encode(rangeName, StandardCharsets.UTF_8)
                 + "&fromCell=" + URLEncoder.encode(fromCell, StandardCharsets.UTF_8)
                 + "&toCell=" + URLEncoder.encode(toCell, StandardCharsets.UTF_8);
 
-        // CompletableFuture to handle async processing
         CompletableFuture<List<Coordinate>> future = new CompletableFuture<>();
+        RequestBody requestBody = RequestBody.create("{}", MediaType.parse("application/json")); // Non-null empty JSON body
 
-        // Use HttpClientUtil to send an async POST request
-        HttpClientUtil.runReqAsyncWithJson(urlString, HttpMethod.POST, null, responseBody -> {
+        HttpClientUtil.runReqAsyncWithJson(urlString, HttpMethod.POST, requestBody, responseBody -> {
             if (responseBody == null) {
                 future.completeExceptionally(new RuntimeException("Failed to create range: Empty response from server."));
                 return;
             }
 
-            // Parse the response to a list of Coordinate objects
-            Type coordinateListType = new TypeToken<List<Coordinate>>() {}.getType();
-            List<Coordinate> coordinates = Constants.GSON_INSTANCE_WITH_DESERIALIZERS.fromJson(responseBody, coordinateListType);
+            try {
+                // First, check if the response contains an error key
+                if (responseBody.trim().startsWith("{")) {
+                    JsonObject jsonResponse = JsonParser.parseString(responseBody).getAsJsonObject();
+                    if (jsonResponse.has("error")) {
+                        String errorMessage = jsonResponse.get("error").getAsString();
+                        future.completeExceptionally(new IllegalArgumentException(errorMessage));
+                        return;
+                    }
+                }
 
-            // Complete the future with the result
-            if (coordinates != null) {
+                // If no "error" key exists, assume it's a valid list of coordinates
+                Type coordinateListType = new TypeToken<List<Coordinate>>() {}.getType();
+                List<Coordinate> coordinates = Constants.GSON_INSTANCE_WITH_DESERIALIZERS.fromJson(responseBody, coordinateListType);
                 future.complete(coordinates);
-            } else {
-                future.completeExceptionally(new RuntimeException("Failed to create range: Invalid response format."));
+            } catch (Exception e) {
+                future.completeExceptionally(new RuntimeException("Unexpected response format: " + e.getMessage()));
             }
         });
 
         return future;
     }
 
-    public void removeRange(String sheetName, String selectedRange) {
+
+
+    public CompletableFuture<Void> removeRange(String sheetName, String selectedRange) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+
         String url = Constants.REMOVE_RANGE_URL
                 + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                 + "&rangeName=" + URLEncoder.encode(selectedRange, StandardCharsets.UTF_8);
 
-        // Use an empty JSON request body since we're using query parameters
         RequestBody requestBody = RequestBody.create("", MediaType.parse("application/json"));
 
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, requestBody, (responseBody) -> {
             if (responseBody == null) {
-                System.out.println("Failed to remove range: Empty response from server.");
+                future.completeExceptionally(new RuntimeException("Server response was empty"));
             } else if (responseBody.contains("success")) {
                 System.out.println("Range removed successfully.");
+                future.complete(null); // Indicate success
             } else {
-                System.out.println("Failed to remove range: " + responseBody);
+                future.completeExceptionally(new IllegalArgumentException(responseBody));
             }
         });
+
+        return future;
     }
 
-    public CompletableFuture<CellDTO> getCell(String sheetName, int row, int column) {
-        CompletableFuture<CellDTO> future = new CompletableFuture<>();
+
+    public CompletableFuture<Optional<CellDTO>> getCell(String sheetName, int row, int column) {
+        CompletableFuture<Optional<CellDTO>> future = new CompletableFuture<>();
         String url = Constants.GET_CELL_URL
                 + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                 + "&row=" + row
                 + "&column=" + column;
 
-        // Use HttpClientUtil or similar to run asynchronously
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.GET, null, (responseBody) -> {
-            if (responseBody == null) {
-                future.completeExceptionally(new RuntimeException("Failed to load cell: Empty response from server."));
+            if (responseBody == null || responseBody.trim().equals("{}")) {
+                // No cell found, complete with an empty Optional
+                future.complete(Optional.empty());
                 return;
             }
 
-            // Deserialize the response into a CellDTO
             try {
                 CellDTO cellDTO = Constants.GSON_INSTANCE_WITH_DESERIALIZERS.fromJson(responseBody, CellDTO.class);
-                future.complete(cellDTO);
+                future.complete(Optional.of(cellDTO));
             } catch (Exception e) {
                 future.completeExceptionally(e);
             }
@@ -308,6 +319,7 @@ public class ServerEngineService {
 
         return future;
     }
+
 
     public CompletableFuture<List<Coordinate>> validateRange(String sheetName, String fromCell, String toCell) {
         CompletableFuture<List<Coordinate>> future = new CompletableFuture<>();

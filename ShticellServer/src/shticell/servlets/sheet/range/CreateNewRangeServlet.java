@@ -1,6 +1,7 @@
 package shticell.servlets.sheet.range;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
 import exception.InvalidXMLFormatException;
@@ -61,10 +62,16 @@ public class CreateNewRangeServlet extends HttpServlet {
             response.getWriter().write(gson.toJson(newRange));
         } catch (InvalidXMLFormatException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson("Invalid range format: " + e.getMessage()));
+            writeErrorResponse(response, "Invalid range format: " + e.getMessage());
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson("Failed to create range: " + e.getMessage()));
+            writeErrorResponse(response, "Failed to add range: " + e.getMessage());
         }
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        JsonObject errorObject = new JsonObject();
+        errorObject.addProperty("error", errorMessage);
+        response.getWriter().write(gson.toJson(errorObject));
     }
 }

@@ -1,6 +1,7 @@
 package shticell.servlets.sheet.range;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
 import jakarta.servlet.ServletException;
@@ -22,6 +23,7 @@ public class RemoveRangeServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
 
         // Get and decode the parameters
         String sheetName = request.getParameter("sheetName");
@@ -29,7 +31,7 @@ public class RemoveRangeServlet extends HttpServlet {
 
         if (sheetName == null || rangeName == null) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(gson.toJson("Missing required parameters."));
+            writeErrorResponse(response, "Missing required parameters.");
             return;
         }
 
@@ -42,7 +44,7 @@ public class RemoveRangeServlet extends HttpServlet {
 
         if (sheetManager == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write(gson.toJson("Sheet not found."));
+            writeErrorResponse(response, "Sheet not found.");
             return;
         }
 
@@ -53,7 +55,13 @@ public class RemoveRangeServlet extends HttpServlet {
             response.getWriter().write(gson.toJson("Range removed successfully."));
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson("Failed to remove range: " + e.getMessage()));
+            writeErrorResponse(response, "Failed to remove range: " + e.getMessage());
         }
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        JsonObject errorObject = new JsonObject();
+        errorObject.addProperty("error", errorMessage);
+        response.getWriter().write(gson.toJson(errorObject));
     }
 }

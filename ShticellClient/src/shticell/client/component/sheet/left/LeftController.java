@@ -3,6 +3,7 @@ package shticell.client.component.sheet.left;
 import exception.InvalidXMLFormatException;
 import exception.OutOfBoundsException;
 import immutable.objects.SheetDTO;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -285,41 +286,32 @@ public class LeftController {
         String fromCell = fromCellField.getText();
         String toCell = toCellField.getText();
 
-        // Validate inputs (You can add more validation as necessary)
         if (rangeName.isEmpty() || fromCell.isEmpty() || toCell.isEmpty()) {
-            showErrorPopup("Error","Please fill all fields.");
+            showErrorPopup("Error", "Please fill all fields.");
             return;
         }
 
-        if(rangeNames.contains(rangeName)) {
-            showErrorPopup("Error","Range already exists.");
+        if (rangeNames.contains(rangeName)) {
+            showErrorPopup("Error", "Range already exists.");
             return;
         }
 
-        try {
-            // Generate list of cells in the range
-            List<Coordinate> cellsInRange = centerController.getServerEngineService().createNewRange(sharedModel.getSheetName(), rangeName, fromCell, toCell).get();
-
-            // Add the range to the map and update the ComboBox
-            rangeNames.add(rangeName);
-
-            // Clear the input fields
-            rangeNameField.clear();
-            fromCellField.clear();
-            toCellField.clear();
-        }
-        catch(OutOfBoundsException e)
-        {
-            showErrorPopup("Out of Bounds",e.getMessage());
-        }
-        catch (InvalidXMLFormatException e)
-        {
-            showErrorPopup("Invalid", e.getMessage());
-        }
-        catch (Exception e){
-            showErrorPopup("Error", e.getMessage());
-        }
+        centerController.getServerEngineService().createNewRange(sharedModel.getSheetName(), rangeName, fromCell, toCell)
+                .thenAccept(cellsInRange -> {
+                    Platform.runLater(() -> {
+                        rangeNames.add(rangeName);
+                        rangeNameField.clear();
+                        fromCellField.clear();
+                        toCellField.clear();
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showErrorPopup("Error Adding Range", ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage()));
+                    return null;
+                });
     }
+
+
 
     // Handle selecting a range from the ComboBox
     @FXML
@@ -331,27 +323,35 @@ public class LeftController {
         }
     }
 
-    // Handle deleting the selected range
     @FXML
     private void handleDeleteRange() {
         String selectedRange = rangeComboBox.getValue();
-        try {
-            if (selectedRange != null) {
-                centerController.getServerEngineService().removeRange(sharedModel.getSheetName(), selectedRange);
-                rangeNames.remove(selectedRange);
-                rangeDetailsArea.clear();
+        if (selectedRange != null) {
+            centerController.getServerEngineService()
+                    .removeRange(sharedModel.getSheetName(), selectedRange)
+                    .thenRun(() -> {
+                        Platform.runLater(() -> {
+                            rangeNames.remove(selectedRange);
+                            rangeDetailsArea.clear();
 
-                // Trigger selection of the next available range after deletion
-                if (!rangeNames.isEmpty()) {
-                    handleSelectRange();  // Trigger the select range event to display the new selection
-                }
-            }
-        } catch (IllegalArgumentException e) {
-            showErrorPopup("Error Removing Range", e.getMessage());
-        } catch (Exception e) {
-            showErrorPopup("Error", e.getMessage());
+                            if (!rangeNames.isEmpty()) {
+                                try {
+                                    handleSelectRange(); // Select the next range if available
+                                } catch (ExecutionException e) {
+                                    throw new RuntimeException(e);
+                                } catch (InterruptedException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        });
+                    })
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> showErrorPopup("Error Removing Range", ex.getMessage()));
+                        return null;
+                    });
         }
     }
+
 
     // Populate the ComboBox with ranges from the sheet
     @FXML

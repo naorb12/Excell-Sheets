@@ -1,6 +1,7 @@
 package deserializer;
 
 import com.google.gson.*;
+import immutable.objects.CellDTO;
 import javafx.scene.paint.Color;
 import sheet.cell.api.EffectiveValue;
 import sheet.cell.impl.CellImpl;

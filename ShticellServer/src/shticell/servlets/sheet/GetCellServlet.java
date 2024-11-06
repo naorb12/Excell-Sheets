@@ -20,7 +20,7 @@ public class GetCellServlet extends HttpServlet {
     private static final Gson gson = new Gson();
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
@@ -28,7 +28,6 @@ public class GetCellServlet extends HttpServlet {
         int row;
         int column;
 
-        // Parse row and column from parameters, with error handling
         try {
             row = Integer.parseInt(request.getParameter("row"));
             column = Integer.parseInt(request.getParameter("column"));
@@ -38,7 +37,6 @@ public class GetCellServlet extends HttpServlet {
             return;
         }
 
-        // Retrieve the ShticellEngine instance and locate the sheet
         ShticellEngine engine = ServletUtils.getEngine(getServletContext());
         SheetManager sheetManager = engine.getSheetManagerMap().get(sheetName);
 
@@ -48,17 +46,16 @@ public class GetCellServlet extends HttpServlet {
             return;
         }
 
-        // Fetch the cell from the sheet manager
         CellDTO cellDTO = sheetManager.getCell(row, column);
 
-        if (cellDTO == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write(gson.toJson("Cell not found."));
-        } else {
-            response.setStatus(HttpServletResponse.SC_OK);
-            try (PrintWriter out = response.getWriter()) {
+        response.setStatus(HttpServletResponse.SC_OK);
+        try (PrintWriter out = response.getWriter()) {
+            if (cellDTO == null) {
+                out.write("{}"); // Return an empty JSON object if no cell is found
+            } else {
                 out.write(gson.toJson(cellDTO));
             }
         }
     }
 }
+
