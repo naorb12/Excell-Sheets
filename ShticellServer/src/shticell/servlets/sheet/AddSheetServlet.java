@@ -2,6 +2,7 @@ package shticell.servlets.sheet;
 
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import engine.ShticellEngine;
 import immutable.objects.SheetManagerDTO;
 import exception.InvalidXMLFormatException;
@@ -19,9 +20,13 @@ import java.io.IOException;
 @WebServlet("/addsheet")
 public class AddSheetServlet extends HttpServlet {
 
+    private static final Gson gson = new Gson();
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        response.setContentType("application/json");
 
         BufferedReader reader = request.getReader();
         Gson gson = new Gson();
@@ -37,7 +42,12 @@ public class AddSheetServlet extends HttpServlet {
         try {
             engine.mapSTLSheet(sheetName, sheet, owner);  // Add the sheet to the engine
         } catch (InvalidXMLFormatException e) {
-            throw new RuntimeException(e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeErrorResponse(response, "Failed to add sheet: " + e.getMessage());
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            writeErrorResponse(response, "Failed to add sheet: " + e.getMessage());
+            return;
         }
 
         SheetManagerDTO sheetManagerDTO = engine.getSheetManagerDTO(sheetName);
@@ -46,9 +56,14 @@ public class AddSheetServlet extends HttpServlet {
         String sheetManagerJson = gson.toJson(sheetManagerDTO);
 
         // Send back the JSON response
-        response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().write(sheetManagerJson);
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        JsonObject errorObject = new JsonObject();
+        errorObject.addProperty("error", errorMessage);
+        response.getWriter().write(gson.toJson(errorObject));
     }
 }
 

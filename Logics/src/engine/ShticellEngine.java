@@ -44,6 +44,9 @@ public class ShticellEngine {
 
     public void mapSTLSheet(String sheetName, STLSheet generatedSheet, String owner) throws InvalidXMLFormatException {
         try {
+            if(sheetManagerMap.containsKey(sheetName)) {
+                throw new InvalidXMLFormatException("Sheet " + sheetName + " already exists");
+            }
             // Step 1: Validate sheet dimensions
             validateSheetDimensions(generatedSheet);
             // Step 2: Initialize the custom SheetImpl object with the validated size

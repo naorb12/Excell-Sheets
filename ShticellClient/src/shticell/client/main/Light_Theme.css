@@ -135,3 +135,9 @@
     -fx-border-style: solid;
     -fx-padding: 0px;  /* Consistent padding for both cells and headers */
 }
+
+.highlight-selector {
+    -fx-background-color: yellow;
+    -fx-border-color: red;
+    -fx-border-width: 2px;
+}

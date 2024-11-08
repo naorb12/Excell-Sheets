@@ -1,6 +1,7 @@
 package shticell.servlets.sheet.range;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
 import exception.InvalidXMLFormatException;
@@ -51,7 +52,13 @@ public class GetWordsFromColumnAndRangeServlet extends HttpServlet {
         } catch (Exception e) {
             // General error handling for any other exception
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write(gson.toJson("Failed to retrieve words due to an internal error."));
+            writeErrorResponse(response, "Failed to retrieve words " + e.getMessage());
         }
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        JsonObject errorObject = new JsonObject();
+        errorObject.addProperty("error", errorMessage);
+        response.getWriter().write(gson.toJson(errorObject));
     }
 }

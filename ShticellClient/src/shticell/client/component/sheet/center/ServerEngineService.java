@@ -182,7 +182,8 @@ public class ServerEngineService {
         return future;
     }
 
-    public void setCell(String sheetName, int row, int column, String input) {
+    public CompletableFuture<Void> setCell(String sheetName, int row, int column, String input) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
         String url = Constants.SET_CELL_URL + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                 + "&row=" + row + "&column=" + column;
 
@@ -193,11 +194,15 @@ public class ServerEngineService {
         // Send asynchronous request to set the cell value
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, requestBody, (responseBody) -> {
             if (responseBody == null) {
-                System.out.println("Failed to set cell value: Empty response from server.");
+                future.completeExceptionally(new RuntimeException("Failed to set cell: Empty response from server."));
+                //System.out.println("Failed to set cell value: Empty response from server.");
+            } else if (responseBody.contains("success")) {
+                future.complete(null);  // Notify completion
             } else {
-                System.out.println("Cell updated successfully.");
+                future.completeExceptionally(new IllegalArgumentException(responseBody));
             }
         });
+        return future;
     }
 
     public CompletableFuture<SheetDTO> applyDynamicAnalysis(String sheetName, Coordinate coordinate, Number newValue) {

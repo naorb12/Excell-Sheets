@@ -85,7 +85,7 @@ public class HttpClientUtil {
                         responseConsumer.accept(null);
                     } else {
                         String json = response.body().string();
-                        System.out.println("Raw response: " + json);  // Log the raw response here
+                        //System.out.println("Raw response: " + json);  // Log the raw response here
                         if (response.isSuccessful() && json != null) {
                             responseConsumer.accept(json);
                         } else {

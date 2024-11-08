@@ -59,7 +59,10 @@ public class SetCellServlet extends HttpServlet {
 
         try {
             // Update the cell value
-            sheetManager.setCell(row, column, input);
+            synchronized (sheetManager) {
+                sheetManager.setCell(row, column, input);
+            }
+
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write(gson.toJson("Cell updated successfully."));
         } catch (Exception e) {

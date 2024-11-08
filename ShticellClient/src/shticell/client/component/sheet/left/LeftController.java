@@ -94,8 +94,10 @@ public class LeftController {
 
 
     public void setupBindings() {
-        // Bind buttons to the sheetLoaded property from sharedModel
-        deleteRangeButton.disableProperty().bind(Bindings.isNull(rangeComboBox.valueProperty()));
+        deleteRangeButton.disableProperty().bind(
+                Bindings.isNull(rangeComboBox.valueProperty())
+                        .or(sharedModel.latestVersionSelectedProperty().not())
+        );
 
         designButton.disableProperty().bind(
                 sharedModel.readOnlyProperty().or(sharedModel.latestVersionSelectedProperty().not())

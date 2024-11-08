@@ -1,6 +1,7 @@
 package shticell.servlets.sheet;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
 import engine.permission.property.PermissionStatus;
@@ -41,30 +42,35 @@ public class GetSheetByNameServlet extends HttpServlet {
 
         // Prepare the response map with the sheet data
         Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("sheetDTO", sheetManager.getSheet());
+        synchronized (sheetManager) {
+            responseMap.put("sheetDTO", sheetManager.getSheet());
 
-        // Only check permissions if a userName was provided
-        if (userName != null && !userName.isEmpty()) {
-            // Retrieve user permissions
-            UserPermissionsDTO userPermissionsDTO = sheetManager.getUserPermissionsMap().get(userName);
-            String permissionType = null;
+            // Only check permissions if a userName was provided
+            if (userName != null && !userName.isEmpty()) {
+                // Retrieve user permissions
+                UserPermissionsDTO userPermissionsDTO = sheetManager.getUserPermissionsMap().get(userName);
+                String permissionType = null;
 
-            // Check if the user has approved permissions
-            if (userPermissionsDTO != null && userPermissionsDTO.getPermissionStatus() == PermissionStatus.APPROVED) {
-                permissionType = userPermissionsDTO.getPermissionType().toString();
-            } else if (userPermissionsDTO != null && userPermissionsDTO.getLastApprovedPermissionType() != null) {
-                permissionType = userPermissionsDTO.getLastApprovedPermissionType().toString();
+                // Check if the user has approved permissions
+                if (userPermissionsDTO != null && userPermissionsDTO.getPermissionStatus() == PermissionStatus.APPROVED) {
+                    permissionType = userPermissionsDTO.getPermissionType().toString();
+                } else if (userPermissionsDTO != null && userPermissionsDTO.getLastApprovedPermissionType() != null) {
+                    permissionType = userPermissionsDTO.getLastApprovedPermissionType().toString();
+                } else {
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    JsonObject error = new JsonObject();
+                    error.addProperty("error", "Access denied.");
+                    response.getWriter().write(gson.toJson(error));
+
+                    return;
+                }
+
+                // Add permission type to the response map
+                responseMap.put("permissionType", permissionType);
             } else {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write(gson.toJson("Access denied."));
-                return;
+                // If no userName provided, default permission to null
+                responseMap.put("permissionType", null);
             }
-
-            // Add permission type to the response map
-            responseMap.put("permissionType", permissionType);
-        } else {
-            // If no userName provided, default permission to null
-            responseMap.put("permissionType", null);
         }
 
         // Send the response

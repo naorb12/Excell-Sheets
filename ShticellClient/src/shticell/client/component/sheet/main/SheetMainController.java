@@ -133,6 +133,7 @@ public class SheetMainController implements ShticellCommands {
                     centerController.renderGrid(sheetDTO);
                     leftController.populateSelectors(sheetDTO);
                     sharedModel.setSheetName(sheetName);
+                    topController.populateVersionSelector();
                     // refresher.run();
                 } else {
                     System.out.println("Failed to load sheetDTO: Deserialization error.");
@@ -140,6 +141,9 @@ public class SheetMainController implements ShticellCommands {
 
                 if (permissionType == PermissionType.READER) {
                     sharedModel.setReadOnly(true);
+                }
+                else {
+                    sharedModel.setReadOnly(false);
                 }
             });
         });

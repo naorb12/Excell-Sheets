@@ -1,6 +1,7 @@
 package shticell.client.component.sheet.top;
 
 import immutable.objects.SheetDTO;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -79,17 +80,32 @@ public class TopController {
     private void handleUpdateValueButtonAction() {
         try {
             String cellID = selectedCellIDLabel.getText();
+            System.out.println("Updating value for selected cell ID: " + cellID);
+
             int row = Integer.parseInt(cellID.substring(1));
             int col = cellID.charAt(0) - 'A' + 1;
-            centerController.getServerEngineService().setCell(sharedModel.getSheetName(), row, col, cellOriginalValueTextArea.getText());
-            populateVersionSelector();
-            centerController.renderGridPane();
-        }
-        catch (Exception e) {
+
+            centerController.getServerEngineService()
+                    .setCell(sharedModel.getSheetName(), row, col, cellOriginalValueTextArea.getText())
+                    .thenRun(() -> Platform.runLater(() -> {
+                        try {
+                            populateVersionSelector();
+                            centerController.renderGridPane();
+                            //System.out.println("grid pane rendered.");
+                        } catch (Exception ex) {
+                            showErrorPopup("Failed to update UI", ex.getMessage());
+                        }
+                    }))
+                    .exceptionally(ex -> {
+                        Platform.runLater(() -> showErrorPopup("Failed to update value", ex.getMessage()));
+                        return null;
+                    });
+        } catch (Exception e) {
             showErrorPopup("Failed to update value", e.getMessage());
         }
-
     }
+
+
 
     @FXML
     private void handleSheetVersionSelected() throws ExecutionException, InterruptedException {
@@ -134,21 +150,33 @@ public class TopController {
     }
 
     @FXML
-    public void populateVersionSelector() throws ExecutionException, InterruptedException {
+    public void populateVersionSelector() {
         // Clear previous items
         sheetVersionSelector.getItems().clear();
-        // Get version history from the engine's version history map
-        Map<Integer, SheetDTO> versionHistory = centerController.getServerEngineService().getVersionHistory(sharedModel.getSheetName()).get();
-        // Add version numbers (keys) as strings to the ComboBox
-        for (Integer version : versionHistory.keySet()) {
-            sheetVersionSelector.getItems().add("Version " + version);
-        }
 
-        // Optionally, select the latest version by default
-        if (!sheetVersionSelector.getItems().isEmpty()) {
-            sheetVersionSelector.getSelectionModel().selectLast(); // Select the latest version
-        }
+        // Asynchronously get the version history
+        centerController.getServerEngineService().getVersionHistory(sharedModel.getSheetName())
+                .thenAccept(versionHistory -> {
+                    Platform.runLater(() -> {
+                        // Add version numbers (keys) as strings to the ComboBox
+                        versionHistory.keySet().stream()
+                                .sorted() // Ensure versions are sorted numerically
+                                .forEach(version -> sheetVersionSelector.getItems().add("Version " + version));
+//                        System.out.println("Size of versionHistory map" + versionHistory.size());
+//                        System.out.println("Size of version selector: " + sheetVersionSelector.getItems().size());
+
+                        // Optionally, select the latest version by default
+                        if (!sheetVersionSelector.getItems().isEmpty()) {
+                            sheetVersionSelector.getSelectionModel().selectLast(); // Select the latest version
+                        }
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showErrorPopup("Error", "Failed to fetch version history: " + ex.getMessage()));
+                    return null;
+                });
     }
+
 
     public void updateSelectedCell(String cellID, String originalValue, int version) {
         selectedCellIDLabel.setText(cellID);
