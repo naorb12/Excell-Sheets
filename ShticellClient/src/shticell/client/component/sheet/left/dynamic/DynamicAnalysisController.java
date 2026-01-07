@@ -124,13 +124,18 @@ public class DynamicAnalysisController {
             }
         });
 
-        // Add a listener to handle slider value changes
         valuesSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (!stepSizeTextField.getText().isEmpty()) {
+                try {
+                    double stepSize = Double.parseDouble(stepSizeTextField.getText());
+                    snapSliderToStep(stepSize);  // Snap only if valid step size
+                } catch (NumberFormatException e) {
+                    // Ignore invalid input in step size
+                }
+            }
             try {
-                handleSliderValueChange(newValue);
-            } catch (ExecutionException e) {
-                throw new RuntimeException(e);
-            } catch (InterruptedException e) {
+                handleSliderValueChange(valuesSlider.getValue());
+            } catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });
@@ -213,20 +218,20 @@ public class DynamicAnalysisController {
     // Listener for snapping the slider value to the nearest step
     private ChangeListener<Number> sliderValueListener = (observable, oldValue, newValue) -> {};
 
-    // Method to snap the slider to the nearest step based on the step size
     private void snapSliderToStep(double stepSize) {
         double currentValue = valuesSlider.getValue();
         double minValue = valuesSlider.getMin();
 
-        // Calculate the nearest step value
+        // Calculate the snapped value
         double snappedValue = minValue + Math.round((currentValue - minValue) / stepSize) * stepSize;
 
-        // Prevent unnecessary updates to avoid infinite loops
-        if (snappedValue != currentValue) {
+        // Update the slider's value only if the snapped value is different
+        if (Math.abs(snappedValue - currentValue) > 1e-6) {  // Small tolerance to avoid repeated updates
+            valuesSlider.valueProperty().removeListener(sliderValueListener);
             valuesSlider.setValue(snappedValue);
+            valuesSlider.valueProperty().addListener(sliderValueListener);
         }
     }
-
 
     // Utility method to adjust slider value to remain within bounds
     private void adjustSliderValueWithinBounds() {
@@ -378,7 +383,8 @@ public class DynamicAnalysisController {
 
     @FXML
     private void handleSliderValueChange(Number newValue) throws ExecutionException, InterruptedException {
+        System.out.println("new value: " + newValue);
         Coordinate coordinate = parseCellNameToCoordinate(cellSelector.getValue());
-        centerController.applyDynamicAnalysis(coordinate, newValue);
+        Platform.runLater(() -> centerController.applyDynamicAnalysis(coordinate, newValue));
     }
 }

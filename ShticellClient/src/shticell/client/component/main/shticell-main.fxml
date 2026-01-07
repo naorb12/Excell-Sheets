@@ -3,6 +3,7 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <SplitPane orientation="VERTICAL" prefHeight="447.0" prefWidth="454.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.main.ShticellAppMainController">
     <items>
@@ -20,7 +21,10 @@
                     </rowConstraints>
                     <children>
                         <Label id="greeting-label" fx:id="userGreetingLabel" text="Hello Mosh" />
-                        <Label id="chat-app-client-header" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Shticell Client" GridPane.columnSpan="2" />
+                        <Label id="chat-app-client-header" alignment="CENTER" maxWidth="1.7976931348623157E308" text="Shticell Client" GridPane.columnSpan="2">
+                     <font>
+                        <Font size="20.0" />
+                     </font></Label>
                         <AnchorPane fx:id="mainPanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnSpan="2147483647" GridPane.rowIndex="1" />
                     </children>
                     <padding>

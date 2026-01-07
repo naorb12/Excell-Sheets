@@ -6,6 +6,8 @@ import immutable.objects.UserPermissionsDTO;
 import engine.permission.property.PermissionStatus;
 import engine.permission.property.PermissionType;
 import immutable.objects.SheetDTO;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -16,7 +18,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import okhttp3.*;
 import shticell.client.component.api.ShticellCommands;
 import shticell.client.component.main.ShticellAppMainController;
@@ -42,6 +47,9 @@ public class DashboardController implements Cloneable, ShticellCommands {
     private TimerTask refresherTask;
     private final BooleanProperty autoUpdate;
     private final IntegerProperty totalSheets;
+
+    @FXML
+    private VBox dashboardVbox;
 
     // Sheets Dashboard
     @FXML
@@ -88,8 +96,8 @@ public class DashboardController implements Cloneable, ShticellCommands {
 
 
     @FXML
-    public Label errorMessageLabel;
-    public final StringProperty errorMessageProperty = new SimpleStringProperty();
+    public Label infoMessageLabel;
+    public final StringProperty infoMessageProperty = new SimpleStringProperty();
 
 
     public DashboardController() {
@@ -146,7 +154,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
 
         userPermissionsTableView.setItems(userPermissionsData);
 
-        errorMessageLabel.textProperty().bind(errorMessageProperty);
+        infoMessageLabel.textProperty().bind(infoMessageProperty);
 
         HttpClientUtil.setCookieManagerLoggingFacility(line ->
                 Platform.runLater(() -> updateHttpStatusLine(line)));
@@ -162,6 +170,13 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Add Listener to handle giving out permissions
         userPermissionsTableView.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             onPermissionSelected(newSelection);});
+
+        dashboardVbox.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (!sheetTableView.isHover() && !userPermissionsTableView.isHover()) {
+                sheetTableView.getSelectionModel().clearSelection();
+                userPermissionsTableView.getSelectionModel().clearSelection();
+            }
+        });
     }
 
     private void setViewSheetButtonAccordingToPermissions(SheetDTO newSelection) {
@@ -237,7 +252,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
     // Refactored response processing logic
     private void processAddSheetResponse(String responseBody) {
         if (responseBody == null) {
-            errorMessageProperty.set("Failed to add sheet: Empty response body");
+            showTemporaryErrorMessage("Failed to add sheet: Empty response body");
             return;
         }
 
@@ -254,7 +269,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
             // Add sheetDTO to your data
             sheetData.add(sheetDTO);
         } else {
-            errorMessageProperty.set("Deserialization failed: sheetManagerDTO is null");
+            showTemporaryErrorMessage("Deserialization failed: sheetManagerDTO is null");
         }
     }
 
@@ -307,7 +322,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
 
     private void processPermissionsResponse(String responseBody) {
         if (responseBody == null) {
-            errorMessageProperty.set("Failed to load permissions: Empty response");
+            showTemporaryErrorMessage("Failed to load permissions: Empty response");
             return;
         }
 
@@ -323,7 +338,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         if (permissionsMap != null) {
             userPermissionsData.addAll(permissionsMap.values());
         } else {
-            errorMessageProperty.set("Failed to load permissions: Invalid response format");
+            showTemporaryErrorMessage("Failed to load permissions: Invalid response format");
         }
 
         // Refresh the table view
@@ -349,7 +364,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
     }
 
     public void close() throws IOException {
-        shticellAppMainController.close();
+        //shticellAppMainController.close();
     }
 
     public void setActive() {
@@ -368,7 +383,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
     public void startDashboardRefresher() {
         refresherTask = new DashboardRefresher(sheetData, sheetTableView, currentUserPermissionsMap, shticellAppMainController.getCurrentUserName());  // Pass sheetData and sheetTableView
         timer = new Timer();
-        timer.schedule(refresherTask, 0, Constants.REFRESH_RATE);  // Refresh every REFRESH_RATE milliseconds (e.g., 5 seconds)
+        timer.schedule(refresherTask, 0, Constants.REFRESH_RATE);  // Refresh every REFRESH_RATE milliseconds
     }
 
     public void stopDashboardRefresher() {
@@ -406,12 +421,13 @@ public class DashboardController implements Cloneable, ShticellCommands {
     }
 
     // Action when the "Request Reader Permission" button is clicked
+    // Action when the "Request Reader Permission" button is clicked
     @FXML
     private void onRequestReaderPermission() {
         // Check if a sheet is selected
         SheetDTO selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
         if (selectedSheet == null) {
-            errorMessageProperty.set("No sheet selected. Please select a sheet to request permission.");
+            showTemporaryErrorMessage("No sheet selected. Please select a sheet to request permission.");
             return;
         }
 
@@ -426,15 +442,15 @@ public class DashboardController implements Cloneable, ShticellCommands {
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, emptyBody, (responseBody) -> {
             Platform.runLater(() -> {
                 if (responseBody == null) {
-                    errorMessageProperty.set("Failed to request reader permission: Empty response from server.");
+                    showTemporaryErrorMessage("Failed to request reader permission: Empty response from server.");
                     return;
                 }
 
                 // Handle success or failure based on server response (assuming server sends a success/failure message)
                 if (responseBody.contains("success")) {
-                    errorMessageProperty.set("Reader permission requested successfully.");
+                    showTemporaryErrorMessage("Reader permission requested successfully.");
                 } else {
-                    errorMessageProperty.set("Failed to request reader permission: " + responseBody);
+                    showTemporaryErrorMessage("Failed to request reader permission: " + responseBody);
                 }
             });
         });
@@ -447,7 +463,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Check if a sheet is selected
         SheetDTO selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
         if (selectedSheet == null) {
-            errorMessageProperty.set("No sheet selected. Please select a sheet to request permission.");
+            showTemporaryErrorMessage("No sheet selected. Please select a sheet to request permission.");
             return;
         }
 
@@ -462,15 +478,15 @@ public class DashboardController implements Cloneable, ShticellCommands {
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, emptyBody, (responseBody) -> {
             Platform.runLater(() -> {
                 if (responseBody == null) {
-                    errorMessageProperty.set("Failed to request reader permission: Empty response from server.");
+                    showTemporaryErrorMessage("Failed to request reader permission: Empty response from server.");
                     return;
                 }
 
                 // Handle success or failure based on server response (assuming server sends a success/failure message)
                 if (responseBody.contains("success")) {
-                    errorMessageProperty.set("Reader permission requested successfully.");
+                    showTemporaryErrorMessage("Reader permission requested successfully.");
                 } else {
-                    errorMessageProperty.set("Failed to request reader permission: " + responseBody);
+                    showTemporaryErrorMessage("Failed to request reader permission: " + responseBody);
                 }
             });
         });
@@ -482,7 +498,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Check if a sheet is selected
         SheetDTO selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
         if (selectedSheet == null) {
-            errorMessageProperty.set("No sheet selected. Please select a sheet to request permission.");
+            showTemporaryErrorMessage("No sheet selected. Please select a sheet to request permission.");
             return;
         }
 
@@ -497,15 +513,15 @@ public class DashboardController implements Cloneable, ShticellCommands {
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, emptyBody, (responseBody) -> {
             Platform.runLater(() -> {
                 if (responseBody == null) {
-                    errorMessageProperty.set("Failed to approve request: Empty response from server.");
+                    showTemporaryErrorMessage("Failed to approve request: Empty response from server.");
                     return;
                 }
 
                 // Handle success or failure based on server response (assuming server sends a success/failure message)
                 if (responseBody.contains("success")) {
-                    errorMessageProperty.set("Permission approved successfully.");
+                    showTemporaryErrorMessage("Permission approved successfully.");
                 } else {
-                    errorMessageProperty.set("Failed to approve permission: " + responseBody);
+                    showTemporaryErrorMessage("Failed to approve permission: " + responseBody);
                 }
             });
         });
@@ -517,7 +533,7 @@ public class DashboardController implements Cloneable, ShticellCommands {
         // Check if a sheet is selected
         SheetDTO selectedSheet = sheetTableView.getSelectionModel().getSelectedItem();
         if (selectedSheet == null) {
-            errorMessageProperty.set("No sheet selected. Please select a sheet to request permission.");
+            showTemporaryErrorMessage("No sheet selected. Please select a sheet to request permission.");
             return;
         }
 
@@ -532,18 +548,32 @@ public class DashboardController implements Cloneable, ShticellCommands {
         HttpClientUtil.runReqAsyncWithJson(url, HttpMethod.POST, emptyBody, (responseBody) -> {
             Platform.runLater(() -> {
                 if (responseBody == null) {
-                    errorMessageProperty.set("Failed to reject request: Empty response from server.");
+                    showTemporaryErrorMessage("Failed to reject request: Empty response from server.");
                     return;
                 }
 
                 // Handle success or failure based on server response (assuming server sends a success/failure message)
                 if (responseBody.contains("success")) {
-                    errorMessageProperty.set("Permission rejected successfully.");
+                    showTemporaryErrorMessage("Permission rejected successfully.");
                 } else {
-                    errorMessageProperty.set("Failed to reject permission: " + responseBody);
+                    showTemporaryErrorMessage("Failed to reject permission: " + responseBody);
                 }
             });
         });
+    }
+
+    private void showTemporaryErrorMessage(String message) {
+        infoMessageProperty.set(message);
+
+        // Create a Timeline to clear the message after 1.5 seconds
+        Timeline timeline = new Timeline(
+                new KeyFrame(
+                        Duration.seconds(1.5),
+                        event -> infoMessageProperty.set("")
+                )
+        );
+        timeline.setCycleCount(1); // Ensure it runs only once
+        timeline.play();
     }
 
 }

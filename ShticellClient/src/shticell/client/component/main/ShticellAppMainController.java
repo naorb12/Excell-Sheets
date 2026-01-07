@@ -74,7 +74,14 @@ public class ShticellAppMainController implements Closeable, HttpStatusUpdate {
 
     @Override
     public void close() throws IOException {
-        dashboardComponentController.close();
+        try {
+            if (dashboardComponentController != null) {
+                dashboardComponentController.close(); // Close dashboard-specific resources
+            }
+            System.out.println("Main application resources closed successfully.");
+        } catch (Exception e) {
+            System.err.println("Failed to close main application resources: " + e.getMessage());
+        }
     }
 
     private void loadLoginPage() {

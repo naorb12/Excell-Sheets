@@ -4,6 +4,8 @@ import engine.permission.property.PermissionType;
 import immutable.objects.SheetDTO;
 import immutable.objects.SheetManagerDTO;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -24,8 +26,14 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SheetMainController implements ShticellCommands {
+
+    private Timer timer;
+    private TimerTask refresherTask;
+    private final BooleanProperty autoUpdate;
 
     @FXML
     private ShticellAppMainController shticellAppMainController;
@@ -43,6 +51,10 @@ public class SheetMainController implements ShticellCommands {
     private Button backToDashboardButton;
 
     private SharedModel sharedModel;
+
+    public SheetMainController() {
+        this.autoUpdate = new SimpleBooleanProperty(true);
+    }
 
 
     public void initialize() {
@@ -133,7 +145,9 @@ public class SheetMainController implements ShticellCommands {
                     centerController.renderGrid(sheetDTO);
                     leftController.populateSelectors(sheetDTO);
                     sharedModel.setSheetName(sheetName);
+                    sharedModel.setUserName(shticellAppMainController.getCurrentUserName());
                     topController.populateVersionSelector();
+                    startSheetMainRefresher();
                     // refresher.run();
                 } else {
                     System.out.println("Failed to load sheetDTO: Deserialization error.");
@@ -149,11 +163,24 @@ public class SheetMainController implements ShticellCommands {
         });
     }
 
-
     public void setInactive(){
-
+        try {
+            stopSheetMainRefresher();
+        } catch (Exception ignored) {}
     }
 
+    private void startSheetMainRefresher() {
+        refresherTask = new SheetMainRefresher(centerController, topController, sharedModel);
+        timer = new Timer();
+        timer.schedule(refresherTask, 0, Constants.REFRESH_RATE);
+    }
+
+    public void stopSheetMainRefresher() {
+        if (refresherTask != null && timer != null) {
+            refresherTask.cancel();
+            timer.cancel();
+        }
+    }
 
     private void setReadOnly() {
         System.out.println("READONLY");

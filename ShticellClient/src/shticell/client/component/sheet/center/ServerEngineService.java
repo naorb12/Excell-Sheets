@@ -3,26 +3,17 @@ package shticell.client.component.sheet.center;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import exception.InvalidXMLFormatException;
 import immutable.objects.CellDTO;
 import immutable.objects.SheetDTO;
-import javafx.application.Platform;
 import javafx.scene.paint.Color;
 import okhttp3.MediaType;
-import okhttp3.Request;
 import okhttp3.RequestBody;
-import okhttp3.Response;
 import sheet.coordinate.Coordinate;
 import shticell.client.util.Constants;
 import shticell.client.util.http.HttpClientUtil;
 import shticell.client.util.http.HttpMethod;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -182,10 +173,10 @@ public class ServerEngineService {
         return future;
     }
 
-    public CompletableFuture<Void> setCell(String sheetName, int row, int column, String input) {
+    public CompletableFuture<Void> setCell(String sheetName, int row, int column, String input, String userName) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         String url = Constants.SET_CELL_URL + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
-                + "&row=" + row + "&column=" + column;
+                + "&row=" + row + "&column=" + column + "&userName=" + URLEncoder.encode(userName, StandardCharsets.UTF_8);
 
         // Create JSON payload with the input value
         String jsonPayload = "{\"input\": \"" + input + "\"}";
@@ -205,14 +196,15 @@ public class ServerEngineService {
         return future;
     }
 
-    public CompletableFuture<SheetDTO> applyDynamicAnalysis(String sheetName, Coordinate coordinate, Number newValue) {
+    public CompletableFuture<SheetDTO> applyDynamicAnalysis(String sheetName, Coordinate coordinate, Number newValue, String usarNameUpdated) {
         CompletableFuture<SheetDTO> result = new CompletableFuture<>();
 
         try {
             String url = Constants.APPLY_DYNAMIC_ANALYSIS_URL
                     + "?sheetName=" + URLEncoder.encode(sheetName, StandardCharsets.UTF_8)
                     + "&row=" + coordinate.getRow()
-                    + "&col=" + coordinate.getColumn();
+                    + "&col=" + coordinate.getColumn()
+                    + "&userName=" + usarNameUpdated ;
 
             // Create JSON payload for the new value
             String jsonPayload = "{\"newValue\": " + newValue + "}";

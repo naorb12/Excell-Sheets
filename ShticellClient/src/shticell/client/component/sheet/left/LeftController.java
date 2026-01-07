@@ -1,7 +1,5 @@
 package shticell.client.component.sheet.left;
 
-import exception.InvalidXMLFormatException;
-import exception.OutOfBoundsException;
 import immutable.objects.SheetDTO;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -283,7 +281,13 @@ public class LeftController {
 
     // Handle adding a new range
     @FXML
-    private void handleAddRange() {
+    private void handleAddRange() throws ExecutionException, InterruptedException {
+
+        if (!isOnLatestVersion()) {
+            showErrorPopup("Update Failed", "You are not on the latest version. Please update to the latest version first.");
+            return;
+        }
+
         String rangeName = rangeNameField.getText();
         String fromCell = fromCellField.getText();
         String toCell = toCellField.getText();
@@ -326,7 +330,12 @@ public class LeftController {
     }
 
     @FXML
-    private void handleDeleteRange() {
+    private void handleDeleteRange() throws ExecutionException, InterruptedException {
+
+        if (!isOnLatestVersion()) {
+            showErrorPopup("Update Failed", "You are not on the latest version. Please update to the latest version first.");
+            return;
+        }
         String selectedRange = rangeComboBox.getValue();
         if (selectedRange != null) {
             centerController.getServerEngineService()
@@ -385,5 +394,16 @@ public class LeftController {
         alert.setContentText(message);
 
         alert.showAndWait();  // Shows the alert and waits for the user to close it
+    }
+
+    private boolean isOnLatestVersion() throws ExecutionException, InterruptedException {
+        int latestVersion = centerController.getServerEngineService()
+                .getVersionHistory(sharedModel.getSheetName())
+                .get()
+                .keySet()
+                .stream()
+                .max(Integer::compare)
+                .orElse(0);
+        return sharedModel.getCurrentVersionLoaded() >= latestVersion;
     }
 }

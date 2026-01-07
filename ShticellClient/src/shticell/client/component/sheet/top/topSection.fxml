@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.Cursor?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.sheet.top.TopController">
-    <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0" spacing="10">
+<AnchorPane prefHeight="40.0" prefWidth="1044.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.sheet.top.TopController">
+    <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="1075.0" spacing="10">
         <children>
-            <Label fx:id="selectedCellIDLabel" text="Selected Cell ID" />
-            <TextArea fx:id="cellOriginalValueTextArea" prefHeight="38.0" prefWidth="121.0" text="Original Value">
+            <Label fx:id="selectedCellIDLabel" prefHeight="17.0" prefWidth="133.0" text="Selected Cell ID" />
+            <TextArea fx:id="cellOriginalValueTextArea" prefHeight="40.0" prefWidth="166.0" text="Original Value">
                 <cursor>
                     <Cursor fx:constant="TEXT" />
-                </cursor></TextArea>
-            <Button fx:id="updateValueButton" text="Update Value" />
-            <Label fx:id="lastUpdateCellVersionLabel" text="Last Update Cell Version" />
-            <ComboBox fx:id="sheetVersionSelector" prefWidth="170.0" />
+                </cursor>
+         </TextArea>
+            <Button fx:id="updateValueButton" prefHeight="25.0" prefWidth="161.0" text="Update Value" />
+            <Label fx:id="lastUpdateCellVersionLabel" maxWidth="1.7976931348623157E308" prefHeight="17.0" prefWidth="415.0" text="Last Update Cell Version" />
+            <ComboBox fx:id="sheetVersionSelector" prefHeight="25.0" prefWidth="149.0" />
         </children>
     </HBox>
 </AnchorPane>

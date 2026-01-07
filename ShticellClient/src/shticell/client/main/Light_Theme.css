@@ -64,9 +64,9 @@
     -fx-background-color: lightblue;  /* Highlight selected rows with a light blue color */
 }
 
-/* Error message styling */
-.error-label {
-    -fx-text-fill: red; /* Red color for error messages */
+/* message styling */
+.info-label {
+    -fx-text-fill: rgba(0, 13, 255, 0.73); /* color for messages */
     -fx-font-weight: bold;
     -fx-padding: 5px;
     -fx-alignment: center;

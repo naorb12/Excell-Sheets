@@ -1,6 +1,7 @@
 package shticell.client.component.sheet.main;
 
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.stage.Stage;
 
 public class SharedModel {
@@ -12,9 +13,13 @@ public class SharedModel {
 
     private final SimpleBooleanProperty readOnly = new SimpleBooleanProperty(false);
 
+    private final SimpleIntegerProperty currentVersionLoaded = new SimpleIntegerProperty(1);
+
     private Stage primaryStage;
 
     private String sheetName;
+
+    private String userName;
 
     public void setPrimaryStage(Stage primaryStage) {
         this.primaryStage = primaryStage;
@@ -60,5 +65,20 @@ public class SharedModel {
         this.sheetName = sheetName;
     }
 
+    public int getCurrentVersionLoaded() {
+        return currentVersionLoaded.get();
+    }
+
+    public void setCurrentVersionLoaded(int currentLatestVersionLoaded) {
+        this.currentVersionLoaded.set(currentLatestVersionLoaded);
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
 }

@@ -1,6 +1,5 @@
 package shticell.client.component.sheet.top;
 
-import immutable.objects.SheetDTO;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -9,7 +8,6 @@ import shticell.client.component.sheet.center.CenterController;
 import shticell.client.component.sheet.left.LeftController;
 import shticell.client.component.sheet.main.SharedModel;
 
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class TopController {
@@ -79,18 +77,23 @@ public class TopController {
     @FXML
     private void handleUpdateValueButtonAction() {
         try {
+            if(!isOnLatestVersion())
+            {
+                showErrorPopup("Update Failed", "You are not on the latest version. Please update to the latest version first.");
+                return;
+            }
             String cellID = selectedCellIDLabel.getText();
-            System.out.println("Updating value for selected cell ID: " + cellID);
 
             int row = Integer.parseInt(cellID.substring(1));
             int col = cellID.charAt(0) - 'A' + 1;
 
             centerController.getServerEngineService()
-                    .setCell(sharedModel.getSheetName(), row, col, cellOriginalValueTextArea.getText())
+                    .setCell(sharedModel.getSheetName(), row, col, cellOriginalValueTextArea.getText(), sharedModel.getUserName())
                     .thenRun(() -> Platform.runLater(() -> {
                         try {
                             populateVersionSelector();
                             centerController.renderGridPane();
+                            sharedModel.setCurrentVersionLoaded(sharedModel.getCurrentVersionLoaded() + 1);
                             //System.out.println("grid pane rendered.");
                         } catch (Exception ex) {
                             showErrorPopup("Failed to update UI", ex.getMessage());
@@ -105,26 +108,39 @@ public class TopController {
         }
     }
 
-
-
     @FXML
     private void handleSheetVersionSelected() throws ExecutionException, InterruptedException {
         if (sheetVersionSelector != null && sheetVersionSelector.getValue() != null) {
             String selectedValue = sheetVersionSelector.getValue();
 
             if (!selectedValue.equals("Select Sheet Version")) {
+                String versionNumber = selectedValue.replaceAll("\\D+", ""); // Removes all non-digit characters
+                int version = Integer.parseInt(versionNumber);
+
                 if (selectedValue.equals(sheetVersionSelector.getItems().get(sheetVersionSelector.getItems().size() - 1))) {
                     centerController.renderGridPane();
                     centerController.setEnabled();
+                    centerController.getServerEngineService().getSheet(sharedModel.getSheetName()).thenAccept(sheetDTO -> {
+                        // Ensure UI updates are on the JavaFX Application Thread
+                        Platform.runLater(() -> {
+                            leftController.populateSelectors(sheetDTO);
+                        });
+                    }).exceptionally(ex -> {
+                        // Handle any errors that occur
+                        System.out.println("Error occurred: " + ex.getMessage());
+                        return null;
+                    });
                     sharedModel.setLatestVersionSelected(true);
+                    sheetVersionSelector.getStyleClass().removeAll("highlight-selector");
+                    //sheetVersionSelector.setTooltip(null);
                 } else {
-                    String versionNumber = selectedValue.replaceAll("\\D+", ""); // Removes all non-digit characters
-                    int version = Integer.parseInt(versionNumber);
                     centerController.renderGrid(centerController.getServerEngineService().peekVersion(sharedModel.getSheetName(), version).get());
                     resetLabelsAndText();
                     sharedModel.setLatestVersionSelected(false);
                     centerController.setDisabled();
                 }
+
+                sharedModel.setCurrentVersionLoaded(version);
             }
         }
     }
@@ -178,10 +194,18 @@ public class TopController {
     }
 
 
-    public void updateSelectedCell(String cellID, String originalValue, int version) {
+    public ComboBox<String> getSheetVersionSelector() {
+        return sheetVersionSelector;
+    }
+
+    public void updateSelectedCell(String cellID, String originalValue, int version, String userNameUpdated) {
         selectedCellIDLabel.setText(cellID);
         cellOriginalValueTextArea.setText(originalValue);
-        lastUpdateCellVersionLabel.setText("Cell Version: " + String.valueOf(version));
+        if(userNameUpdated != null) {
+            lastUpdateCellVersionLabel.setText("Cell Version: " + String.valueOf(version) + " Updated by: " + userNameUpdated);
+        } else {
+            lastUpdateCellVersionLabel.setText("Cell Version: " + String.valueOf(version));
+        }
     }
 
     public void setSelectedCellIDLabel(Label selectedCellIDLabel) {
@@ -195,5 +219,49 @@ public class TopController {
         lastUpdateCellVersionLabel.setText("Last Update Cell Version");
     }
 
+    private boolean isOnLatestVersion() throws ExecutionException, InterruptedException {
+        int latestVersion = getLatestVersionFromServer();
+        return sharedModel.getCurrentVersionLoaded() >= latestVersion;
+    }
+
+    private int getLatestVersionFromServer() throws ExecutionException, InterruptedException {
+        int latestVersion = 0;
+        latestVersion = centerController.getServerEngineService()
+                .getVersionHistory(sharedModel.getSheetName())
+                .get()
+                .keySet()
+                .stream()
+                .max(Integer::compare)
+                .orElse(0);
+
+        return latestVersion;
+    }
+
+
+    // A populate versions method, used by the Sheet Main Refresher - so it WILL NOT force transition to latest versio
+    @FXML
+    public void populateVersionSelectorFromRefresher() {
+        // Clear previous items
+        sheetVersionSelector.getItems().clear();
+
+        // Asynchronously get the version history
+        centerController.getServerEngineService().getVersionHistory(sharedModel.getSheetName())
+                .thenAccept(versionHistory -> {
+                    Platform.runLater(() -> {
+                        // Add version numbers (keys) as strings to the ComboBox
+                        versionHistory.keySet().stream()
+                                .sorted() // Ensure versions are sorted numerically
+                                .forEach(version -> sheetVersionSelector.getItems().add("Version " + version));
+
+                        if (!sheetVersionSelector.getItems().isEmpty()) {
+                            sheetVersionSelector.getSelectionModel().select(sharedModel.getCurrentVersionLoaded() - 1);
+                        }
+                    });
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showErrorPopup("Error", "Failed to fetch version history: " + ex.getMessage()));
+                    return null;
+                });
+    }
 }
 

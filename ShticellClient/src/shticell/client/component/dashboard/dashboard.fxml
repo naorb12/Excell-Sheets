@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="616.0" prefWidth="987.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.dashboard.DashboardController">
+<VBox fx:id="dashboardVbox" alignment="CENTER" prefHeight="616.0" prefWidth="987.0" spacing="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="shticell.client.component.dashboard.DashboardController">
    <GridPane prefHeight="525.0" prefWidth="873.0">
      <columnConstraints>
        <ColumnConstraints hgrow="SOMETIMES" maxWidth="688.0" minWidth="10.0" prefWidth="502.0" />
@@ -17,7 +17,7 @@
          <RowConstraints maxHeight="176.0" minHeight="10.0" prefHeight="176.0" vgrow="SOMETIMES" />
      </rowConstraints>
       <children>
-          <Label fx:id="errorMessageLabel" maxWidth="1.7976931348623157E308" prefHeight="45.0" prefWidth="192.0" styleClass="error-label" textOverrun="CLIP" wrapText="true" GridPane.columnIndex="1" />
+          <Label fx:id="infoMessageLabel" maxWidth="1.7976931348623157E308" prefHeight="45.0" prefWidth="192.0" styleClass="info-label" textOverrun="CLIP" wrapText="true" GridPane.columnIndex="1" />
       
           <!-- TableView to Display Sheets -->
           <TableView fx:id="sheetTableView" prefHeight="156.0" prefWidth="554.0" GridPane.rowIndex="1">
@@ -69,12 +69,12 @@
                <Label contentDisplay="CENTER" prefHeight="17.0" prefWidth="159.0" text="Request Permission" />
                <HBox alignment="CENTER" prefHeight="41.0" prefWidth="192.0">
                   <children>
-                     <Button fx:id="requestReaderButton"  disable="true" mnemonicParsing="false" onAction="#onRequestReaderPermission" prefHeight="25.0" prefWidth="122.0" text="Reader">
+                     <Button fx:id="requestReaderButton" disable="true" mnemonicParsing="false" onAction="#onRequestReaderPermission" prefHeight="25.0" prefWidth="122.0" text="Reader">
                         <HBox.margin>
                            <Insets right="5.0" />
                         </HBox.margin>
                      </Button>
-                     <Button fx:id="requestWriterButton"  disable="true" mnemonicParsing="false" onAction="#onRequestWriterPermission" prefHeight="25.0" prefWidth="113.0" text="Writer">
+                     <Button fx:id="requestWriterButton" disable="true" mnemonicParsing="false" onAction="#onRequestWriterPermission" prefHeight="25.0" prefWidth="113.0" text="Writer">
                         <HBox.margin>
                            <Insets left="5.0" />
                         </HBox.margin>
@@ -88,12 +88,12 @@
                </Label>
                <HBox alignment="CENTER" prefHeight="44.0" prefWidth="192.0">
                   <children>
-                     <Button fx:id="approveRequestButton"  disable="true" mnemonicParsing="false" onAction="#onApprovePermissionRequest" prefHeight="25.0" prefWidth="114.0" text="Approve">
+                     <Button fx:id="approveRequestButton" disable="true" mnemonicParsing="false" onAction="#onApprovePermissionRequest" prefHeight="25.0" prefWidth="114.0" text="Approve">
                         <HBox.margin>
                            <Insets right="5.0" />
                         </HBox.margin>
                      </Button>
-                     <Button fx:id="denyRequestButton"  disable="true" mnemonicParsing="false" onAction="#onDenyPermissionRequest" prefHeight="25.0" prefWidth="109.0" text="Deny">
+                     <Button fx:id="denyRequestButton" disable="true" mnemonicParsing="false" onAction="#onDenyPermissionRequest" prefHeight="25.0" prefWidth="109.0" text="Deny">
                         <HBox.margin>
                            <Insets left="5.0" />
                         </HBox.margin>

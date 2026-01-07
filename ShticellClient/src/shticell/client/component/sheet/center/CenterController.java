@@ -179,9 +179,9 @@ public class CenterController {
                         highlightInfluencingOnCells(cell.getInfluencingOn());
 
                         // Update the top controller with selected cell ID and value
-                        topController.updateSelectedCell(selectedCellID, cell.getOriginalValue(), cell.getVersion());
+                        topController.updateSelectedCell(selectedCellID, cell.getOriginalValue(), cell.getVersion(), cell.getUserNameUpdated());
                     } else {
-                        topController.updateSelectedCell(selectedCellID, null, 1);  // Handle case for empty cells
+                        topController.updateSelectedCell(selectedCellID, null, 1, null);  // Handle case for empty cells
                     }
                 });
 
@@ -366,7 +366,7 @@ public class CenterController {
 
 
     public void applyDynamicAnalysis(Coordinate coordinate, Number newValue) {
-        serverEngineService.applyDynamicAnalysis(sharedModel.getSheetName(), coordinate, newValue)
+        serverEngineService.applyDynamicAnalysis(sharedModel.getSheetName(), coordinate, newValue, sharedModel.getUserName())
                 .thenAccept(dynamicAnalysisSheet -> Platform.runLater(() -> {
                     // Update the UI with the new sheet
                     renderGrid(dynamicAnalysisSheet);
@@ -470,7 +470,7 @@ public class CenterController {
     }
 
     public void updateValueBySlider(Coordinate coordinate, double value) throws ExecutionException, InterruptedException {
-        serverEngineService.setCell(sharedModel.getSheetName(), coordinate.getRow(), coordinate.getColumn(), String.valueOf(value));
+        serverEngineService.setCell(sharedModel.getSheetName(), coordinate.getRow(), coordinate.getColumn(), String.valueOf(value), sharedModel.getUserName());
         renderGridPane();
         topController.populateVersionSelector();
     }
