@@ -27,6 +27,7 @@ public class DynamicAnalysisServlet extends HttpServlet {
         String sheetName = request.getParameter("sheetName");
         int row = Integer.parseInt(request.getParameter("row"));
         int col = Integer.parseInt(request.getParameter("col"));
+        String userNameUpdated = request.getParameter("username");
 
         // Parse the JSON body to retrieve the new value
         JsonObject jsonBody = gson.fromJson(request.getReader(), JsonObject.class);
@@ -43,7 +44,7 @@ public class DynamicAnalysisServlet extends HttpServlet {
         }
 
         // Perform dynamic analysis (your implementation in SheetManager)
-        SheetDTO updatedSheetDTO = sheetManager.applyDynamicAnalysis(new Coordinate(row, col), newValue);
+        SheetDTO updatedSheetDTO = sheetManager.applyDynamicAnalysis(new Coordinate(row, col), newValue, userNameUpdated);
 
         if (updatedSheetDTO != null) {
             response.setStatus(HttpServletResponse.SC_OK);

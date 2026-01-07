@@ -26,6 +26,7 @@ public class SetCellServlet extends HttpServlet {
         String sheetName = request.getParameter("sheetName");
         int row = Integer.parseInt(request.getParameter("row"));
         int column = Integer.parseInt(request.getParameter("column"));
+        String userNameUpdated = request.getParameter("userName");
 
         // Read input JSON from the request body
         StringBuilder jsonBody = new StringBuilder();
@@ -60,7 +61,7 @@ public class SetCellServlet extends HttpServlet {
         try {
             // Update the cell value
             synchronized (sheetManager) {
-                sheetManager.setCell(row, column, input);
+                sheetManager.setCell(row, column, input, userNameUpdated);
             }
 
             response.setStatus(HttpServletResponse.SC_OK);

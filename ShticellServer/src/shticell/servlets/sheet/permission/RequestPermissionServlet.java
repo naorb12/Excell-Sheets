@@ -1,6 +1,7 @@
 package shticell.servlets.sheet.permission;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import engine.ShticellEngine;
 import engine.manager.SheetManager;
 import engine.permission.UserPermissions;
@@ -43,7 +44,18 @@ public class RequestPermissionServlet extends HttpServlet {
         UserPermissionsDTO userPermissionsDTO = sheetManager.getUserPermissionsMap().get(userName);
         if (userPermissionsDTO != null && userPermissionsDTO.getPermissionType() == PermissionType.OWNER) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.getWriter().write(gson.toJson("You are already the owner of this sheet."));
+            JsonObject errorObject = new JsonObject();
+            errorObject.addProperty("error", "You are already the owner of this sheet.");
+            response.getWriter().write(gson.toJson(errorObject));
+            return;
+        }
+
+        if (userPermissionsDTO != null && userPermissionsDTO.getPermissionType() == PermissionType.convertStringToType(permissionType)
+                && userPermissionsDTO.getPermissionStatus() == PermissionStatus.APPROVED) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            JsonObject errorObject = new JsonObject();
+            errorObject.addProperty("error", "You already have " + permissionType + " permissions to this sheet.");
+            response.getWriter().write(gson.toJson(errorObject));
             return;
         }
 
