@@ -45,8 +45,11 @@ public class CellImplDeserializer implements JsonDeserializer<CellImpl> {
                 ? context.deserialize(jsonObject.get("foregroundColor"), Color.class)
                 : null;
 
+        String userNameUpdated = jsonObject.has("userNameUpdated") && !jsonObject.get("userNameUpdated").isJsonNull() ? jsonObject.get("userNameUpdated").getAsString() : null; ;
+
+
         // Create and populate the CellImpl instance
-        CellImpl cell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), originalValue, effectiveValue, versionNumber, dependsOn, influencingOn);
+        CellImpl cell = new CellImpl(coordinate.getRow(), coordinate.getColumn(), originalValue, effectiveValue, versionNumber, dependsOn, influencingOn, userNameUpdated);
         cell.setBackgroundColor(backgroundColor);
         cell.setForegroundColor(foregroundColor);
 

@@ -26,4 +26,6 @@ public interface CellDTO {
 
     javafx.scene.paint.Color getForegroundColor();
 
+    String getUserNameUpdated();
+
 }
